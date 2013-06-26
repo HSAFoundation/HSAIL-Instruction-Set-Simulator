@@ -888,15 +888,14 @@ template<class T> static void NrcpLogic(T result, T a) {
 TestAll(FloatInst, Nrcp, Unary)
 
 static void BitAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
-  if (c == 0 || c == 8 || c == 16 || c == 24 || c == 32) {
-    unsigned tag = (32 - c) / 8;
-    for (unsigned i = 0; i < 4; ++i) {
-      if (i + tag > 3)
-        EXPECT_EQ((a >> (((i + tag) % 4) * 8)) & 0xFF,
-                  (result >> (i * 8)) & 0xFF);
+  if (c < 32) {
+    for (unsigned i=0; i < 32; ++i) {
+      if (i + c > 31)
+        EXPECT_EQ((b >> (i + c - 32)) & 0x1,
+                  (result >> i) & 0x1);
       else
-        EXPECT_EQ((b >> ((i + tag) * 8)) & 0xFF,
-                  (result >> (i * 8)) & 0xFF);
+        EXPECT_EQ((a >> (i + c)) & 0x1,
+                  (result >> i) & 0x1);
     }
   }
 }
@@ -904,15 +903,14 @@ extern "C" b32 BitAlign_b32(b32, b32, b32);
 MakeTest(BitAlign_b32, BitAlign_b32_Logic)
 
 static void ByteAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
-  if (c <= 4) {
-    unsigned tag = (4 - c);
-    for (unsigned i = 0; i < 4; ++i) {
-      if (i + tag > 3)
-        EXPECT_EQ(((a) >> (((i + tag) % 4) * 8)) & 0xFF,
-                  (result >> (i * 8)) & 0xFF);
-      else
-        EXPECT_EQ(((b) >> (((i + tag)) * 8)) & 0xFF,
-                  (result >> (i * 8)) & 0xFF);
+  if (c < 4) {
+    for (unsigned i=0; i < 3; ++i) {
+      if (i + c > 3)
+        EXPECT_EQ((b >> (i+c-4)*8) & 0xFF,
+                  (result >> i*8)  & 0xFF);
+      else 
+        EXPECT_EQ((a >> (i+c)*8)  & 0xFF,
+                  (result >> i*8) & 0xFF);  
     }
   }
 }

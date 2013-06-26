@@ -5577,33 +5577,168 @@ TEST(BrigKernelTest, testLd) {
   }
 }
 
-TEST(BrigInstTest, VectorBitalign1) {
-  hsa::brig::BrigProgram BP = TestHSAIL(
-    "version 0:96:$full:$large;\n"
-    "\n"
-    "kernel &__instruction4_test_kernel(\n"
-    "        kernarg_u32 %result, \n"
-    "        kernarg_u32 %input1)\n"
-    "{\n"
-    "        bitalign_b32 $s1, 0x77665544, 0x33221100, 16;\n"
-    "        ld_kernarg_u64 $d0, [%result] ;\n"
-    "        st_u32 $s1, [$d0] ;\n"
+TEST(BrigInstTest, VectorBitalign) {
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$large;\n"
+      "\n"
+      "kernel &__instruction4_test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "        bitalign_b32 $s1, 0xA3A2A1A0, 0xB3B2B1B0, 8;\n"
+      "        ld_kernarg_u64 $d0, [%result] ;\n"
+      "        st_u32 $s1, [$d0] ;\n"
+      "        ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
 
-    "        ret;\n"
-    "};\n");
-  EXPECT_TRUE(BP);
-  if (!BP) return;
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    uint32_t *arg0 = new uint32_t(0);
+    uint32_t *arg1 = new uint32_t(0);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(0xB0A3A2A1, *arg0);
+    delete arg0;
+    delete arg1;
+  }
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$large;\n"
+      "\n"
+      "kernel &__instruction4_test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "        bitalign_b32 $s1, 0xA3A2A1A0, 0xB3B2B1B0, 16;\n"
+      "        ld_kernarg_u64 $d0, [%result] ;\n"
+      "        st_u32 $s1, [$d0] ;\n"
+      "        ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
 
-  hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
-  uint32_t *arg0 = new uint32_t( 0 );
-  uint32_t *arg1 = new uint32_t(0x55443322);
-  void *args[] = { &arg0, arg1 };
-  BE.launch(fun, args);
-  EXPECT_EQ(0x55443322, *arg0);
-  delete arg0;
-  delete arg1;
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    uint32_t *arg0 = new uint32_t( 0 );
+    uint32_t *arg1 = new uint32_t(0x55443322);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(0xB1B0A3A2, *arg0);
+    delete arg0;
+    delete arg1;
+  }
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$large;\n"
+      "\n"
+      "kernel &__instruction4_test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "        bitalign_b32 $s1, 0xA3A2A1A0, 0xB3B2B1B0, 24;\n"
+      "        ld_kernarg_u64 $d0, [%result] ;\n"
+      "        st_u32 $s1, [$d0] ;\n"
+      "        ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    uint32_t *arg0 = new uint32_t( 0 );
+    uint32_t *arg1 = new uint32_t(0x55443322);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(0xB2B1B0A3, *arg0);
+    delete arg0;
+    delete arg1;
+  }
 }
+
+TEST(BrigInstTest, VectorBytealign) {
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$large;\n"
+      "\n"
+      "kernel &__instruction4_test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "        bytealign_b32 $s1, 0xA3A2A1A0, 0xB3B2B1B0, 1;\n"
+      "        ld_kernarg_u64 $d0, [%result] ;\n"
+      "        st_u32 $s1, [$d0] ;\n"
+      "        ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    uint32_t *arg0 = new uint32_t(0);
+    uint32_t *arg1 = new uint32_t(0);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(0xB0A3A2A1, *arg0);
+    delete arg0;
+    delete arg1;
+  }
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$large;\n"
+      "\n"
+      "kernel &__instruction4_test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "        bytealign_b32 $s1, 0xA3A2A1A0, 0xB3B2B1B0, 2;\n"
+      "        ld_kernarg_u64 $d0, [%result] ;\n"
+      "        st_u32 $s1, [$d0] ;\n"
+      "        ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    uint32_t *arg0 = new uint32_t( 0 );
+    uint32_t *arg1 = new uint32_t(0x55443322);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(0xB1B0A3A2, *arg0);
+    delete arg0;
+    delete arg1;
+  }
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$large;\n"
+      "\n"
+      "kernel &__instruction4_test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "        bytealign_b32 $s1, 0xA3A2A1A0, 0xB3B2B1B0, 3;\n"
+      "        ld_kernarg_u64 $d0, [%result] ;\n"
+      "        st_u32 $s1, [$d0] ;\n"
+      "        ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    uint32_t *arg0 = new uint32_t( 0 );
+    uint32_t *arg1 = new uint32_t(0x55443322);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(0xB2B1B0A3, *arg0);
+    delete arg0;
+    delete arg1;
+  }
+}
+
 
 TEST(Instruction2Test, Abs) {
   {

@@ -671,7 +671,9 @@ template<class T> static T Nrcp(T x) {
 FloatInst(define, Nrcp, Unary)
 
 extern "C" b32 BitAlign_b32(b32 w, b32 x, b32 y) {
-  return (b64(w) << y) | (b64(x) >> (32 - y));
+  unsigned shift = y & 31;
+  b64 temp = (b64(x) << 32) | b64(w);
+  return (temp >> shift);
 }
 
 extern "C" b32 ByteAlign_b32(b32 w, b32 x, b32 y) {
