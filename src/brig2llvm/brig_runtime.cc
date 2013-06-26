@@ -680,12 +680,10 @@ extern "C" b32 ByteAlign_b32(b32 w, b32 x, b32 y) {
   return BitAlign_b32(w, x, y * 8);
 }
 
-extern "C" b32 Lerp_b32(b32 w, b32 x, b32 y) {
-  b32 result = 0;
+extern "C" u8x4 Lerp_u8x4(u8x4 w, u8x4 x, u8x4 y) {
+  u8x4 result = 0;
   for (unsigned i = 0; i < 4; ++i) {
-    result |= (((((w >> 8 * i) & 0xFF)
-                 + ((x >> 8 * i) & 0xFF)
-                 + ((y >> 8 * i) & 0x1)) >> 1) & 0xFF) << 8 * i;
+    result[i] = (w[i] + x[i] + (y[i] & 0x1)) >> 1;
   }
   return result;
 }

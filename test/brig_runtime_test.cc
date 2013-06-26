@@ -917,16 +917,14 @@ static void ByteAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
 extern "C" b32 ByteAlign_b32(b32, b32, b32);
 MakeTest(ByteAlign_b32, ByteAlign_b32_Logic)
 
-static void Lerp_b32_Logic(b32 result, b32 a, b32 b, b32 c) {
+static void Lerp_u8x4_Logic(u8x4 result, u8x4 a, u8x4 b, u8x4 c) {
   for (unsigned i = 0; i < 4; ++i) {
-    EXPECT_EQ((result >> i * 8) & 0xFF,
-                ((((a >> i * 8) & 0xFF)
-                + ((b >> i * 8) & 0xFF)
-                + ((c >> i * 8) & 0x1)) >> 1) & 0xFF);
+    EXPECT_EQ(result[i],
+              (a[i] + b[i] + (c[i] & 0x1))>>1);
   }
 }
-extern "C" b32 Lerp_b32(b32, b32, b32);
-MakeTest(Lerp_b32, Lerp_b32_Logic)
+extern "C" u8x4 Lerp_u8x4(u8x4, u8x4, u8x4);
+MakeVectorTest(Lerp_u8x4, Lerp_u8x4_Logic)
 
 static void Sad_u32_u32_Logic(u32 result, u32 a, u32 b, u32 c) {
   EXPECT_EQ(abs(a - b) + c, result);

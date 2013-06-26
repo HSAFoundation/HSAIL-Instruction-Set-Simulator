@@ -7446,6 +7446,13 @@ TEST(Instruction4Test, Cmov_64) {
   delete arg1;
 }
 
+TEST(Instruction4Test, Lerp) {
+  {
+    const uint32_t testVec[] = { 0x7070807, 0x0E0C0A08, 0x020507, 0x01000100};
+    testInst("lerp_u8x4", testVec);
+  }
+}
+
 TEST(Instruction5Test, PackCvt) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$small;\n"
