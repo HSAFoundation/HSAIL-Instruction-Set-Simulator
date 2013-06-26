@@ -285,11 +285,13 @@
   }                                                         \
   template<class R, class T>                                \
   static void PackedCmp_ ## FUNC ## Logic(R result, T a, T b) {    \
-    ForEach(Cmp_ ## FUNC ## Logic, result, a, b);                  \
+    for (int i = 0; i < R::Len; ++i)                               \
+      Cmp_ ## FUNC ## Logic(result[i], a[i], b[i]);                \
   }                                                                \
   template<class R, class T>                                       \
   static void PackedCmp_ ## FUNC ## uLogic(R result, T a, T b) {   \
-    ForEach(Cmp_ ## FUNC ## uLogic, result, a, b);                 \
+    for (int i = 0; i < R::Len; ++i)                               \
+      Cmp_ ## FUNC ## uLogic(result[i], a[i], b[i]);               \
   }                                                                \
   Cmp(declare, FUNC, b32)                                   \
   Cmp(declare, FUNC, b64)                                   \

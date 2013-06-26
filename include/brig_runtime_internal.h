@@ -277,12 +277,16 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## Atomic ## NARY(INST, u32)                \
   D ## Atomic ## NARY(INST, u64)
 
-#define CmpImpl(FUNC,PRED)                                      \
-  template<class T> static T Cmp_ ## FUNC (T x, T y) {          \
-    return cmpResult<T>(PRED);                                  \
-  }                                                             \
-  template<class T> static T Cmp_ ## FUNC ## _pp_ (T x, T y) {  \
-    return map(Cmp_ ## FUNC, x, y);                             \
+#define CmpImpl(FUNC,PRED)                                                       \
+  template<class R, class T> static R Cmp_ ## FUNC (T x, T y) {                  \
+    return cmpResult<R>(PRED);                                                   \
+  }                                                                              \
+  template<class R, class T> static R Cmp_ ## FUNC ## _pp_ (T x, T y) {          \
+                                                                                 \
+    R result;                                                                    \
+    for (int i=0;  i < R::Len; i++)                                              \
+      result[i] = Cmp_ ## FUNC<typename R::Base, typename T::Base>(x[i], y[i]);  \
+    return result;                                                               \
   }
 
 #define CmpInst(FUNC,PRED)                              \
@@ -354,20 +358,20 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## PackedCmp(FUNC, RET, TYPE)
 
 #define definePackedCmp(FUNC,RET,TYPE)                                       \
-  extern "C" TYPE Cmp_ ## FUNC ## _pp_ ## RET ## _ ## TYPE(TYPE t, TYPE u) { \
-    return Cmp_ ## FUNC ## _pp_ (t, u);                                      \
+  extern "C" RET Cmp_ ## FUNC ## _pp_ ## RET ## _ ## TYPE(TYPE t, TYPE u) {  \
+    return Cmp_ ## FUNC ## _pp_ <RET, TYPE> (t, u);                          \
 }
 
-#define declarePackedCmp(FUNC,RET,TYPE)                                     \
-  extern "C" TYPE Cmp_ ## FUNC ## _pp_ ## RET ## _ ## TYPE(TYPE t, TYPE u);
+#define declarePackedCmp(FUNC,RET,TYPE)                                      \
+  extern "C" RET Cmp_ ## FUNC ## _pp_ ## RET ## _ ## TYPE(TYPE t, TYPE u);
 
-#define defineCmpRet(FUNC,RET,TYPE)                                 \
-  extern "C" bool FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u) {  \
-    return FUNC(t, u);                                              \
+#define defineCmpRet(FUNC,RET,TYPE)                                          \
+  extern "C" RET FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u) {            \
+    return FUNC<RET, TYPE>(t, u);                                            \
   }
 
-#define declareCmpRet(FUNC,RET,TYPE)                              \
-  extern "C" bool FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u);
+#define declareCmpRet(FUNC,RET,TYPE)                                         \
+  extern "C" RET FUNC ## _ ## RET ## _ ## TYPE (TYPE t, TYPE u);
 
 #define RIICvt(D)                               \
   ICvt(D, Cvt, ~0, b1)                          \
