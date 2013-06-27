@@ -2634,7 +2634,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u32 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
-    testInstCvt("cvt_upi_sat", "_u16", "_f32", result.u32, input.f32 );
+    testInstCvt("cvt_upi_sat", "_u32", "_f32", result.u32, input.f32 );
   }   
   
   // f32 -> s32
@@ -2821,7 +2821,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u64 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
-    testInstCvt("cvt_upi_sat", "_u32", "_f64", result.u32, input.f64 );
+    testInstCvt("cvt_upi_sat", "_u64", "_f64", result.u64, input.f64 );
   }  
   
   // f64 -> s64
@@ -2936,7 +2936,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u32 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
-    testInstCvt("cvt_downi_sat", "_u16", "_f32", result.u32, input.f32 );
+    testInstCvt("cvt_downi_sat", "_u32", "_f32", result.u32, input.f32 );
   }   
   
   // f32 -> s32
@@ -3122,7 +3122,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u64 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
-    testInstCvt("cvt_downi_sat", "_u32", "_f64", result.u32, input.f64 );
+    testInstCvt("cvt_downi_sat", "_u64", "_f64", result.u64, input.f64 );
   }  
   
   // f64 -> s64
@@ -3235,7 +3235,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u32 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
-    testInstCvt("cvt_neari_sat", "_u16", "_f32", result.u32, input.f32 );
+    testInstCvt("cvt_neari_sat", "_u32", "_f32", result.u32, input.f32 );
   }   
   
   // f32 -> s32
@@ -3421,7 +3421,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u64 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
-    testInstCvt("cvt_neari_sat", "_u32", "_f64", result.u32, input.f64 );
+    testInstCvt("cvt_neari_sat", "_u64", "_f64", result.u64, input.f64 );
   }  
   
   // f64 -> s64
@@ -3535,7 +3535,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u32 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
-    testInstCvt("cvt_zeroi_sat", "_u16", "_f32", result.u32, input.f32 );
+    testInstCvt("cvt_zeroi_sat", "_u32", "_f32", result.u32, input.f32 );
   }   
   
   // f32 -> s32
@@ -3721,7 +3721,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u64 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
-    testInstCvt("cvt_zeroi_sat", "_u32", "_f64", result.u32, input.f64 );
+    testInstCvt("cvt_zeroi_sat", "_u64", "_f64", result.u64, input.f64 );
   }  
   
   // f64 -> s64
