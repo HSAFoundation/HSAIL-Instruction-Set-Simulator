@@ -4807,14 +4807,14 @@ TEST(BrigInstTest, CombineV2_b64) {
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP->getFunction("regV2");
-  uint64_t *x = new uint64_t(0x1234567887654321);
-  uint64_t *y = new uint64_t(0x9ABCDEF00FEDCBA9);
+  uint64_t *x = new uint64_t(0x1234567887654321ULL);
+  uint64_t *y = new uint64_t(0x9ABCDEF00FEDCBA9ULL);
   uint64_t *output = new uint64_t[2];
   memset(output, 0, sizeof(uint64_t[2]));
   void *args[] = { &output, x, y };
   BE.launch(fun, args);
-  EXPECT_EQ(0x1234567887654321, output[0]);
-  EXPECT_EQ(0x9ABCDEF00FEDCBA9, output[1]);
+  EXPECT_EQ(0x1234567887654321ULL, output[0]);
+  EXPECT_EQ(0x9ABCDEF00FEDCBA9ULL, output[1]);
 
   delete x;
   delete y;
@@ -6534,7 +6534,7 @@ TEST(Instruction4Test, Cmov_64) {
   uint64_t *arg1 = new uint64_t(0);
   void *args[] = { &arg0, arg1 };
   BE.launch(fun, args);
-  EXPECT_EQ(0x5555666677778888, *arg0);
+  EXPECT_EQ(0x5555666677778888ULL, *arg0);
   delete arg0;
   delete arg1;
 }
