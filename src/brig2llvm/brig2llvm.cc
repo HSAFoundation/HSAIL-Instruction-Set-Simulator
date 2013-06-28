@@ -536,6 +536,9 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
 
   if ((inst->opcode == BRIG_OPCODE_SHUFFLE && opnum == 3))
     return runOnType(C, BRIG_TYPE_U64);
+  
+  if (inst->opcode == BRIG_OPCODE_BITMASK)
+    return runOnType(C, BRIG_TYPE_B32);
 
   return destType;
 }

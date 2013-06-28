@@ -606,7 +606,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
 
 #define defineBitMask(TYPE)                              \
   extern "C" TYPE BitMask ## _ ## TYPE (b32 t, b32 u) {  \
-    return BitMask<TYPE>(t, u);                                \
+    return BitMask<TYPE>(t, u);                          \
   }
 
 #define SignedVectorMulHi(D)                \
