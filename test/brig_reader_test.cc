@@ -6672,6 +6672,22 @@ TEST(Instruction3Test, Max) {
                                  0xfffffffffffffffeLL };
     testInst("max_u64", testVec);
   }
+  {
+    const uint32_t testVec[] = { 0xfefdfbff, 0xfefcfbfe, 0xfafdfbff };
+    testInst("max_pp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xffffffff, 0xfefcfbfe, 0xfafdfbff };
+    testInst("max_ps_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfefefeff, 0xfefcfbfe, 0xfafdfbff };
+    testInst("max_sp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xffffffff, 0xfefcfbfe, 0xfafdfbff };
+    testInst("max_ss_u8x4", testVec);
+  }      
 }
 
 TEST(Instruction3Test, Min) {
@@ -6695,6 +6711,22 @@ TEST(Instruction3Test, Min) {
                                  0xfffffffffffffffeLL };
     testInst("min_u64", testVec);
   }
+  {
+    const uint32_t testVec[] = { 0xfafcfbfe, 0xfefcfbfe, 0xfafdfbff };
+    testInst("min_pp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfefcfbfe, 0xfefcfbfe, 0xfafdfbff };
+    testInst("min_ps_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfafdfbfe, 0xfefcfbfe, 0xfafdfbff };
+    testInst("min_sp_u8x4", testVec);
+  }
+  {
+    const uint32_t testVec[] = { 0xfefefefe, 0xfefcfbfe, 0xfafdfbff };
+    testInst("min_ss_u8x4", testVec);
+  }   
 }
 
 TEST(Instruction3Test, BitMask) {
