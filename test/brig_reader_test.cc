@@ -7494,6 +7494,39 @@ TEST(Instruction5Test, PackCvt) {
   delete arg4; 
 }
 
+TEST(Instruction5Test, BitInsert) {
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$large;\n"
+      "\n"
+      "kernel &__test_kernel(\n"
+      "        kernarg_u32 %result, \n"
+      "        kernarg_u32 %input1)\n"
+      "{\n"
+      "        bitinsert_u32 $s1, 0xffffeefe,\n"
+      "                           0x33,\n"
+      "                           5, 7;\n"  
+      "        ld_kernarg_u64 $d0, [%result];\n"
+      "        st_u32 $s1, [$d0] ;\n"
+ 
+      "        ret;\n"
+      "};\n");
+
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    uint32_t *arg0 = new uint32_t(0);
+    uint32_t *arg1 = new uint32_t(0);
+    void *args[] = { &arg0, arg1 };
+    BE.launch(fun, args);
+    EXPECT_EQ(0xffffe67e, *arg0);
+    delete arg0;
+    delete arg1;  
+  }
+}
+
 TEST(Instruction4Test, Pack) {
   {
     const uint32_t testVec[] = {0xff1111ff, 0x11ff, 0xff11, 1 };

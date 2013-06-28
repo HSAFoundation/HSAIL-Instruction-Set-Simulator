@@ -468,15 +468,14 @@ UnsignedInst(define, BitExtract, Ternary)
 
 template<class T> static T BitInsert(T w, T x, b32 y, b32 z) {
   typedef typename Int<T>::Unsigned Unsigned;
-  b32 width  = y & b32(Int<T>::Bits - 1);
-  b32 offset = z & b32(Int<T>::Bits - 1);
-  Unsigned mask = ~(~T(0) << width) << offset;
-  mask = ~mask;
-  w &= mask;
-  return w | (x << offset);
+  b32 width  = z & b32(Int<T>::Bits - 1);
+  b32 offset = y & b32(Int<T>::Bits - 1);
+  Unsigned mask = (1 << width) - 1;
+  w &= ~(mask << offset);
+  return w | ((x & mask) << offset);
 }
-defineQuaternary(BitInsert, b32)
-defineQuaternary(BitInsert, b64)
+SignedInst(define, BitInsert, Quaternary)
+UnsignedInst(define, BitInsert, Quaternary)
 
 template<class T> static T BitMask(b32 y, b32 z) {
   unsigned offset = Int<T>::ShiftMask & y;

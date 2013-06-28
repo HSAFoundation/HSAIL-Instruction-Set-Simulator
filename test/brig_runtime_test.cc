@@ -553,20 +553,16 @@ TestAll(SignedInst, BitExtract, Ternary)
 TestAll(UnsignedInst, BitExtract, Ternary)
 
 template<class T> static void BitInsertLogic(T result, T a, T b, b32 c, b32 d) {
-  b32 width  = c & b32(Int<T>::Bits - 1);
-  b32 offset = d & b32(Int<T>::Bits - 1);
-  T resultNe = a;
-  for (unsigned i = 0; i < width && offset + i < Int<T>::Bits; ++i) {
-    resultNe &= ~(T(1) << (offset + i));
-    resultNe |= (b << offset) & (T(1) << (offset + i));
-  }
-  resultNe |= (b & (~T(0) << width)) << offset;
-  EXPECT_EQ(resultNe, result);
+  typedef typename Int<T>::Unsigned Unsigned;
+  b32 width  = d & b32(Int<T>::Bits - 1);
+  b32 offset = c & b32(Int<T>::Bits - 1);
+  Unsigned mask = (1 << width) - 1;
+  
+  EXPECT_EQ(result & (mask << offset), (b & mask) << offset);
+  EXPECT_EQ(result & ~(mask << offset), a & ~(mask << offset));
 }
-declareQuaternary(BitInsert, b32)
-declareQuaternary(BitInsert, b64)
-MakeTest(BitInsert_b32, BitInsertLogic)
-MakeTest(BitInsert_b64, BitInsertLogic)
+TestAll(SignedInst, BitInsert, Quaternary)
+TestAll(UnsignedInst, BitInsert, Quaternary)
 
 template<class T> static void BitSelectLogic(T result, T a, T b, T c) {
   EXPECT_EQ(b &  a, result &  a);
