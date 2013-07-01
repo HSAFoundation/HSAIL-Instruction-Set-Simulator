@@ -31,6 +31,12 @@
   TEST(BrigRuntimeTest, INST) {                 \
     TestAtomic ## NARY(INST, Atomic ## LOGIC);  \
   }
+  
+#define MakeSadhiVectorTest()                   \
+  TEST(BrigRuntimeTest, Sadhi_u16x2_u8x4) {     \
+    TestSadhiVectorInst(Sadhi_u16x2_u8x4,       \
+                        SadHi_u16x2_u8x4_Logic);\
+  }
 
 #define TestAll(TYPE,INST,NARY)                 \
   TYPE(declare, INST, NARY)                     \
@@ -545,6 +551,25 @@ static void TestVectorInst(R (*Impl)(T, T, unsigned),
       T b = testVectorB[j];
       for(unsigned k = 0; k < testVectorB.size(); ++k) {
         unsigned c = testVectorU[k];
+        Logic(Impl(a, b, c), a, b, c);
+      }
+    }
+  }
+}
+
+template<class T, class R>
+static void TestSadhiVectorInst(R (*Impl)(T, T, R),
+                           void (*Logic)(R, T, T, R)) {
+  typedef typename T::Base Base;
+  typedef typename R::Base DestBase;
+  const std::vector<Base> &testVectorB = getTestVector<Base>();
+  const std::vector<DestBase> &testVectorU = getTestVector<DestBase>();
+  for(unsigned i = 0; i < testVectorB.size(); ++i) {
+    T a = testVectorB[i];
+    for(unsigned j = 0; j < testVectorB.size(); ++j) {
+      T b = testVectorB[j];
+      for(unsigned k = 0; k < testVectorU.size(); ++k) {
+        R c = testVectorU[k];
         Logic(Impl(a, b, c), a, b, c);
       }
     }

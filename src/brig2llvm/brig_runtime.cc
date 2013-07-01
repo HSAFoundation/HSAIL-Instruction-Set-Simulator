@@ -683,31 +683,31 @@ extern "C" u32 Sad_u32_u32(u32 w, u32 x, u32 y) {
   return abs(w - x) + y;
 }
 
-extern "C" u32 Sad_u32_u16x2(u32 w, u32 x, u32 y) {
+extern "C" u32 Sad_u32_u16x2(u16x2 w, u16x2 x, u32 y) {
   u32 result = 0;
-  for (unsigned i = 0; i < 2; ++i) {
-    result += Sad_u32_u32((w >> i * 16) & 0xFFFF,
-                          (x >> i * 16) & 0xFFFF, 0);
-  }
+  for (unsigned i = 0; i < 2; ++i)
+    result += Sad_u32_u32(w[i], x[i], 0);
+
   return result + y;
 }
 
-extern "C" u32 Sad_u32_u8x4(u32 w, u32 x, u32 y) {
+extern "C" u32 Sad_u32_u8x4(u8x4 w, u8x4 x, u32 y) {
   u32 result = 0;
-  for (unsigned i = 0; i < 4; ++i) {
-    result += Sad_u32_u32((w >> i * 8) & 0xFF,
-                          (x >> i * 8) & 0xFF, 0);
-  }
+  for (unsigned i = 0; i < 4; ++i)
+    result += Sad_u32_u32(w[i], x[i], 0);
+
   return result + y;
 }
 
-extern "C" u32 Sadhi_u16x2_u8x4(u32 w, u32 x, u32 y) {
-  u32 result = 0;
-  for (unsigned i = 0; i < 4; ++i) {
-    result += Sad_u32_u32((w >> i * 8) & 0xFF,
-                          (x >> i * 8) & 0xFF, 0);
-  }
-  return (result << 16) + y;
+extern "C" u16x2 Sadhi_u16x2_u8x4(u8x4 w, u8x4 x, u16x2 y) {
+  u32 temp_result = 0;
+  for (unsigned i = 0; i < 4; ++i)
+    temp_result += Sad_u32_u32(w[i], x[i], 0);
+    
+  u16x2 result = y;
+  result[1] += temp_result;
+  
+  return result;    
 }
 
 CmpInst(eq, x == y)

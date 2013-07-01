@@ -895,36 +895,38 @@ static void Sad_u32_u32_Logic(u32 result, u32 a, u32 b, u32 c) {
 extern "C" u32 Sad_u32_u32(u32, u32, u32);
 MakeTest(Sad_u32_u32, Sad_u32_u32_Logic)
 
-static void Sad_u32_u16x2_Logic(u32 result, u32 a, u32 b, u32 c) {
-  EXPECT_EQ(abs((a & 0xFFFF) - (b & 0xFFFF)) +
-            abs(((a >> 16) & 0xFFFF) - ((b >> 16) & 0xFFFF)) +
+static void Sad_u32_u16x2_Logic(u32 result, u16x2 a, u16x2 b, u32 c) {
+  EXPECT_EQ(abs(a[0] - b[0]) +
+            abs(a[1] - b[1]) +
             c,
             result);
 }
-extern "C" u32 Sad_u32_u16x2(u32, u32, u32);
-MakeTest(Sad_u32_u16x2, Sad_u32_u16x2_Logic)
+extern "C" u32 Sad_u32_u16x2(u16x2, u16x2, u32);
+MakeVectorTest(Sad_u32_u16x2, Sad_u32_u16x2_Logic)
 
-static void Sad_u32_u8x4_Logic(u32 result, u32 a, u32 b, u32 c) {
-  EXPECT_EQ(abs((a & 0xFF) - (b & 0xFF)) +
-            abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF)) +
-            abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF)) +
-            abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF)) +
+static void Sad_u32_u8x4_Logic(u32 result, u8x4 a, u8x4 b, u32 c) {
+  EXPECT_EQ(abs(a[0] - b[0]) +
+            abs(a[1] - b[1]) +
+            abs(a[2] - b[2]) +
+            abs(a[3] - b[3]) +
             c,
             result);
 }
-extern "C" u32 Sad_u32_u8x4(u32, u32, u32);
-MakeTest(Sad_u32_u8x4, Sad_u32_u8x4_Logic)
+extern "C" u32 Sad_u32_u8x4(u8x4, u8x4, u32);
+MakeVectorTest(Sad_u32_u8x4, Sad_u32_u8x4_Logic)
 
-static void SadHi_u16x2_u8x4_Logic(u32 result, u32 a, u32 b, u32 c) {
-  EXPECT_EQ(((abs((a & 0xFF) - (b & 0xFF)) +
-              abs(((a >> 8) & 0xFF)  - ((b >> 8)  & 0xFF)) +
-              abs(((a >> 16) & 0xFF) - ((b >> 16) & 0xFF)) +
-              abs(((a >> 24) & 0xFF) - ((b >> 24) & 0xFF))) << 16) +
-            c,
-            result);
+static void SadHi_u16x2_u8x4_Logic(u16x2 result, u8x4 a, u8x4 b, u16x2 c) {
+  EXPECT_EQ((abs(a[0] - b[0]) +
+             abs(a[1] - b[1]) +
+             abs(a[2] - b[2]) +
+             abs(a[3] - b[3]) +
+             c[1]) & 0xFFFF,
+             result[1]);
+  EXPECT_EQ( c[0],
+             result[0]);            
 }
-extern "C" u32 Sadhi_u16x2_u8x4(u32, u32, u32);
-MakeTest(Sadhi_u16x2_u8x4, SadHi_u16x2_u8x4_Logic)
+extern "C" u16x2 Sadhi_u16x2_u8x4(u8x4, u8x4, u16x2);
+MakeSadhiVectorTest()
 
 TestCmp(eq, a == b)
 TestCmp(ne, a != b)
