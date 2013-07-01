@@ -4430,26 +4430,62 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("f32", result, value, bits);
   }
   {
-    const uint32_t result = uint32_t(0x7f800000);
+    const uint32_t result = uint32_t(0x7f800000); // PosInf
     const char *value = "0f7f800000";
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
   {
-    const uint32_t result = uint32_t(0xff800000);
+    const uint32_t result = uint32_t(0xff800000); // NegInf
     const char *value = "0fff800000";
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
   {
-    const uint32_t result = uint32_t(0xff800001);
+    const uint32_t result = uint32_t(0xff800001); // SNaN
     const char *value = "0fff800001";
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
   {
-    const uint32_t result = uint32_t(0x7f800001);
+    const uint32_t result = uint32_t(0x7f800001); // SNaN
     const char *value = "0f7f800001";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0xff800003); // SNaN
+    const char *value = "0fff800003";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x7f800003); // SNaN
+    const char *value = "0f7f800003";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x7fC00000); // QNaN
+    const char *value = "0f7fC00000";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0x7fC00003); // QNaN
+    const char *value = "0f7fC00003";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0xffC00000); // QNaN
+    const char *value = "0fffC00000";
+    unsigned bits = 32;
+    testGlobalInitializer("f32", result, value, bits);
+  }
+  {
+    const uint32_t result = uint32_t(0xffC00003); // QNaN
+    const char *value = "0fffC00003";
     unsigned bits = 32;
     testGlobalInitializer("f32", result, value, bits);
   }
@@ -4508,41 +4544,84 @@ TEST(BrigGlobalTest, GlobalInitializer) {
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x7ff0000000000000LL);
+    const uint64_t result = uint64_t(0x7ff0000000000000ULL); // PosInf
     const char *value = "0d7ff0000000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xfff0000000000000LL);
+    const uint64_t result = uint64_t(0xfff0000000000000ULL); // NegInf
     const char *value = "0dfff0000000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x7fff800000000000LL);
+    const uint64_t result = uint64_t(0x7fff800000000000ULL); // QNaN
     const char *value = "0d7fff800000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0xfff8000000000000LL);
+    const uint64_t result = uint64_t(0xfff8000000000000ULL); // QNaN
     const char *value = "0dfff8000000000000";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x000fffffffffffffLL);
+    const uint64_t result = uint64_t(0x000fffffffffffffULL); // denomalized
     const char *value = "0d000fffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
   {
-    const uint64_t result = uint64_t(0x800fffffffffffffLL);
+    const uint64_t result = uint64_t(0x800fffffffffffffULL);  // denomalized
     const char *value = "0d800fffffffffffff";
     unsigned bits = 64;
     testGlobalInitializer("f64", result, value, bits);
   }
+  {
+    const uint64_t result = uint64_t(0x7ff8000000000000ULL);  // QNaN
+    const char *value = "0d7ff8000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xfff8000000000003ULL); // QNaN
+    const char *value = "0dfff8000000000003";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7ff7000000000000ULL); // SNaN
+    const char *value = "0d7ff7000000000000";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7ff0000000000001ULL); // SNaN
+    const char *value = "0d7ff0000000000001";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xfff0000000000001ULL); // SNaN
+    const char *value = "0dfff0000000000001";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0x7ff0000000000003ULL); // SNaN
+    const char *value = "0d7ff0000000000003";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+  {
+    const uint64_t result = uint64_t(0xfff0000000000003ULL); // SNaN
+    const char *value = "0dfff0000000000003";
+    unsigned bits = 64;
+    testGlobalInitializer("f64", result, value, bits);
+  }
+
 }
 
 static const char GlobalArrayInst[] =
