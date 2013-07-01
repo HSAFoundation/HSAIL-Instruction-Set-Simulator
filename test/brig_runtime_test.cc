@@ -1006,7 +1006,7 @@ template<class R, class T> static void Cvt_zero_Logic(R result, T a) {
   } else if (isNegInf(a)) {
     EXPECT_PRED1(isNegInf<R>, result);
   } else {
-    EXPECT_GE(std::abs(a), std::abs(result));
+    EXPECT_GE(std::abs(R(a)), std::abs(result));
   }
 }
 

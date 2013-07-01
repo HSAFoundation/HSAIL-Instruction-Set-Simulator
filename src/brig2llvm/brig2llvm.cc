@@ -670,7 +670,7 @@ static llvm::Function *getInstFun(const inst_iterator inst,
     AB.addAttribute(llvm::Attribute::NoAlias);
     AB.addAttribute(llvm::Attribute::NoCapture);
     llvm::AttributeSet attrs =
-      llvm::AttributeSet::get(C, llvm::AttributeSet::FunctionIndex, AB);
+      llvm::AttributeSet::get(C, 1, AB);
     instFun->setAttributes(attrs);
   }
 

@@ -53,6 +53,21 @@ extern "C" void disableFtzMode(void) {
 #endif  // defined(__arm__)
 }
 
+// On i386, the x87 FPU does not respect the FTZ mode. We use the
+// -mfpmath=sse compile flag to ensure the compiler uses SSE floating
+// point instead of x87, but sometimes we call libraries that use the
+// x87 FPU. The fixFTZ macro does a floating point addition using
+// SSE. If the input to the operation is a denormal, it will be
+// flushed to zero; otherwise, the operation will be unchanged. Even
+// though (X + 0) appears to be an identity operation, correct
+// compilers cannot optimize it away. See Section F.9.2 of the C11
+// specification for details.
+#if defined (__i386__)
+#define fixFTZ(X) (X + 0)
+#else
+#define fixFTZ(X) (X)
+#endif
+
 extern "C" void setRoundingMode_near(void) {
   fesetround(FE_TONEAREST);
 }
@@ -85,44 +100,28 @@ FloatInst(define, Neg, Unary)
 SignedVectorInst(define, Neg, Unary)
 FloatVectorInst(define, Neg, Unary)
 
-template<class T> static T Ceil(T t) { return std::ceil(t); }
+template<class T> static T Ceil(T t) { return std::ceil(fixFTZ(t)); }
 template<class T> static T CeilVector(T t) { return map(Ceil, t); }
 FloatInst(define, Ceil, Unary)
 FloatVectorInst(define, Ceil, Unary)
 
-template<class T> static T Floor(T t) { return std::floor(t); }
+template<class T> static T Floor(T t) { return std::floor(fixFTZ(t)); }
 template<class T> static T FloorVector(T t) { return map(Floor, t); }
 FloatInst(define, Floor, Unary)
 FloatVectorInst(define, Floor, Unary)
 
-template<class T> static T Trunc(T t) {
-  if (t >= 0)
-    return std::floor(t);
-  else
-    return std::ceil(t);
-}
+static float  Trunc(float t)  { return ::truncf(fixFTZ(t)); }
+static double Trunc(double t) { return ::trunc(fixFTZ(t)); }
 template<class T> static T TruncVector(T t) { return map(Trunc, t); }
 FloatInst(define, Trunc, Unary)
 FloatVectorInst(define, Trunc, Unary)
 
-template<class T> static T Rint(T a) {
-  if (isNan(a) || isInf(a))
-    return a;
-
-  T ceil_a = std::ceil(a);
-  T floor_a = std::floor(a);
-
-  if (ceil_a - a < a - floor_a) {
-    return ceil_a;
-  } else if (ceil_a - a > a - floor_a) {
-    return floor_a;
-  } else {
-    uint64_t int_ceil = (uint64_t) ceil_a;
-    if (int_ceil % 2 == 0)
-      return ceil_a;
-    else
-      return floor_a;
-  }
+template<class T> static T Rint(T t)  { 
+  int oldMode = fegetround();
+  fesetround(FE_TONEAREST);
+  volatile T result = T(nearbyint(fixFTZ(t)));
+  fesetround(oldMode);
+  return result;
 }
 template<class T> static T RintVector(T t) { return map(Rint, t); }
 FloatInst(define, Rint, Unary)

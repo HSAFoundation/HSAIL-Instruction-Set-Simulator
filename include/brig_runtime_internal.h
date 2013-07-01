@@ -684,18 +684,18 @@ template<> inline bool isDivisionError(float, float) { return false; }
 template<> inline bool isDivisionError(double, double) { return false; }
 
 template<class T> inline T Int48Ty(T t) {
-  struct { T x:48; } Ext;
-  return Ext.x = t;
+  unsigned shift = Int<T>::Bits - 48;
+  return (t << shift) >> shift;
 }
 
 template<class T> inline T Int24Ty(T t) {
-  struct { T x:24; } Ext;
-  return Ext.x = t;
+  unsigned shift = Int<T>::Bits - 24;
+  return (t << shift) >> shift;
 }
 
 template<class T> inline T Int12Ty(T t) {
-  struct { T x:12; } Ext;
-  return Ext.x = t;
+  unsigned shift = Int<T>::Bits - 12;
+  return (t << shift) >> shift;
 }
 
 template<class T> inline bool isNegZero(T t) { return false; }
