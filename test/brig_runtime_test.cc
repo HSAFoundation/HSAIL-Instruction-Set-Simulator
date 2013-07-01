@@ -970,6 +970,56 @@ template<class R, class T> static void Cvt_Logic(R result, T a) {
     EXPECT_EQ(R(a), result);
   }
 }
+
+// int to float or float to smaller float
+template<class R, class T> static void Cvt_up_Logic(R result, T a) {
+  if (isNan(a)) {
+    EXPECT_PRED1(isNan<R>, result);
+  } else if (isPosInf(a)) {
+    EXPECT_PRED1(isPosInf<R>, result);
+  } else if (isNegInf(a)) {
+    EXPECT_PRED1(isNegInf<R>, result);
+  } else {
+    EXPECT_LE(R(a), result);
+  }
+}
+
+template<class R, class T> static void Cvt_down_Logic(R result, T a) {
+  if (isNan(a)) {
+    EXPECT_PRED1(isNan<R>, result);
+  } else if (isPosInf(a)) {
+    EXPECT_PRED1(isPosInf<R>, result);
+  } else if (isNegInf(a)) {
+    EXPECT_PRED1(isNegInf<R>, result);
+  } else {
+    EXPECT_GE(R(a), result);
+  }
+}
+
+template<class R, class T> static void Cvt_zero_Logic(R result, T a) {
+  if (isNan(a)) {
+    EXPECT_PRED1(isNan<R>, result);
+  } else if (isPosInf(a)) {
+    EXPECT_PRED1(isPosInf<R>, result);
+  } else if (isNegInf(a)) {
+    EXPECT_PRED1(isNegInf<R>, result);
+  } else {
+    EXPECT_GE(std::abs(a), std::abs(result));
+  }
+}
+
+template<class R, class T> static void Cvt_near_Logic(R result, T a) {
+  if (isNan(a)) {
+    EXPECT_PRED1(isNan<R>, result);
+  } else if (isPosInf(a)) {
+    EXPECT_PRED1(isPosInf<R>, result);
+  } else if (isNegInf(a)) {
+    EXPECT_PRED1(isNegInf<R>, result);
+  } else {
+    EXPECT_GE(0.5, std::abs(result - R(a)));
+  }
+}
+
 template<class R, class T> static void Cvt_upi_Logic(R result, T a) {
   if (isNan(a) || isPosInf(a) || isNegInf(a)) {
     EXPECT_EQ(0, result); // should have an exception

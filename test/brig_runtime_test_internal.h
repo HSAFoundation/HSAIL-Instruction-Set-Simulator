@@ -326,7 +326,7 @@
 
 #define MakeCvtI2FTestRet(TYPE,RET,NAME)              \
   extern "C" RET NAME ## RET ## _ ## TYPE (TYPE);     \
-  MakeTest(NAME ## RET ## _ ## TYPE,  Cvt_Logic)
+  MakeTest(NAME ## RET ## _ ## TYPE,  NAME ## Logic)
 
 #define MakeCvtI2FTestType(TYPE,NAME)           \
   /* MakeCvtI2FTestRet(TYPE, f16, NAME) */      \
