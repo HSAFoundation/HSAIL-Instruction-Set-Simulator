@@ -62,11 +62,21 @@ extern "C" void disableFtzMode(void) {
 // though (X + 0) appears to be an identity operation, correct
 // compilers cannot optimize it away. See Section F.9.2 of the C11
 // specification for details.
-#if defined (__i386__)
+
+// Unfortunatey, on some x86-64 platforms (CentOS 6.5) certain
+// floating point operations (trunc and ceil) are implemented in
+// software as a series of bit operations rather than using the
+// appropriate SSE instruction. Manipulating floating point values
+// with bitwise operations bypasses the flush to zero mode. Since
+// there is no easy way to check whether these operations are
+// implemented in hardware or software, the FTZ workaround is enabled
+// unconditionally. It might be possible to have CMAKE detect whether
+// various floating point operations respect the processor's FTZ mode
+// and selectively enable the workaround, but it seems like too much
+// work to avoid a single floating point add on platforms with good
+// libraries.
+
 #define fixFTZ(X) (X + 0)
-#else
-#define fixFTZ(X) (X)
-#endif
 
 extern "C" void setRoundingMode_near(void) {
   fesetround(FE_TONEAREST);
