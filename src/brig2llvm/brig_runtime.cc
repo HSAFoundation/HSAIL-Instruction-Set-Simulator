@@ -834,7 +834,7 @@ template<> f32 Cvt(f64 f, int mode) {
 template<> bool Cvt(f64 f, int mode) { return f != 0.0; }
 // Floating point rounding:
 // Int to Int, Int to f32, Int to f64
-template<class R, class T> static R Cvt(T t, int mode)  {
+template<class R, class T> static R Cvt(volatile T t, int mode)  {
   if (!~mode) return R(t);
   int oldMode = fegetround();
   fesetround(mode);
