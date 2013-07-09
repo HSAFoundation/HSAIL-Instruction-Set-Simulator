@@ -1,51 +1,23 @@
- -- Building hsail2brig_test --
- Supposed that the project folder is named `hsail2brig'
+-- HSAIL Simulator Build Instruction --
+The simulator and tests can be built with clang or gcc.
 
-On Linux:
-- Create a sub-directory:
+To build 64-bit versions:
+- Create a build directory: (for example, build_linux)
     mkdir build_linux
-- Go to that sub-directory :
+- Go to that directory :
     cd build_linux
 - Generate make file with cmake:
-    cmake ../
-- Build the project:
+    cmake [-DCMAKE_BUILD_TYPE = <Debug| Release>] <path/to/project/dir>
+- Build the project with make:
     make
-- Execute the built program:
-    ./hsail2brig_test
-    
-On Linux with Eclipse Platform IDE with CDT4:
-- Create a directory outside of the project directory:
-    mkdir ../build_eclipse
-- Go to that folder:
-    cd ../build_eclipse
-- Generate project file with CMake:
-    cmake-gui ../hsail2brig
-    + On the CMAKE GUI, click on Configure. 
-    + On the new Window, choose Eclipse CDT4-Unix Makefiles, Use default native compilers as the generator. Then click on Finish.
-    + Click on Configure again, and then click on Generate.
-    + Exit CMAKE GUI
-        
-- Build project with Eclipse CDT:
-    + Run Eclipse
-    + Choose File -> Import ... -> C/C++ -> Existing Code as Makefile Project
-    + In the new Window, click Browse... next to the field Existing Code Location. Browse to the build_eclipse directory above. 
-    + Choose Linux GCC as Toolchain for Indexers.  
-    + Click on Finish. The project has been imported to Eclipse.
-    + It can be built now with Eclipse.
-    
- 
-On Windows (in Cygwin Environment)
-- Run Cygwin Terminal. The following commands are in Cygwin Terminal
-- Create a sub-directory:
+
+To build 32-bit versions:
+- Create build directory, for example build_linux
     mkdir build_linux
-- Go to that sub-directory :
+- Go to that directory :
     cd build_linux
 - Generate make file with cmake:
-    cmake ../
-- Build the project:
+    CFLAGS="-m32" CXXFLAGS="-m32" LDFLAGS="-m32" cmake [-DCMAKE_BUILD_TYPE = <Debug| Release>] <path/to/project/dir>
+- Build the project with make:
     make
-- Execute the built program:
-    ./hsail2brig_test
- 
 
-          
