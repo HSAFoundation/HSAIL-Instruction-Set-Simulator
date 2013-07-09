@@ -34,8 +34,10 @@ set(LLVM_SRC_DIR
 set(LLVM_BUILD_DIR
   ${PROJECT_BINARY_DIR}/compiler)
 
+Find_Package(Git)
 add_custom_target( build_libhsail ALL
   DEPENDS brig2llvm
+  COMMAND ${GIT_EXECUTABLE} pull https://github.com/HSAFoundation/HSAIL-Tools.git
   COMMAND ${CMAKE_MAKE_PROGRAM} LLVM_SRC=${LLVM_SRC_DIR} LLVM_BUILD=${LLVM_BUILD_DIR}
   WORKING_DIRECTORY ${LibHSAIL_BUILD_DIR} )
 
