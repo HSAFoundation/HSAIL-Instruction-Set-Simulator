@@ -1090,14 +1090,18 @@ template<>
 llvm::Constant *runOnInitializer<float>(llvm::LLVMContext &C,
                                         llvm::Type *type,
                                         const float *array) {
-  return llvm::ConstantFP::get(C, llvm::APFloat(*array));
+  llvm::APInt API(32, *(const uint32_t *) array);
+  llvm::APFloat APF(llvm::APFloat::IEEEsingle, API);
+  return llvm::ConstantFP::get(C, APF);
 }
 
 template<>
 llvm::Constant *runOnInitializer<double>(llvm::LLVMContext &C,
                                          llvm::Type *type,
                                          const double *array) {
-  return llvm::ConstantFP::get(C, llvm::APFloat(*array));
+  llvm::APInt API(64, *(const uint64_t *) array);
+  llvm::APFloat APF(llvm::APFloat::IEEEdouble, API);
+  return llvm::ConstantFP::get(C, APF);
 }
 
 template<class T>
