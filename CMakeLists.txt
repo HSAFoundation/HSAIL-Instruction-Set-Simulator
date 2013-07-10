@@ -61,7 +61,8 @@ SET(LOCAL_LIBHSAIL_LIB ${PROJECT_SOURCE_DIR}/src/brig2llvm/HSAIL-Tools/libHSAIL/
 include (EnsureAtomicOps)
 include (EnsureLLVMisPresent)
 include (EnsureLibHSAILisPresent)
-
+include (EnsureELFisPresent)
+include (EnsureLibDwarfisPresent)
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
 ensure_libHSAIL_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/HSAIL-Tools)
 
