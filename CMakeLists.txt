@@ -55,8 +55,6 @@ SET(LLVM_REQUIRES_EH "true")
 
 # obtain specific information about llvm setup
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
-SET(LOCAL_LIBHSAIL_INCLUDE src/brig2llvm/HSAIL-Tools/libHSAIL/libHSAIL)
-SET(LOCAL_LIBHSAIL_LIB ${PROJECT_SOURCE_DIR}/src/brig2llvm/HSAIL-Tools/libHSAIL/build_linux)
 
 include (EnsureAtomicOps)
 include (EnsureLLVMisPresent)
@@ -64,7 +62,7 @@ include (EnsureLibHSAILisPresent)
 include (EnsureELFisPresent)
 include (EnsureLibDwarfisPresent)
 ensure_llvm_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/compiler)
-ensure_libHSAIL_is_present(${PROJECT_SOURCE_DIR} src/brig2llvm/HSAIL-Tools)
+ensure_libHSAIL_is_present(${PROJECT_SOURCE_DIR} src/HSAIL-Tools)
 
 SET(PROJ_SEARCH_PATH
 "${PROJECT_SOURCE_DIR}/include"
@@ -110,6 +108,35 @@ else (UNIX)
 endif (UNIX)
 
 SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}" )
+set(LLVM_SRC_DIR
+  ${PROJECT_SOURCE_DIR}/src/brig2llvm/compiler)
+
+# use libHSAIL makefile to build libHSAIL
+set(HSAIL_TOOLS_SRC_DIR
+    ${PROJECT_SOURCE_DIR}/src/HSAIL-Tools/libHSAIL)
+set(HSAIL_TOOLS_BINARY_DIR
+    ${PROJECT_BINARY_DIR}/HSAIL-Tools)
+Find_Package(Git)
+
+SET( MAKE_OPTIONS 
+     " LLVM_SRC=${LLVM_SRC_DIR}"
+     " LLVM_BUILD=${LLVM_BINARY_DIR}"
+     " BUILD_DIR=${HSAIL_TOOLS_BINARY_DIR}"
+     " CXX=${CMAKE_CXX_COMPILER}"
+     " AR=${CMAKE_AR}"
+     " CC=${CMAKE_C_COMPILER}")
+
+string(TOUPPER "${CMAKE_BUILD_TYPE}" uppercase_CMAKE_BUILD_TYPE)
+
+if (uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+  SET( MAKE_OPTIONS ${MAKE_OPTIONS} " _DBG=1")
+endif (uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+
+add_custom_target( build_libhsail ALL
+  DEPENDS brig2llvm
+  COMMAND ${GIT_EXECUTABLE} pull https://github.com/HSAFoundation/HSAIL-Tools.git
+  COMMAND ${CMAKE_MAKE_PROGRAM} ${MAKE_OPTIONS}
+  WORKING_DIRECTORY ${HSAIL_TOOLS_SRC_DIR} )
 
 set(brig_runtime_test_SOURCES
   test/brig_runtime_test.cc
@@ -166,10 +193,3 @@ add_executable(debug ${debug_SOURCES})
 target_link_libraries(debug hsa)
 
 add_subdirectory(test)
-
-set(HSAILASM_PATH
-  ${PROJECT_SOURCE_DIR}/src/brig2llvm/HSAIL-Tools/libHSAIL/build_linux/)
-
-add_custom_target( install_hsailasm ALL
-  DEPENDS build_libhsail
-  COMMAND cp ${HSAILASM_PATH}/hsailasm ${PROJECT_BINARY_DIR}/test )
