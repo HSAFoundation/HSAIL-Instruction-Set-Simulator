@@ -38,7 +38,7 @@ TEST(HSARuntimeTest, VectorCopy) {
 
   llvm::OwningPtr<llvm::MemoryBuffer> file;
   llvm::error_code ec =
-    llvm::MemoryBuffer::getFile(XSTR(BIN_PATH) "/VectorCopy.o", file);
+    llvm::MemoryBuffer::getFile(XSTR(OBJ_PATH) "/VectorCopy.o", file);
   EXPECT_TRUE(!ec);
   if (ec) return;
 

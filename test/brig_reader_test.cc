@@ -8996,7 +8996,7 @@ TEST(BrigInstTest, PackedShl) {
 }
 
 TEST(DebugTest, Square) {
-  const char filename[] = XSTR(BIN_PATH) "/square.o";
+  const char filename[] = XSTR(OBJ_PATH) "/square.o";
   BrigReader *reader = BrigReader::createBrigReader(filename);
   EXPECT_TRUE(reader);
   if (!reader) return;

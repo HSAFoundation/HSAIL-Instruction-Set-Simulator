@@ -93,7 +93,7 @@ static void callback(hsa::brig::BrigRegState *regs, size_t pc, void *data) {
 int main(int argc, char **argv) {
 
   hsa::brig::BrigReader *reader =
-    hsa::brig::BrigReader::createBrigReader(XSTR(BIN_PATH) "/fib.o");
+    hsa::brig::BrigReader::createBrigReader(XSTR(OBJ_PATH) "/fib.o");
   if (!reader) {
     std::cerr << argv[0] << ": File not found: " << argv[1] << "\n";
     return 0;

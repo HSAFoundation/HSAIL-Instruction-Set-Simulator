@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 
   llvm::OwningPtr<llvm::MemoryBuffer> file;
   llvm::error_code ec =
-    llvm::MemoryBuffer::getFile(XSTR(BIN_PATH) "/fib.o", file);
+    llvm::MemoryBuffer::getFile(XSTR(OBJ_PATH) "/fib.o", file);
   if (ec) return -1;
 
   hsa::Program *program =

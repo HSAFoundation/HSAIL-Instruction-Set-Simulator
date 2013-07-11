@@ -13,4 +13,4 @@
 *.a
 
 src/brig2llvm/compiler
-src/brig2llvm/HSAIL-Tools
+src/HSAIL-Tools
