@@ -53,42 +53,86 @@ static void printSourceLine(T &out, llvm::DILineInfo &info) {
   out << text;
 }
 
-static hsa::brig::BrigRegState prevRegState;
-
 template<typename T, size_t N>
 static int getArraySize(T (&array)[N]) { return N; }
 
-static void showRegChanges(hsa::brig::BrigRegState *regs) {
-  for (int i = 0; i < getArraySize(regs->c); ++i) {
-    if (regs->c[i] != prevRegState.c[i]) {
-      std::cout << "$c" << i << "=" << regs->c[i] << "\n";
-    }
-  }
-  for (int i = 0; i < getArraySize(regs->s); ++i) {
-    if (regs->s[i] != prevRegState.s[i]) {
-      std::cout << "$s" << i << "=" << regs->s[i]
-                << ",  FP: " << *(float *)(regs->s + i) << "\n";
-    }
-  }
-  for (int i = 0; i < getArraySize(regs->d); ++i) {
-    if (regs->d[i] != prevRegState.d[i]) {
-      std::cout << "$d" << i << "=" << regs->d[i]
-                << ",  FP: " << *(double *)(regs->d + i) << "\n";
-    }
-  }
-  std::cout << "\n";
-  prevRegState = *regs;
-}
+class DemoDebugger : public hsa::brig::HSADebugger {
 
-static void callback(hsa::brig::BrigRegState *regs, size_t pc, void *data) {
-  showRegChanges(regs);
-  hsa::brig::BrigProgram *BP = (hsa::brig::BrigProgram *) data;
-  llvm::DILineInfo info = BP->getLineInfoForAddress(pc);
-  std::cout << info.getFunctionName() << " at "
-            << info.getFileName() << ":" << info.getLine() << "\t";
-  printSourceLine(std::cout, info);
-  std::cout << "\n";
-}
+ public:
+  virtual void updatePC(size_t pc) {
+    stack.back().showRegChanges();
+    llvm::DILineInfo info = BP->getLineInfoForAddress(pc);
+    std::cout << info.getFunctionName() << " at "
+              << info.getFileName() << ":" << info.getLine() << "\t";
+    printSourceLine(std::cout, info);
+    std::cout << "\n";
+  }
+
+  virtual void enterFn(hsa::brig::BrigRegState *regs, hsa::brig::FunId id) {
+    stack.push_back(StackFrame(id, regs));
+    std::cout << "Entering: " << BP->getFunctionName(id) << "\n";
+  }
+
+  virtual void leaveFn() {
+    std::cout << "Leaving: " << BP->getFunctionName(stack.back().id) << "\n";
+    stack.pop_back();
+  }
+
+  virtual void declareLocal(void *addr, hsa::brig::SymbolId id) {
+    stack.back().locals.push_back(Symbol(id, addr));
+    std::cout << BP->getSymbolName(id) << " @ " << addr << "\n";
+  }
+
+  virtual void declareGlobal(void *addr, hsa::brig::SymbolId id) {
+    globals.push_back(Symbol(id, addr));
+    std::cout << BP->getSymbolName(id) << " @ " << addr << "\n";
+  }
+
+  void setBrigProgram(hsa::brig::BrigProgram *BP) {
+    this->BP = BP;
+  }
+
+ private:
+  typedef std::pair<hsa::brig::SymbolId, void *> Symbol;
+  typedef std::vector<Symbol> SymbolList;
+
+  SymbolList globals;
+  hsa::brig::BrigProgram *BP;
+
+  struct StackFrame {
+    hsa::brig::BrigRegState prevRegState;
+    hsa::brig::BrigRegState *regs;
+    hsa::brig::FunId id;
+    SymbolList locals;
+
+    StackFrame(hsa::brig::FunId id, hsa::brig::BrigRegState *regs) :
+      prevRegState(*regs), regs(regs), id(id) {}
+
+    void showRegChanges() {
+      for (int i = 0; i < getArraySize(regs->c); ++i) {
+        if (regs->c[i] != prevRegState.c[i]) {
+          std::cout << "$c" << i << "=" << regs->c[i] << "\n";
+        }
+      }
+      for (int i = 0; i < getArraySize(regs->s); ++i) {
+        if (regs->s[i] != prevRegState.s[i]) {
+          std::cout << "$s" << i << "=" << regs->s[i]
+                    << ",  FP: " << *(float *)(regs->s + i) << "\n";
+        }
+      }
+      for (int i = 0; i < getArraySize(regs->d); ++i) {
+        if (regs->d[i] != prevRegState.d[i]) {
+          std::cout << "$d" << i << "=" << regs->d[i]
+                    << ",  FP: " << *(double *)(regs->d + i) << "\n";
+        }
+      }
+      std::cout << "\n";
+      prevRegState = *regs;
+    }
+  };
+
+  std::vector<StackFrame> stack;
+};
 
 int main(int argc, char **argv) {
 
@@ -105,12 +149,15 @@ int main(int argc, char **argv) {
     return 0;
   }
 
+
+  DemoDebugger dbg;
   hsa::brig::BrigProgram BP =
-    hsa::brig::GenLLVM::getLLVMModule(mod, callback, &BP);
+    hsa::brig::GenLLVM::getLLVMModule(mod, &dbg);
   if (!BP) {
     std::cerr << argv[0] << ": Translation failure\n";
     return 0;
   }
+  dbg.setBrigProgram(&BP);
 
   hsa::brig::BrigEngine BE(BP);
 

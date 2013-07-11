@@ -69,7 +69,7 @@ static ForceBrigRuntimeLinkage runtime;
 
 BrigEngine::BrigEngine(hsa::brig::BrigProgram &BP,
                        bool forceInterpreter,
-                       char optLevel) : EE_(NULL), M_(BP.M.get()) {
+                       char optLevel) : EE_(NULL), M_(BP) {
   init(forceInterpreter, optLevel);
 }
 

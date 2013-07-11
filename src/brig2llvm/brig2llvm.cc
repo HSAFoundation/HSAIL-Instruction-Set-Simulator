@@ -51,6 +51,13 @@ static bool isARM(void) {
 #endif
 }
 
+SymbolInfo::SymbolInfo(std::string name, const BrigSymbol &S, bool isGlobal) :
+    name(name),
+    dim(S.getArrayDim()),
+    type(S.getType()),
+    seg(S.getStorageClass()),
+    isGlobal(isGlobal) {}
+
 void BrigProgram::delModule(llvm::Module *M) {
   if (!M) return;
   llvm::LLVMContext *C = &M->getContext();
@@ -181,25 +188,32 @@ static unsigned getRegOffset(const BrigString *name) {
   return offset;
 }
 
-typedef std::map<uint32_t, llvm::Function *> FunMap;
+class FunScope;
+static void insertEnterFn(llvm::BasicBlock &, const FunScope &);
+static void insertDeclareVariable(llvm::BasicBlock &,
+                                  const SymbolId,
+                                  const bool,
+                                  const FunScope &);
+
 typedef std::map<const void *, llvm::Value *> SymbolMap;
 
 struct ModScope {
   FunMap &funMap;
   SymbolMap &symbolMap;
+  SymbolInfoMap &symbolInfoMap;
   llvm::DIContext *debugInfo;
-  const Callback callback;
-  const CallbackData cbd;
+  const HSADebugger *dbg;
   llvm::DIBuilder &DB;
 
   ModScope(FunMap &funMap,
            SymbolMap &symbolMap,
+           SymbolInfoMap &symbolInfoMap,
            llvm::DIContext *debugInfo,
-           const Callback callback,
-           const CallbackData cbd,
+           const HSADebugger *dbg,
            llvm::DIBuilder &DB) :
     funMap(funMap), symbolMap(symbolMap),
-    debugInfo(debugInfo), callback(callback), cbd(cbd),
+    symbolInfoMap(symbolInfoMap),
+    debugInfo(debugInfo), dbg(dbg),
     DB(DB) {}
 };
 
@@ -210,6 +224,7 @@ struct FunScope {
  private:
   const ModScope &parent;
   llvm::DISubprogram sub;
+  const size_t id;
 
  public:
   CBMap cbMap;
@@ -218,7 +233,7 @@ struct FunScope {
   FunScope(ModScope &parent,
            const BrigFunction &brigFun,
            llvm::Function *llvmFun) :
-    parent(parent) {
+    parent(parent), id(brigFun.getOffset()) {
 
     llvm::LLVMContext &C = llvmFun->getContext();
     const BrigControlBlock E = brigFun.end();
@@ -247,12 +262,22 @@ struct FunScope {
                          DL.getTypeAllocSize(regsType),
                          DL.getPrefTypeAlignment(regsType));
 
+    insertEnterFn(entry, *this);
+
+    for (BrigSymbol brigArg = brigFun.arg_begin(),
+           E = brigFun.arg_end(); brigArg != E; ++brigArg) {
+      insertDeclareVariable(entry, brigArg.getAddr(), false, *this);
+    }
+
     for (BrigSymbol local = brigFun.local_begin(),
-          E = brigFun.local_end(); local != E; ++local) {
+           E = brigFun.local_end(); local != E; ++local) {
       llvm::StringRef name = getStringRef(local.getName());
       llvm::Type *type = runOnType(C, local);
-      parent.symbolMap[local.getAddr()] =
-        new llvm::AllocaInst(type, name, &entry);
+      llvm::Value *v = new llvm::AllocaInst(type, name, &entry);
+      parent.symbolMap[local.getAddr()] = v;
+      parent.symbolInfoMap[local.getAddr()] =
+        SymbolInfo(name.str(), local, false);
+      insertDeclareVariable(entry, local.getAddr(), false, *this);
     }
 
     if (!hasDebugInfo()) return;
@@ -278,7 +303,7 @@ struct FunScope {
                                llvmFun);
   }
 
-  llvm::Value *lookupSymbol(const BrigDirectiveSymbol *symbol) const {
+  llvm::Value *lookupSymbol(const void *symbol) const {
     SymbolMap::const_iterator it = parent.symbolMap.find(symbol);
     return it != parent.symbolMap.end() ? it->second : NULL;
   }
@@ -288,12 +313,19 @@ struct FunScope {
     return it != parent.symbolMap.end() ? it->second : NULL;
   }
 
+  SymbolInfoMap::const_iterator symbol_begin() const {
+    return parent.symbolInfoMap.begin();
+  }
+
+  SymbolInfoMap::const_iterator symbol_end() const {
+    return parent.symbolInfoMap.begin();
+  }
+
   llvm::Function *lookupFun(uint32_t addr) const {
     return parent.funMap.find(addr)->second;
   }
 
-  Callback getCallback() const { return parent.callback; }
-  CallbackData getCBD() const { return parent.cbd; }
+  const HSADebugger *getHSADebugger() const { return parent.dbg; }
   bool hasDebugInfo() const { return parent.debugInfo; }
 
   llvm::DILineInfo getLineInfo(size_t addr) const {
@@ -317,6 +349,8 @@ struct FunScope {
       parent.DB.createLexicalBlockFile(sub, file);
     return llvm::DebugLoc::get(info.getLine(), info.getColumn(), LB);
   }
+
+  size_t getFunId() const { return id; }
 };
 
 static llvm::Value *getRegAddr(llvm::BasicBlock &B,
@@ -524,8 +558,8 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
 
   if ((inst->opcode == BRIG_OPCODE_CLASS && opnum == 2)) {
     return runOnType(C, BRIG_TYPE_U32);
-  }    
-     
+  }
+
   if (inst->opcode == BRIG_OPCODE_PACK && opnum == 1)
     return destType;
 
@@ -540,7 +574,7 @@ static llvm::Type *getOperandTy(llvm::LLVMContext &C,
 
   if ((inst->opcode == BRIG_OPCODE_SHUFFLE && opnum == 3))
     return runOnType(C, BRIG_TYPE_U64);
-  
+
   if (inst->opcode == BRIG_OPCODE_BITMASK)
     return runOnType(C, BRIG_TYPE_B32);
 
@@ -735,33 +769,129 @@ static void insertRestoreRoundingMode(llvm::BasicBlock &B) {
   llvm::CallInst::Create(restoreRound, "", &B);
 }
 
-static void insertDebugCallback(llvm::BasicBlock &B,
-                                inst_iterator inst,
-                                const BrigInstHelper &helper,
-                                const FunScope &scope) {
+static void insertUpdatePC(llvm::BasicBlock &B,
+                           inst_iterator inst,
+                           const BrigInstHelper &helper,
+                           const FunScope &scope) {
 
-  if (!scope.getCallback()) return;
+  if (!scope.getHSADebugger()) return;
 
   llvm::LLVMContext &C = B.getContext();
 
   llvm::Type *intPtrTy = llvm::Type::getIntNTy(C, sizeof(intptr_t) * 8);
 
-  llvm::Type *argsTy[] = { scope.regs->getType(), intPtrTy, intPtrTy };
+  llvm::Type *argsTy[] = { intPtrTy, intPtrTy };
   llvm::FunctionType *callbackTy =
     llvm::FunctionType::get(llvm::Type::getVoidTy(C), argsTy, false);
 
+  void (*updatePC)(HSADebugger *, size_t) = HSADebugger::updatePC;
   llvm::Constant *cbIntValue =
-    llvm::ConstantInt::get(intPtrTy, (intptr_t) scope.getCallback());
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) updatePC);
   llvm::Value *cbFPValue =
     llvm::ConstantExpr::getIntToPtr(cbIntValue, callbackTy->getPointerTo());
+
+  llvm::Value *cbdIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) scope.getHSADebugger());
 
   llvm::Value *pcValue =
     llvm::ConstantInt::get(intPtrTy, helper.getAddr(inst));
 
-  llvm::Value *cbdIntValue =
-    llvm::ConstantInt::get(intPtrTy, (intptr_t) scope.getCBD());
+  llvm::Value *args[] = { cbdIntValue, pcValue };
 
-  llvm::Value *args[] = { scope.regs, pcValue, cbdIntValue };
+  llvm::CallInst::Create(cbFPValue, args, "", &B);
+}
+
+static void insertEnterFn(llvm::BasicBlock &B, const FunScope &scope) {
+
+  if (!scope.getHSADebugger()) return;
+
+  llvm::LLVMContext &C = B.getContext();
+
+  llvm::Type *intPtrTy = llvm::Type::getIntNTy(C, sizeof(intptr_t) * 8);
+
+  llvm::Type *argsTy[] = { intPtrTy, scope.regs->getType(), intPtrTy };
+  llvm::FunctionType *callbackTy =
+    llvm::FunctionType::get(llvm::Type::getVoidTy(C), argsTy, false);
+
+  void (*enterFn)(HSADebugger *, BrigRegState *, FunId) = HSADebugger::enterFn;
+  llvm::Constant *cbIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) enterFn);
+  llvm::Value *cbFPValue =
+    llvm::ConstantExpr::getIntToPtr(cbIntValue, callbackTy->getPointerTo());
+
+  llvm::Value *cbdIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) scope.getHSADebugger());
+
+  llvm::Value *idValue =
+    llvm::ConstantInt::get(intPtrTy, scope.getFunId());
+
+  llvm::Value *args[] = { cbdIntValue, scope.regs, idValue };
+
+  llvm::CallInst::Create(cbFPValue, args, "", &B);
+}
+
+static void insertLeaveFn(llvm::BasicBlock &B, const FunScope &scope) {
+
+  if (!scope.getHSADebugger()) return;
+
+  llvm::LLVMContext &C = B.getContext();
+
+  llvm::Type *intPtrTy = llvm::Type::getIntNTy(C, sizeof(intptr_t) * 8);
+
+  llvm::Type *argsTy[] = { intPtrTy };
+  llvm::FunctionType *callbackTy =
+    llvm::FunctionType::get(llvm::Type::getVoidTy(C), argsTy, false);
+
+  void (*leaveFn)(HSADebugger *) = HSADebugger::leaveFn;
+  llvm::Constant *cbIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) leaveFn);
+  llvm::Value *cbFPValue =
+    llvm::ConstantExpr::getIntToPtr(cbIntValue, callbackTy->getPointerTo());
+
+  llvm::Value *cbdIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) scope.getHSADebugger());
+
+  llvm::Value *args[] = { cbdIntValue };
+
+  llvm::CallInst::Create(cbFPValue, args, "", &B);
+}
+
+static void insertDeclareVariable(llvm::BasicBlock &B,
+                                  const SymbolId id,
+                                  const bool isGlobal,
+                                  const FunScope &scope) {
+
+  if (!scope.getHSADebugger()) return;
+
+  llvm::LLVMContext &C = B.getContext();
+
+  llvm::Value *v = scope.lookupSymbol(id);
+
+  llvm::Type *intPtrTy = llvm::Type::getIntNTy(C, sizeof(intptr_t) * 8);
+  llvm::Type *int8PtrTy = llvm::Type::getInt8PtrTy(C);
+
+  llvm::Type *argsTy[] = { intPtrTy, int8PtrTy, intPtrTy };
+  llvm::FunctionType *callbackTy =
+    llvm::FunctionType::get(llvm::Type::getVoidTy(C), argsTy, false);
+
+  void (*declareSymbol)(HSADebugger *, void *, SymbolId);
+  if(isGlobal) declareSymbol = HSADebugger::declareGlobal;
+  else declareSymbol = HSADebugger::declareLocal;
+
+  llvm::Constant *cbIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) declareSymbol);
+  llvm::Value *cbFPValue =
+    llvm::ConstantExpr::getIntToPtr(cbIntValue, callbackTy->getPointerTo());
+
+  llvm::Value *cbdIntValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) scope.getHSADebugger());
+
+  llvm::Value *addr = new llvm::BitCastInst(v, int8PtrTy, "", &B);
+
+  llvm::Value *idValue =
+    llvm::ConstantInt::get(intPtrTy, (intptr_t) id);
+
+  llvm::Value *args[] = { cbdIntValue, addr, idValue };
 
   llvm::CallInst::Create(cbFPValue, args, "", &B);
 }
@@ -929,9 +1059,10 @@ static void runOnInstruction(llvm::BasicBlock &B,
                              const FunScope &scope) {
   llvm::LLVMContext &C = B.getContext();
 
-  insertDebugCallback(B, inst, helper, scope);
+  insertUpdatePC(B, inst, helper, scope);
 
   if (inst->opcode == BRIG_OPCODE_RET) {
+    insertLeaveFn(B, scope);
     llvm::ReturnInst::Create(C, &B);
   } else if (helper.isDirectBranchInst(inst)) {
     runOnDirectBranchInst(B, inst, helper, scope);
@@ -984,8 +1115,12 @@ static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
   // Fall through to the next control block
   if (bb->empty() || !llvm::isa<llvm::TerminatorInst>(&bb->back())) {
     ++it;
-    if (it != scope.cbMap.end()) llvm::BranchInst::Create(it->second, bb);
-    else llvm::ReturnInst::Create(C, bb);
+    if (it != scope.cbMap.end()) {
+      llvm::BranchInst::Create(it->second, bb);
+    } else {
+      insertLeaveFn(*bb, scope);
+      llvm::ReturnInst::Create(C, bb);
+    }
   }
 }
 
@@ -1006,7 +1141,8 @@ static llvm::Value *getParameter(llvm::BasicBlock *bb,
 // We create a trampoline with the function signature:
 // void fun(char **argv)
 // The real function arguments are encoded in the argv array.
-static void makeKernelTrampoline(llvm::Function *fun, llvm::StringRef name) {
+static void makeKernelTrampoline(llvm::Function *fun, llvm::StringRef name,
+                                 const FunScope &scope) {
 
   llvm::LLVMContext &C = fun->getContext();
   llvm::Module *M = fun->getParent();
@@ -1035,6 +1171,12 @@ static void makeKernelTrampoline(llvm::Function *fun, llvm::StringRef name) {
     llvm::Type *paramTy = funTy->getParamType(i);
     trampParams.push_back(getParameter(bb, argArray, paramTy, i + 1));
   }
+
+  typedef SymbolInfoMap::const_iterator SymbolInfoMapIt;
+  for(SymbolInfoMapIt info = scope.symbol_begin(),
+        E = scope.symbol_end(); info != E; ++info)
+    if(info->second.isGlobal)
+      insertDeclareVariable(*bb, info->first, true, scope);
 
   llvm::CallInst::Create(fun, trampParams, "", bb);
   llvm::ReturnInst::Create(C, bb);
@@ -1070,8 +1212,11 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   llvm::Function::arg_iterator llvmArg = fun->arg_begin();
   llvm::Function::arg_iterator E = fun->arg_end();
   for (; llvmArg != E; ++brigArg, ++llvmArg) {
-    llvmArg->setName(getStringRef(brigArg.getName()));
+    llvm::StringRef name = getStringRef(brigArg.getName());
+    llvmArg->setName(name);
     mScope.symbolMap[brigArg.getAddr()] = llvmArg;
+    mScope.symbolInfoMap[brigArg.getAddr()] =
+      SymbolInfo(name.str(), brigArg, false);
   }
 
   if (F.isDeclaration()) return;
@@ -1082,7 +1227,7 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
   }
 
   llvm::StringRef nameRef = getStringRef(F.getName());
-  if (F.isKernel()) makeKernelTrampoline(fun, nameRef);
+  if (F.isKernel()) makeKernelTrampoline(fun, nameRef, fScope);
 }
 
 template<class T>
@@ -1125,7 +1270,8 @@ static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
 }
 
 static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
-                        SymbolMap &symbolMap) {
+                        SymbolMap &symbolMap,
+                        SymbolInfoMap &symbolInfoMap) {
   llvm::LLVMContext &C = M.getContext();
   llvm::Type *type = runOnType(C, S);
   bool isConst = S.isConst();
@@ -1157,6 +1303,8 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
 
   symbolMap[S.getAddr()] =
     new llvm::GlobalVariable(M, type, isConst, linkage, init, name);
+  symbolInfoMap[S.getAddr()] = SymbolInfo(name.str(), S, true);
+
 }
 
 llvm::DIContext *runOnDebugInfo(const BrigModule &M) {
@@ -1193,8 +1341,7 @@ llvm::DIContext *runOnDebugInfo(const BrigModule &M) {
 }
 
 BrigProgram GenLLVM::getLLVMModule(const BrigModule &M,
-                                   Callback callback,
-                                   CallbackData cbd) {
+                                   HSADebugger *dbg) {
 
   if (!M.isValid()) return NULL;
 
@@ -1210,9 +1357,10 @@ BrigProgram GenLLVM::getLLVMModule(const BrigModule &M,
   insertSetThreadInfo(*C, mod);
 
   SymbolMap symbolMap;
+  SymbolInfoMap symbolInfoMap;
   for (BrigSymbol symbol = M.global_begin(),
         E = M.global_end(); symbol != E; ++symbol) {
-    runOnGlobal(*mod, symbol, symbolMap);
+    runOnGlobal(*mod, symbol, symbolMap, symbolInfoMap);
   }
 
   FunMap funMap;
@@ -1220,20 +1368,19 @@ BrigProgram GenLLVM::getLLVMModule(const BrigModule &M,
     funMap[fun.getOffset()] = createFunctionDecl(*mod, fun);
   }
 
-  ModScope scope(funMap, symbolMap, debugInfo, callback, cbd, DB);
+  ModScope scope(funMap, symbolMap, symbolInfoMap, debugInfo, dbg, DB);
   for (BrigFunction fun = M.begin(), E = M.end(); fun != E; ++fun) {
     runOnFunction(*mod, fun, scope);
   }
 
   DB.finalize();
 
-  return BrigProgram(mod, debugInfo);
+  return BrigProgram(mod, debugInfo, funMap, symbolInfoMap);
 }
 
 std::string GenLLVM::getLLVMString(const BrigModule &M,
-                                   Callback callback,
-                                   CallbackData cbd) {
-  BrigProgram BP = getLLVMModule(M, callback, cbd);
+                                   HSADebugger *dbg) {
+  BrigProgram BP = getLLVMModule(M, dbg);
   if (!BP) return "";
 
   std::string output;
