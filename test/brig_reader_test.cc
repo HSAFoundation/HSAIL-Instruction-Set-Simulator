@@ -508,7 +508,7 @@ TEST(BrigInstTest, VectorMulHi) {
   {
     const uint64_t testVec[] = { 0x1, 0x4000000000000000LL, 4 };
     testInst("mulhi_u64", testVec);
-  }  
+  }
   {
     const int32_t testVec[] = { -0x1, 0x40000000, -4 };
     testInst("mulhi_s32", testVec);
@@ -516,7 +516,7 @@ TEST(BrigInstTest, VectorMulHi) {
   {
     const int64_t testVec[] = {-0x3, 0x6000000000000000LL, -8 };
     testInst("mulhi_s64", testVec);
-  }  
+  }
 }
 
 TEST(BrigInstTest, VectorSub) {
@@ -2560,7 +2560,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x0;         //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_upi_sat", "_u8", "_f32", result.u8, input.f32 );
-  } 
+  }
   // f32 -> s8
   {
     result.u8 = 0x2;         // 2
@@ -2571,7 +2571,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x7F;        // 127
     input.u32 = 0x43018000;  // 129.5f
     testInstCvt("cvt_upi_sat", "_s8", "_f32", result.s8, input.f32 );
-  }   
+  }
   {
     result.u8 = 0xFF;        // -1
     input.u32 = 0xBFCCCCCD;  // -1.6f
@@ -2587,7 +2587,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0x101;      // 257
     input.u32 = 0x43804CCD;  // 256.6f
     testInstCvt("cvt_upi_sat", "_u16", "_f32", result.u16, input.f32 );
-  } 
+  }
   {
     result.u16 = 0xFFFF;     // 65536
     input.u32 = 0x4780E8CD;  // 66001.6f
@@ -2597,8 +2597,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_upi_sat", "_u16", "_f32", result.u16, input.f32 );
-  }   
-  
+  }
+
   // f32 -> s16
   {
     result.u16 = 0x7FFF;     // 32767
@@ -2613,14 +2613,14 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u16 = 0xFF7F;     // -129
     input.u32 = 0xC3018000;  // -129.5f
-    testInstCvt("cvt_upi_sat", "_s16", "_f32", result.s16, input.f32 );  
+    testInstCvt("cvt_upi_sat", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u16 = 0x8000;     // -32768
     input.u32 = 0xC700E99A;  // -33001.6f
     testInstCvt("cvt_upi_sat", "_s16", "_f32", result.s16, input.f32 );
   }
-  
+
   // f32 -> u32
   {
     result.u32 = 0x101D2;    // 66002
@@ -2631,13 +2631,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0xFFFFFFFF; // 4294967295
     input.u32 = 0x4F802666;   // 4300000256f
     testInstCvt("cvt_upi_sat", "_u32", "_f32", result.u32, input.f32 );
-  }  
+  }
   {
     result.u32 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_upi_sat", "_u32", "_f32", result.u32, input.f32 );
-  }   
-  
+  }
+
   // f32 -> s32
   {
     result.u32 = 0x80EA;     // 33002
@@ -2659,12 +2659,12 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u32 = 0xCF032156;  //-2200000000f
     testInstCvt("cvt_upi_sat", "_s32", "_f32", result.s32, input.f32 );
   }
-  // f32 -> u64 
+  // f32 -> u64
   {
     result.u64 = 0x1004CCC00LL; // 4300000256
     input.u32 = 0x4F802666;   // 4300000256 f
     testInstCvt("cvt_upi_sat", "_u64", "_f32", result.u64, input.f32 );
-  }    
+  }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
     input.u32 = 0x6124CC7A;   // 1.9e+20
@@ -2674,9 +2674,9 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_upi_sat", "_u64", "_f32", result.u64, input.f32 );
-  } 
-  
-  // f32 -> s64  
+  }
+
+  // f32 -> s64
   {
     result.u64 = 0x83215600; // 2200000000
     input.u32 = 0x4F032156;  // 2200000000 f
@@ -2697,7 +2697,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u32 = 0xDF0AC723;            //-9999999980506447872f
     testInstCvt("cvt_upi_sat", "_s64", "_f32", result.s64, input.f32 );
   }
-  
+
   // f64 -> u8
   {
     result.u8 = 0x2;                   // 2
@@ -2713,7 +2713,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x0;                   //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_upi_sat", "_u8", "_f64", result.u8, input.f64 );
-  } 
+  }
   // f64-> s8
   {
     result.u8 = 0x2;                   // 2
@@ -2724,7 +2724,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x7F;                  // 127
     input.u64 = 0x4060300000000000LL;  // 129.5f
     testInstCvt("cvt_upi_sat", "_s8", "_f64", result.s8, input.f64 );
-  }  
+  }
   {
     result.u8 = 0xFF;                  // -1
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
@@ -2734,8 +2734,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x80;                  // -128
     input.u64 = 0xC060300000000000LL;  // -129.5f
     testInstCvt("cvt_upi_sat", "_s8", "_f64", result.s8, input.f64 );
-  }  
-  
+  }
+
   // f64 -> u16
   {
     result.u16 = 0x101;                // 257
@@ -2752,7 +2752,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_upi_sat", "_u16", "_f64", result.u16, input.f64 );
   }
-  
+
   // f64 -> s16
   {
     result.u16 = 0x7FFF;                // 32767
@@ -2768,8 +2768,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0xFF7F;               // -129
     input.u64 = 0xC060300000000000LL;  // -129.5f
     testInstCvt("cvt_upi_sat", "_s16", "_f64", result.s16, input.f64 );
-  }  
-  
+  }
+
   // f64 -> u32
   {
     result.u32 = 0x101D2;              // 66002
@@ -2780,13 +2780,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0xFFFFFFFF;            // 4294967295
     input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
     testInstCvt("cvt_upi_sat", "_u32", "_f64", result.u32, input.f64 );
-  }  
+  }
   {
     result.u32 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_upi_sat", "_u32", "_f64", result.u32, input.f64 );
   }
-    
+
   // f64 -> s32
   {
     result.u32 = 0x80EA;                // 33002
@@ -2807,7 +2807,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0x80000000;           //-2147483648
     input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
     testInstCvt("cvt_upi_sat", "_s32", "_f64", result.s32, input.f64 );
-  }  
+  }
   // f64 -> u64
   {
     result.u64 =  0x1004CCC01LL;        // 4300000257
@@ -2818,13 +2818,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
     input.u64 = 0x4424998F32AC7870LL;   // 1.9e+20
     testInstCvt("cvt_upi_sat", "_u64", "_f64", result.u64, input.f64 );
-  }  
+  }
   {
     result.u64 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_upi_sat", "_u64", "_f64", result.u64, input.f64 );
-  }  
-  
+  }
+
   // f64 -> s64
   {
     result.u64 = 0x83215601LL;         // 2200000001
@@ -2846,7 +2846,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u64 = 0xC3F07AD8F556C6C0LL;    // -1.9e+19
     testInstCvt("cvt_upi_sat", "_s64", "_f64", result.s64, input.f64 );
   }
-  
+
   //downi_sat
   // f32 -> u8
   {
@@ -2863,7 +2863,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x0;         //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_downi_sat", "_u8", "_f32", result.u8, input.f32 );
-  } 
+  }
   // f32 -> s8
   {
     result.u8 = 0x1;         // 1
@@ -2874,7 +2874,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x7F;        // 127
     input.u32 = 0x43018000;  // 129.5f
     testInstCvt("cvt_downi_sat", "_s8", "_f32", result.s8, input.f32 );
-  }   
+  }
   {
     result.u8 = 0xFE;        // -2
     input.u32 = 0xBFCCCCCD;  // -1.6f
@@ -2890,7 +2890,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0x100;      // 256
     input.u32 = 0x43804CCD;  // 256.6f
     testInstCvt("cvt_downi_sat", "_u16", "_f32", result.u16, input.f32 );
-  } 
+  }
   {
     result.u16 = 0xFFFF;     // 65536
     input.u32 = 0x4780E8CD;  // 66001.6f
@@ -2900,8 +2900,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_downi_sat", "_u16", "_f32", result.u16, input.f32 );
-  }   
-  
+  }
+
   // f32 -> s16
   {
     result.u16 = 0x7FFF;     // 32767
@@ -2916,7 +2916,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u16 = 0xFF7E;     // -130
     input.u32 = 0xC3018000;  // -129.5f
-    testInstCvt("cvt_downi_sat", "_s16", "_f32", result.s16, input.f32 );  
+    testInstCvt("cvt_downi_sat", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u16 = 0x8000;     // -32768
@@ -2933,13 +2933,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0xFFFFFFFF;  // 4294967295
     input.u32 = 0x4F802666;   // 4300000256f
     testInstCvt("cvt_downi_sat", "_u32", "_f32", result.u32, input.f32 );
-  }  
+  }
   {
     result.u32 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_downi_sat", "_u32", "_f32", result.u32, input.f32 );
-  }   
-  
+  }
+
   // f32 -> s32
   {
     result.u32 = 0x80E9;     // 33001
@@ -2961,12 +2961,12 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u32 = 0xCF032156;  //-2200000000f
     testInstCvt("cvt_downi_sat", "_s32", "_f32", result.s32, input.f32 );
   }
-  // f32 -> u64 
+  // f32 -> u64
   {
     result.u64 = 0x1004CCC00LL; // 4300000256
     input.u32 = 0x4F802666;     // 4300000256 f
     testInstCvt("cvt_downi_sat", "_u64", "_f32", result.u64, input.f32 );
-  }    
+  }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
     input.u32 = 0x6124CC7A;             // 1.9e+20
@@ -2976,9 +2976,9 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_downi_sat", "_u64", "_f32", result.u64, input.f32 );
-  } 
-  
-  // f32 -> s64  
+  }
+
+  // f32 -> s64
   {
     result.u64 = 0x83215600; // 2200000000
     input.u32 =  0x4F032156;  // 2200000000 f
@@ -2998,7 +2998,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0x8000000000000000LL; //-9.223372e+18
     input.u32 = 0xDF0AC723;            //-9999999980506447872f
     testInstCvt("cvt_downi_sat", "_s64", "_f32", result.s64, input.f32 );
-  }  
+  }
   // f64 -> u8
   {
     result.u8 = 0x1;                   // 1
@@ -3014,7 +3014,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x0;         //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_downi_sat", "_u8", "_f64", result.u8, input.f64 );
-  } 
+  }
   // f64-> s8
   {
     result.u8 = 0x1;                   // 1
@@ -3025,7 +3025,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x7F;                  // 127
     input.u64 = 0x4060300000000000LL;  // 129.5f
     testInstCvt("cvt_downi_sat", "_s8", "_f64", result.s8, input.f64 );
-  }  
+  }
   {
     result.u8 = 0xFE;                  // -2
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
@@ -3035,8 +3035,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x80;        // -128
     input.u64 = 0xC060300000000000LL;  // -129.5f
     testInstCvt("cvt_downi_sat", "_s8", "_f64", result.s8, input.f64 );
-  }  
-  
+  }
+
   // f64 -> u16
   {
     result.u16 = 0x100;                // 256
@@ -3053,7 +3053,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_downi_sat", "_u16", "_f64", result.u16, input.f64 );
   }
-  
+
   // f64 -> s16
   {
     result.u16 = 0x7FFF;                // 32767
@@ -3069,8 +3069,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0xFF7E;               // -130
     input.u64 = 0xC060300000000000LL;  // -129.5f
     testInstCvt("cvt_downi_sat", "_s16", "_f64", result.s16, input.f64 );
-  }  
-  
+  }
+
   // f64 -> u32
   {
     result.u32 = 0x101D1;              // 66001
@@ -3081,13 +3081,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0xFFFFFFFF;            // 4294967295
     input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
     testInstCvt("cvt_downi_sat", "_u32", "_f64", result.u32, input.f64 );
-  }  
+  }
   {
     result.u32 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_downi_sat", "_u32", "_f64", result.u32, input.f64 );
   }
-    
+
   // f64 -> s32
   {
     result.u32 = 0x80E9;                // 33001
@@ -3108,7 +3108,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0x80000000;           //-2147483648
     input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
     testInstCvt("cvt_downi_sat", "_s32", "_f64", result.s32, input.f64 );
-  }  
+  }
   // f64 -> u64
   {
     result.u64 =  0x1004CCC00LL;        // 4300000256
@@ -3119,13 +3119,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
     input.u64 = 0x4424998F32AC7870LL;   // 1.9e+20
     testInstCvt("cvt_downi_sat", "_u64", "_f64", result.u64, input.f64 );
-  }  
+  }
   {
     result.u64 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_downi_sat", "_u64", "_f64", result.u64, input.f64 );
-  }  
-  
+  }
+
   // f64 -> s64
   {
     result.u64 = 0x83215600LL;         // 2200000000
@@ -3162,7 +3162,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x0;         //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_neari_sat", "_u8", "_f32", result.u8, input.f32 );
-  } 
+  }
   // f32 -> s8
   {
     result.u8 = 0x2;         // 2
@@ -3173,7 +3173,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x7F;        // 127
     input.u32 = 0x43018000;  // 129.5f
     testInstCvt("cvt_neari_sat", "_s8", "_f32", result.s8, input.f32 );
-  }   
+  }
   {
     result.u8 = 0xFE;        // -2
     input.u32 = 0xBFCCCCCD;  // -1.6f
@@ -3189,7 +3189,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0x101;      // 257
     input.u32 = 0x43804CCD;  // 256.6f
     testInstCvt("cvt_neari_sat", "_u16", "_f32", result.u16, input.f32 );
-  } 
+  }
   {
     result.u16 = 0xFFFF;     // 65536
     input.u32 = 0x4780E8CD;  // 66001.6f
@@ -3199,8 +3199,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_neari_sat", "_u16", "_f32", result.u16, input.f32 );
-  }   
-  
+  }
+
   // f32 -> s16
   {
     result.u16 = 0x7FFF;     // 32767
@@ -3215,7 +3215,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u16 = 0xFF7E;     // -130
     input.u32 = 0xC3018000;  // -129.5f
-    testInstCvt("cvt_neari_sat", "_s16", "_f32", result.s16, input.f32 );  
+    testInstCvt("cvt_neari_sat", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u16 = 0x8000;     // -32768
@@ -3232,13 +3232,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0xFFFFFFFF;  // 4294967295
     input.u32 = 0x4F802666;   // 4300000256f
     testInstCvt("cvt_neari_sat", "_u32", "_f32", result.u32, input.f32 );
-  }  
+  }
   {
     result.u32 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_neari_sat", "_u32", "_f32", result.u32, input.f32 );
-  }   
-  
+  }
+
   // f32 -> s32
   {
     result.u32 = 0x80EA;     // 33002
@@ -3260,12 +3260,12 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u32 = 0xCF032156;  //-2200000000f
     testInstCvt("cvt_neari_sat", "_s32", "_f32", result.s32, input.f32 );
   }
-  // f32 -> u64 
+  // f32 -> u64
   {
     result.u64 = 0x1004CCC00LL; // 4300000256
     input.u32 = 0x4F802666;     // 4300000256 f
     testInstCvt("cvt_neari_sat", "_u64", "_f32", result.u64, input.f32 );
-  }    
+  }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
     input.u32 = 0x6124CC7A;             // 1.9e+20
@@ -3275,9 +3275,9 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_neari_sat", "_u64", "_f32", result.u64, input.f32 );
-  } 
-  
-  // f32 -> s64  
+  }
+
+  // f32 -> s64
   {
     result.u64 = 0x83215600;  // 2200000000
     input.u32 =  0x4F032156;  // 2200000000 f
@@ -3297,7 +3297,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0x8000000000000000LL; //-9.223372e+18
     input.u32 = 0xDF0AC723;            //-9999999980506447872f
     testInstCvt("cvt_neari_sat", "_s64", "_f32", result.s64, input.f32 );
-  }  
+  }
   // f64 -> u8
   {
     result.u8 = 0x2;                   // 2
@@ -3313,7 +3313,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x0;                   //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_neari_sat", "_u8", "_f64", result.u8, input.f64 );
-  } 
+  }
   // f64-> s8
   {
     result.u8 = 0x2;                   // 2
@@ -3324,7 +3324,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x7F;                  // 127
     input.u64 = 0x4060300000000000LL;  // 129.5f
     testInstCvt("cvt_neari_sat", "_s8", "_f64", result.s8, input.f64 );
-  }  
+  }
   {
     result.u8 = 0xFE;                  // -2
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
@@ -3334,8 +3334,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x80;                  // -128
     input.u64 = 0xC060300000000000LL;  // -129.5f
     testInstCvt("cvt_neari_sat", "_s8", "_f64", result.s8, input.f64 );
-  }  
-  
+  }
+
   // f64 -> u16
   {
     result.u16 = 0x101;                // 257
@@ -3352,7 +3352,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_neari_sat", "_u16", "_f64", result.u16, input.f64 );
   }
-  
+
   // f64 -> s16
   {
     result.u16 = 0x7FFF;                // 32767
@@ -3368,8 +3368,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0xFF7E;               // -130
     input.u64 = 0xC060300000000000LL;  // -129.5f
     testInstCvt("cvt_neari_sat", "_s16", "_f64", result.s16, input.f64 );
-  }  
-  
+  }
+
   // f64 -> u32
   {
     result.u32 = 0x101D2;              // 66002
@@ -3380,13 +3380,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0xFFFFFFFF;            // 4294967295
     input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
     testInstCvt("cvt_neari_sat", "_u32", "_f64", result.u32, input.f64 );
-  }  
+  }
   {
     result.u32 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_neari_sat", "_u32", "_f64", result.u32, input.f64 );
   }
-    
+
   // f64 -> s32
   {
     result.u32 = 0x80EA;                // 33002
@@ -3407,7 +3407,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0x80000000;           //-2147483648
     input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
     testInstCvt("cvt_neari_sat", "_s32", "_f64", result.s32, input.f64 );
-  }  
+  }
   // f64 -> u64
   {
     result.u64 =  0x1004CCC01LL;        // 4300000257
@@ -3418,13 +3418,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
     input.u64 = 0x4424998F32AC7870LL;   // 1.9e+20
     testInstCvt("cvt_neari_sat", "_u64", "_f64", result.u64, input.f64 );
-  }  
+  }
   {
     result.u64 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_neari_sat", "_u64", "_f64", result.u64, input.f64 );
-  }  
-  
+  }
+
   // f64 -> s64
   {
     result.u64 = 0x83215601LL;         // 2200000001
@@ -3446,7 +3446,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u64 = 0xC3F07AD8F556C6C0LL;    // -1.9e+19
     testInstCvt("cvt_neari_sat", "_s64", "_f64", result.s64, input.f64 );
   }
-  
+
   // zeroi_sat
   {
     result.u8 = 0x1;         // 1
@@ -3462,7 +3462,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x0;         //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_zeroi_sat", "_u8", "_f32", result.u8, input.f32 );
-  } 
+  }
   // f32 -> s8
   {
     result.u8 = 0x1;         // 1
@@ -3473,7 +3473,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x7F;        // 127
     input.u32 = 0x43018000;  // 129.5f
     testInstCvt("cvt_zeroi_sat", "_s8", "_f32", result.s8, input.f32 );
-  }   
+  }
   {
     result.u8 = 0xFF;        // -1
     input.u32 = 0xBFCCCCCD;  // -1.6f
@@ -3489,7 +3489,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0x100;      // 256
     input.u32 = 0x43804CCD;  // 256.6f
     testInstCvt("cvt_zeroi_sat", "_u16", "_f32", result.u16, input.f32 );
-  } 
+  }
   {
     result.u16 = 0xFFFF;     // 65536
     input.u32 = 0x4780E8CD;  // 66001.6f
@@ -3499,8 +3499,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_zeroi_sat", "_u16", "_f32", result.u16, input.f32 );
-  }   
-  
+  }
+
   // f32 -> s16
   {
     result.u16 = 0x7FFF;     // 32767
@@ -3515,7 +3515,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
   {
     result.u16 = 0xFF7F;     // -129
     input.u32 = 0xC3018000;  // -129.5f
-    testInstCvt("cvt_zeroi_sat", "_s16", "_f32", result.s16, input.f32 );  
+    testInstCvt("cvt_zeroi_sat", "_s16", "_f32", result.s16, input.f32 );
   }
   {
     result.u16 = 0x8000;     // -32768
@@ -3532,13 +3532,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0xFFFFFFFF;  // 4294967295
     input.u32 = 0x4F802666;   // 4300000256f
     testInstCvt("cvt_zeroi_sat", "_u32", "_f32", result.u32, input.f32 );
-  }  
+  }
   {
     result.u32 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_zeroi_sat", "_u32", "_f32", result.u32, input.f32 );
-  }   
-  
+  }
+
   // f32 -> s32
   {
     result.u32 = 0x80E9;     // 33001
@@ -3560,12 +3560,12 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u32 = 0xCF032156;  //-2200000000f
     testInstCvt("cvt_zeroi_sat", "_s32", "_f32", result.s32, input.f32 );
   }
-  // f32 -> u64 
+  // f32 -> u64
   {
     result.u64 = 0x1004CCC00LL; // 4300000256
     input.u32 = 0x4F802666;     // 4300000256 f
     testInstCvt("cvt_zeroi_sat", "_u64", "_f32", result.u64, input.f32 );
-  }    
+  }
   {
     result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
     input.u32 = 0x6124CC7A;             // 1.9e+20
@@ -3575,9 +3575,9 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0x0;        //  0
     input.u32 = 0xBFCCCCCD;  // -1.6f
     testInstCvt("cvt_zeroi_sat", "_u64", "_f32", result.u64, input.f32 );
-  } 
-  
-  // f32 -> s64  
+  }
+
+  // f32 -> s64
   {
     result.u64 = 0x83215600;  // 2200000000
     input.u32 =  0x4F032156;  // 2200000000 f
@@ -3597,7 +3597,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0x8000000000000000LL; //-9.223372e+18
     input.u32 = 0xDF0AC723;            //-9999999980506447872f
     testInstCvt("cvt_zeroi_sat", "_s64", "_f32", result.s64, input.f32 );
-  }  
+  }
   // f64 -> u8
   {
     result.u8 = 0x1;                   // 1
@@ -3613,7 +3613,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x0;                   //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_zeroi_sat", "_u8", "_f64", result.u8, input.f64 );
-  } 
+  }
   // f64-> s8
   {
     result.u8 = 0x1;                   // 1
@@ -3624,7 +3624,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x7F;                  // 127
     input.u64 = 0x4060300000000000LL;  // 129.5f
     testInstCvt("cvt_zeroi_sat", "_s8", "_f64", result.s8, input.f64 );
-  }  
+  }
   {
     result.u8 = 0xFF;                  // -1
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
@@ -3634,8 +3634,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u8 = 0x80;                  // -128
     input.u64 = 0xC060300000000000LL;  // -129.5f
     testInstCvt("cvt_zeroi_sat", "_s8", "_f64", result.s8, input.f64 );
-  }  
-  
+  }
+
   // f64 -> u16
   {
     result.u16 = 0x100;                // 256
@@ -3652,7 +3652,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_zeroi_sat", "_u16", "_f64", result.u16, input.f64 );
   }
-  
+
   // f64 -> s16
   {
     result.u16 = 0x7FFF;                // 32767
@@ -3668,8 +3668,8 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u16 = 0xFF7F;               // -129
     input.u64 = 0xC060300000000000LL;  // -129.5f
     testInstCvt("cvt_zeroi_sat", "_s16", "_f64", result.s16, input.f64 );
-  }  
-  
+  }
+
   // f64 -> u32
   {
     result.u32 = 0x101D1;              // 66001
@@ -3680,13 +3680,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0xFFFFFFFF;            // 4294967295
     input.u64 = 0x41F004CCC009999ALL;   // 4300000256.6f
     testInstCvt("cvt_zeroi_sat", "_u32", "_f64", result.u32, input.f64 );
-  }  
+  }
   {
     result.u32 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_zeroi_sat", "_u32", "_f64", result.u32, input.f64 );
   }
-    
+
   // f64 -> s32
   {
     result.u32 = 0x80E9;                // 33001
@@ -3707,7 +3707,7 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u32 = 0x80000000;           //-2147483648
     input.u64 = 0xC1E0642AC0133333LL;  //-2200000000.6f
     testInstCvt("cvt_zeroi_sat", "_s32", "_f64", result.s32, input.f64 );
-  }  
+  }
   // f64 -> u64
   {
     result.u64 =  0x1004CCC00LL;        // 4300000256
@@ -3718,13 +3718,13 @@ TEST(BrigInstTest, CvtSatRoundingMode) {
     result.u64 = 0xFFFFFFFFFFFFFFFFLL;  // 1.8446744e+19
     input.u64 = 0x4424998F32AC7870LL;   // 1.9e+20
     testInstCvt("cvt_zeroi_sat", "_u64", "_f64", result.u64, input.f64 );
-  }  
+  }
   {
     result.u64 = 0x0;                  //  0
     input.u64 = 0xBFF999999999999ALL;  // -1.6f
     testInstCvt("cvt_zeroi_sat", "_u64", "_f64", result.u64, input.f64 );
-  }  
-  
+  }
+
   // f64 -> s64
   {
     result.u64 = 0x83215600LL;         // 2200000000
@@ -5252,7 +5252,7 @@ TEST(BrigInstTest, BitSelect) {
                                  0xffff0000eeeebbbbULL,
                                  0x0000ffffaaaaccccULL };
     testInst("bitselect_b64", testVec);
-  }  
+  }
 }
 
 TEST(BrigInstTest, VectorNsqrt) {
@@ -5955,7 +5955,7 @@ TEST(Instruction2Test, Popcount) {
     delete arg0;
     delete arg1;
   }
-  
+
 }
 
 TEST(Instruction2Test, Bitrev) {
@@ -6013,7 +6013,7 @@ TEST(Instruction2Test, FirstBit) {
     delete arg0;
     delete arg1;
   }
-  
+
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$small;\n"
@@ -6060,7 +6060,7 @@ TEST(Instruction2Test, LastBit) {
     const int32_t testVec[] = { -1, 0x0};
     testInst("lastbit_u32_u32", testVec);
   }
-  
+
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$small;\n"
@@ -6442,7 +6442,7 @@ TEST(Instruction2Test, Class) {
     BE.launch(fun, args);
     EXPECT_EQ(1, *arg0);
     delete arg0;
-  }  // PosInf  
+  }  // PosInf
   {  // NegInf
     hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$small;\n"
@@ -6986,7 +6986,7 @@ TEST(Instruction3Test, Add) {
   {
     const uint32_t testVec[] = { 0xefffffff, 0x7ffffffe, 0x7000000e};
     testInst("add_pp_sat_u8x4", testVec);
-  }  
+  }
   {
     const uint32_t testVec[] = { 0x7fffff0c, 0x7ffffffe, 0x7000000e};
     testInst("add_pp_sat_s8x4", testVec);
@@ -6994,7 +6994,7 @@ TEST(Instruction3Test, Add) {
   {
     const uint32_t testVec[] = { 0xffe7ffff, 0x7007fffe, 0x700000e0};
     testInst("add_ps_sat_u8x4", testVec);
-  }  
+  }
   {
     const uint32_t testVec[] = { 0x50e7dfde, 0x7007fffe, 0x700000e0};
     testInst("add_ps_sat_s8x4", testVec);
@@ -7005,10 +7005,10 @@ TEST(Instruction3Test, Add) {
   }
   {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are not modified.
-    
+
     const uint32_t testVec[] = { 0xdededede, 0x7007fffe, 0x700000e0};
     testInst("add_ss_sat_s8x4", testVec);
   }
@@ -7130,19 +7130,19 @@ TEST(Instruction3Test, Sub) {
   }
   {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are NOT modified.
-    
+
     const uint32_t testVec[] = { 0xfefefefe, 0xfafbfcfd, 0xf0fbfdff };
     testInst("sub_ss_u8x4", testVec);
   }
   {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are NOT modified.
-  
+
     const uint32_t testVec[] = { 0x0, 0xfafbfcfd, 0xf0fbfdff };
     testInst("sub_ss_sat_u8x4", testVec);
   }
@@ -7173,22 +7173,22 @@ TEST(Instruction3Test, Sub) {
   }
     {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are NOT modified.
-    
+
     const uint32_t testVec[] = { 0xfefefefe, 0xfafbfcfd, 0xf0fbfdff };
     testInst("sub_ss_u16x2", testVec);
   }
   {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are NOT modified.
-  
+
     const uint32_t testVec[] = { 0x0, 0xfafbfcfd, 0xf0fbfdff };
     testInst("sub_ss_sat_u16x2", testVec);
-  }  
+  }
 }
 
 TEST(Instruction3Test, Shl) {
@@ -7339,7 +7339,7 @@ TEST(Instruction3Test, Max) {
   {
     const uint32_t testVec[] = { 0xffffffff, 0xfefcfbfe, 0xfafdfbff };
     testInst("max_ss_u8x4", testVec);
-  }      
+  }
 }
 
 TEST(Instruction3Test, Min) {
@@ -7378,7 +7378,7 @@ TEST(Instruction3Test, Min) {
   {
     const uint32_t testVec[] = { 0xfefefefe, 0xfefcfbfe, 0xfafdfbff };
     testInst("min_ss_u8x4", testVec);
-  }   
+  }
 }
 
 TEST(Instruction3Test, BitMask) {
@@ -7394,10 +7394,10 @@ TEST(Instruction3Test, BitMask) {
       "        kernarg_u32 %result, \n"
       "        kernarg_u32 %input1)\n"
       "{\n"
-      "        bitmask_b64 $d1, 33, 4;\n"  
+      "        bitmask_b64 $d1, 33, 4;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u64 $d1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -7412,8 +7412,8 @@ TEST(Instruction3Test, BitMask) {
     BE.launch(fun, args);
     EXPECT_EQ(0x1e00000000ULL, *arg0);
     delete arg0;
-    delete arg1;  
-  }    
+    delete arg1;
+  }
 }
 
 TEST(Instruction3Test, Cmp) {
@@ -7427,7 +7427,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        cmp_lt_pp_u8x4_u8x4 $s1, 0x11223344, 0x44221155; \n "
-      "        st_u32 $s1, [$d0] ;\n" 
+      "        st_u32 $s1, [$d0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7454,7 +7454,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        cmp_lt_pp_u16x2_u16x2 $s1, 0x11223344, 0x44221155; \n "
-      "        st_u32 $s1, [$d0] ;\n" 
+      "        st_u32 $s1, [$d0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7469,7 +7469,7 @@ TEST(Instruction3Test, Cmp) {
     BE.launch(fun, args);
     EXPECT_EQ(0xffff0000, *arg0);
     delete arg0;
-    delete arg1; 
+    delete arg1;
   }
   { // Cmp_u32_b1 or s32_b1
     hsa::brig::BrigProgram BP = TestHSAIL(
@@ -7481,7 +7481,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_u32 $s0, [%result];\n"
       "        cmp_eq_u32_b1 $s1, 1, 1; \n "
-      "        st_u32 $s1, [$s0] ;\n" 
+      "        st_u32 $s1, [$s0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7508,7 +7508,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_u32 $s0, [%result];\n"
       "        cmp_eq_u32_b1 $s1, 1, 0; \n "
-      "        st_u32 $s1, [$s0] ;\n" 
+      "        st_u32 $s1, [$s0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7524,7 +7524,7 @@ TEST(Instruction3Test, Cmp) {
     EXPECT_EQ(0x0, *arg0);
     delete arg0;
     delete arg1;
-  }  
+  }
   { // Cmp_f32_b1 or f64_b1
     hsa::brig::BrigProgram BP = TestHSAIL(
       "version 0:96:$full:$small;\n"
@@ -7535,7 +7535,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_f32 $s0, [%result];\n"
       "        cmp_eq_f32_b1 $s1, 1, 1; \n "
-      "        st_f32 $s1, [$s0] ;\n" 
+      "        st_f32 $s1, [$s0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7562,7 +7562,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_f32 $s0, [%result];\n"
       "        cmp_eq_f32_b1 $s1, 1, 0; \n "
-      "        st_f32 $s1, [$s0] ;\n" 
+      "        st_f32 $s1, [$s0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7589,7 +7589,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_u32 $s0, [%result];\n"
       "        cmp_lt_u32_u32 $s1, 0x12345678, 0x87654321; \n "
-      "        st_u32 $s1, [$s0] ;\n" 
+      "        st_u32 $s1, [$s0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7616,7 +7616,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_u32 $s0, [%result];\n"
       "        cmp_gt_u32_u32 $s1, 0x12345678, 0x87654321; \n "
-      "        st_u32 $s1, [$s0] ;\n" 
+      "        st_u32 $s1, [$s0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7632,7 +7632,7 @@ TEST(Instruction3Test, Cmp) {
     EXPECT_EQ(0x0, *arg0);
     delete arg0;
     delete arg1;
-  }  
+  }
   { // Cmp_f32_u32
     hsa::brig::BrigProgram BP = TestHSAIL(
       "version 0:96:$full:$small;\n"
@@ -7643,7 +7643,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_f32 $s0, [%result];\n"
       "        cmp_lt_f32_u32 $s1, 0x12345678, 0x87654321; \n "
-      "        st_f32 $s1, [$s0] ;\n" 
+      "        st_f32 $s1, [$s0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7670,7 +7670,7 @@ TEST(Instruction3Test, Cmp) {
       "{\n"
       "        ld_kernarg_f32 $s0, [%result];\n"
       "        cmp_gt_f32_u32 $s1, 0x12345678, 0x87654321; \n "
-      "        st_f32 $s1, [$s0] ;\n" 
+      "        st_f32 $s1, [$s0] ;\n"
       "        ret;\n"
       "};\n");
 
@@ -7686,7 +7686,7 @@ TEST(Instruction3Test, Cmp) {
     EXPECT_EQ(0.0, *arg0);
     delete arg0;
     delete arg1;
-  } 
+  }
 }
 
 TEST(Instruction3Test, Mul) {
@@ -7714,7 +7714,7 @@ TEST(Instruction3Test, Mul) {
   {
     const uint32_t testVec[] = {0x40606ff, 0x403021f, 0x102030f};
     testInst("mul_pp_sat_u8x4", testVec);
-  }  
+  }
   {
     const uint32_t testVec[] = {0x1f3e5dd1, 0x403021f, 0x102030f};
     testInst("mul_sp_u8x4", testVec);
@@ -7722,25 +7722,25 @@ TEST(Instruction3Test, Mul) {
   {
     const uint32_t testVec[] = {0x1f3e5dff, 0x403021f, 0x102030f};
     testInst("mul_sp_sat_u8x4", testVec);
-  }  
+  }
   {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are NOT modified.
-    
+
     const uint32_t testVec[] = {0xd1d1d1d1, 0x403021f, 0x102030f};
     testInst("mul_ss_u8x4", testVec);
   }
   {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are NOT modified.
-    
+
     const uint32_t testVec[] = {0xffffffff, 0x403021f, 0x102030f};
     testInst("mul_ss_sat_u8x4", testVec);
-  }  
+  }
   {
     const uint32_t testVec[] = {0x3c2d1ed1, 0x403021f, 0x102030f};
     testInst("mul_ps_u8x4", testVec);
@@ -7749,7 +7749,7 @@ TEST(Instruction3Test, Mul) {
     const uint32_t testVec[] = {0x3c2d1eff, 0x403021f, 0x102030f};
     testInst("mul_ps_sat_u8x4", testVec);
   }
-  
+
   // packed mul signed
   {
     const uint32_t testVec[] = {0x4060600, 0x40302f0, 0x10203f0};
@@ -7758,7 +7758,7 @@ TEST(Instruction3Test, Mul) {
   {
     const uint32_t testVec[] = {0x406067f, 0x40302f0, 0x10203f0};
     testInst("mul_pp_sat_s8x4", testVec);
-  }  
+  }
   {
     const uint32_t testVec[] = {0xf0e0d000, 0x40302f0, 0x10203f0};
     testInst("mul_sp_s8x4", testVec);
@@ -7766,25 +7766,25 @@ TEST(Instruction3Test, Mul) {
   {
     const uint32_t testVec[] = {0xf0e0d07f, 0x40302f0, 0x10203f0};
     testInst("mul_sp_sat_s8x4", testVec);
-  }  
+  }
   {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are NOT modified.
-    
+
     const uint32_t testVec[] = {0x0,  0x40302f0, 0x10203f0};
     testInst("mul_ss_s8x4", testVec);
   }
   {
     // Note: PRM  4.12 Table 4-5
-    // ss : the lower element of both sources is used. 
+    // ss : the lower element of both sources is used.
     // the result is written into the lower element of the dest.
     // the other bits of the dest are NOT modified.
-    
+
     const uint32_t testVec[] = {0x7f7f7f7f, 0x40302f0, 0x10203f0};
     testInst("mul_ss_sat_s8x4", testVec);
-  }  
+  }
   {
     const uint32_t testVec[] = {0xc0d0e000, 0x40302f0, 0x10203f0};
     testInst("mul_ps_s8x4", testVec);
@@ -7798,22 +7798,22 @@ TEST(Instruction3Test, Mul) {
 TEST(Instruction3Test, Unpack) {
   {
     const uint32_t testVec[] = {0x11ff, 0x11ff00ff, 1 };
-    testInst("unpack_u32_u16x2", testVec); 
+    testInst("unpack_u32_u16x2", testVec);
   }
   {
     const uint32_t testVec[] = {0x0, 0x11ff00ff, 1 };
-    testInst("unpack_u32_u8x4", testVec); 
+    testInst("unpack_u32_u8x4", testVec);
   }
   {
     const uint32_t testVec[] = {0xff, 0x11ff00ff, 0 };
-    testInst("unpack_u32_u16x2", testVec); 
-  }  
+    testInst("unpack_u32_u16x2", testVec);
+  }
   {
     const uint32_t testVec[] = {0x11, 0x11ff00ff, 3 };
-    testInst("unpack_u32_u8x4", testVec); 
+    testInst("unpack_u32_u8x4", testVec);
   }
-  
-  {  
+
+  {
     hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$small;\n"
     "\n"
@@ -7840,7 +7840,7 @@ TEST(Instruction3Test, Unpack) {
     delete arg0;
     delete arg1;
   }
-  
+
 }
 
 TEST(Instruction3Test, UnpackCvt) {
@@ -7866,12 +7866,12 @@ TEST(Instruction3Test, UnpackCvt) {
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
     BE.launch(fun, args);
-    EXPECT_FLOAT_EQ(3.0, *arg0);  
-    
+    EXPECT_FLOAT_EQ(3.0, *arg0);
+
     delete arg0;
     delete arg1;
   }
-  
+
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
       "version 0:96:$full:$small;\n"
@@ -7894,8 +7894,8 @@ TEST(Instruction3Test, UnpackCvt) {
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
     BE.launch(fun, args);
-    EXPECT_FLOAT_EQ(255.0, *arg0);  
-    
+    EXPECT_FLOAT_EQ(255.0, *arg0);
+
     delete arg0;
     delete arg1;
   }
@@ -7956,10 +7956,10 @@ TEST(Instruction4Test, Bitextract) {
       "        kernarg_u32 %result, \n"
       "        kernarg_u32 %input1)\n"
       "{\n"
-      "        bitextract_u64 $d1, 0x008600000000, 33, 7;\n"  
+      "        bitextract_u64 $d1, 0x008600000000, 33, 7;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u64 $d1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -7974,7 +7974,7 @@ TEST(Instruction4Test, Bitextract) {
     BE.launch(fun, args);
     EXPECT_EQ(0x43ULL, *arg0);
     delete arg0;
-    delete arg1;  
+    delete arg1;
   }
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
@@ -7984,10 +7984,10 @@ TEST(Instruction4Test, Bitextract) {
       "        kernarg_u32 %result, \n"
       "        kernarg_u32 %input1)\n"
       "{\n"
-      "        bitextract_s64 $d1, 0x008600000000, 33, 7;\n"  
+      "        bitextract_s64 $d1, 0x008600000000, 33, 7;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u64 $d1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -8002,8 +8002,8 @@ TEST(Instruction4Test, Bitextract) {
     BE.launch(fun, args);
     EXPECT_EQ(0xFFFFFFFFFFFFFFC3ULL, *arg0);
     delete arg0;
-    delete arg1;  
-  } 
+    delete arg1;
+  }
 }
 
 TEST(Instruction4Test, Mad) {
@@ -8026,10 +8026,10 @@ TEST(Instruction4Test, Shuffle) {
       "        kernarg_u32 %result, \n"
       "        kernarg_u32 %input1)\n"
       "{\n"
-      "        shuffle_s8x4 $s1, 0x11223344, 0x55667788, 0x6C;\n"  
+      "        shuffle_s8x4 $s1, 0x11223344, 0x55667788, 0x6C;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u32 $s1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -8044,7 +8044,7 @@ TEST(Instruction4Test, Shuffle) {
     BE.launch(fun, args);
     EXPECT_EQ(0x77661144, *arg0);
     delete arg0;
-    delete arg1;  
+    delete arg1;
   }
   { // 8x8
     hsa::brig::BrigProgram BP = TestHSAIL(
@@ -8059,7 +8059,7 @@ TEST(Instruction4Test, Shuffle) {
       "                          0xE31AA3;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u64 $d1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -8089,7 +8089,7 @@ TEST(Instruction4Test, Shuffle) {
       "                          0x2;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u32 $s1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -8119,7 +8119,7 @@ TEST(Instruction4Test, Shuffle) {
       "                          0x6C;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u64 $d1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -8149,7 +8149,7 @@ TEST(Instruction4Test, Shuffle) {
       "                          0x2;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u64 $d1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -8381,7 +8381,7 @@ TEST(Instruction5Test, PackCvt) {
   delete arg1;
   delete arg2;
   delete arg3;
-  delete arg4; 
+  delete arg4;
 }
 
 TEST(Instruction5Test, BitInsert) {
@@ -8395,10 +8395,10 @@ TEST(Instruction5Test, BitInsert) {
       "{\n"
       "        bitinsert_u32 $s1, 0xffffeefe,\n"
       "                           0x33,\n"
-      "                           5, 7;\n"  
+      "                           5, 7;\n"
       "        ld_kernarg_u64 $d0, [%result];\n"
       "        st_u32 $s1, [$d0] ;\n"
- 
+
       "        ret;\n"
       "};\n");
 
@@ -8413,24 +8413,24 @@ TEST(Instruction5Test, BitInsert) {
     BE.launch(fun, args);
     EXPECT_EQ(0xffffe67e, *arg0);
     delete arg0;
-    delete arg1;  
+    delete arg1;
   }
 }
 
 TEST(Instruction4Test, Pack) {
   {
     const uint32_t testVec[] = {0xff1111ff, 0x11ff, 0xff11, 1 };
-    testInst("pack_u16x2_u32", testVec); 
+    testInst("pack_u16x2_u32", testVec);
   }
   {
     const uint32_t testVec[] = {0x22ff, 0x11ff, 0xff22, 1 };
-    testInst("pack_u8x4_u32", testVec); 
+    testInst("pack_u8x4_u32", testVec);
   }
   {
     const uint32_t testVec[] = {0x2211ff, 0x11ff, 0xff22, 2 };
-    testInst("pack_u8x4_u32", testVec); 
+    testInst("pack_u8x4_u32", testVec);
   }
-  {  
+  {
     hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$small;\n"
     "\n"
@@ -8457,7 +8457,7 @@ TEST(Instruction4Test, Pack) {
     delete arg0;
     delete arg1;
   }
-}  
+}
 
 TEST(AtomTest, And) {
   hsa::brig::BrigProgram BP = TestHSAIL(
@@ -8981,7 +8981,7 @@ TEST(BrigInstTest, PackedShr) {
   {
     const uint32_t testVec[] = { 0xfe0f0783, 0xf0783c1e, 3 };
     testInst("shr_s16x2", testVec);
-  }  
+  }
 }
 
 TEST(BrigInstTest, PackedShl) {
@@ -8992,7 +8992,7 @@ TEST(BrigInstTest, PackedShl) {
   {
     const uint32_t testVec[] = { 0xc1e0f078U, 0xf0783c1eU, 2 };
     testInst("shl_u16x2", testVec);
-  }  
+  }
 }
 
 TEST(DebugTest, Square) {
