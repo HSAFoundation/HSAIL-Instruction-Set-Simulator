@@ -7833,7 +7833,7 @@ TEST(Instruction3Test, Unpack) {
     hsa::brig::BrigEngine BE(BP);
     llvm::Function *fun = BP->getFunction("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
-    uint64_t *arg1 = new uint64_t(0xffff000076771111);
+    uint64_t *arg1 = new uint64_t(0xffff000076771111LL);
     void *args[] = { &arg0, arg1 };
     BE.launch(fun, args);
     EXPECT_EQ(0xffff0000, *arg0);
