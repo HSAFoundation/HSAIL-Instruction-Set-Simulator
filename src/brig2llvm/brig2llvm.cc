@@ -18,6 +18,7 @@
 
 #include "llvm/DIBuilder.h"
 #include "llvm/DebugInfo.h"
+#include "llvm/ADT/Triple.h"
 #include "llvm/Analysis/Verifier.h"
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -26,6 +27,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/Dwarf.h"
+#include "llvm/Support/Host.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -1347,8 +1349,16 @@ BrigProgram GenLLVM::getLLVMModule(const BrigModule &M,
 
   llvm::LLVMContext *C = new llvm::LLVMContext();
   llvm::Module *mod = new llvm::Module("BRIG", *C);
-  llvm::DIContext *debugInfo = runOnDebugInfo(M);
 
+  // Call normalize to fix incorrect format in the triple string,
+  // which prevent LLVM from setting correct stack alignment and
+  // causing a segmentation fault on 32-bit release build.
+  // clang --dumpmachine gives "x86_64-pc-linux-gnu" while
+  // gcc --dumpmachine gives "x86_64-linux-gnu"
+
+  mod->setTargetTriple(llvm::Triple::normalize(llvm::sys::getProcessTriple()));
+
+  llvm::DIContext *debugInfo = runOnDebugInfo(M);
   llvm::DIBuilder DB(*mod);
   DB.createCompileUnit(llvm::dwarf::DW_LANG_lo_user,
                        "-", "", "brig2llvm", true, "", 0);
