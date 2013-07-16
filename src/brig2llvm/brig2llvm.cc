@@ -1350,12 +1350,13 @@ BrigProgram GenLLVM::getLLVMModule(const BrigModule &M,
   llvm::LLVMContext *C = new llvm::LLVMContext();
   llvm::Module *mod = new llvm::Module("BRIG", *C);
 
-  // Call normalize to fix incorrect format in the triple string,
-  // which prevent LLVM from setting correct stack alignment and
-  // causing a segmentation fault on 32-bit release build.
-  // clang --dumpmachine gives "x86_64-pc-linux-gnu" while
-  // gcc --dumpmachine gives "x86_64-linux-gnu"
-
+  // Call normalize to ensure the triple string is correctly formatted.
+  // Incorrectly formatted triple strings will prevent LLVM from ensuring the
+  // correct stack alignment. On i386 on Linux, the correct stack alignment is
+  // 16-bytes, but the default LLVM stack alignment for i386 is only 8-bytes.
+  // An insufficiently aligned stack will yield segmentation faults when
+  // LLVM-generated code calls into brig_runtime.cc. Saving a xmm register to
+  // the stack with the movaps instruction is particularly problematic.
   mod->setTargetTriple(llvm::Triple::normalize(llvm::sys::getProcessTriple()));
 
   llvm::DIContext *debugInfo = runOnDebugInfo(M);
