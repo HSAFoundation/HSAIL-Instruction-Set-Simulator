@@ -108,6 +108,11 @@ class DemoDebugger : public hsa::brig::HSADebugger {
     StackFrame(hsa::brig::FunId id, hsa::brig::BrigRegState *regs) :
       prevRegState(*regs), regs(regs), id(id) {}
 
+    template<class R, class T> static R bitcast(T i) {
+      union { T i; R r; } conv = { i };
+      return conv.r;
+    }
+
     void showRegChanges() {
       for (int i = 0; i < getArraySize(regs->c); ++i) {
         if (regs->c[i] != prevRegState.c[i]) {
@@ -117,13 +122,13 @@ class DemoDebugger : public hsa::brig::HSADebugger {
       for (int i = 0; i < getArraySize(regs->s); ++i) {
         if (regs->s[i] != prevRegState.s[i]) {
           std::cout << "$s" << i << "=" << regs->s[i]
-                    << ",  FP: " << *(float *)(regs->s + i) << "\n";
+                    << ",  FP: " << bitcast<float>(regs->s[i]) << "\n";
         }
       }
       for (int i = 0; i < getArraySize(regs->d); ++i) {
         if (regs->d[i] != prevRegState.d[i]) {
           std::cout << "$d" << i << "=" << regs->d[i]
-                    << ",  FP: " << *(double *)(regs->d + i) << "\n";
+                    << ",  FP: " << bitcast<double>(regs->d[i]) << "\n";
         }
       }
       std::cout << "\n";
