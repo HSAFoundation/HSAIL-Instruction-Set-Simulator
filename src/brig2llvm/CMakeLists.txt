@@ -15,12 +15,6 @@ include_directories( ${PROJ_SEARCH_PATH} )
 
 LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
 
-#add_subdirectory(compiler)
-#MESSAGE("INCLUDE SEARCH DIRECTORIES: ${PROJ_SEARCH_PATH}")
-# library
-#include("${PROJECT_BINARY_DIR}/compiler/share/llvm/cmake/LLVMConfig.cmake")
-#include(HandleLLVMOptions)
-
 set(LLVM_LINK_COMPONENTS core jit mcjit nativecodegen debuginfo)
 add_llvm_library(brig2llvm
   brig2llvm.cc
