@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 2.8 )
 project (HSA2BRIG)
-SET(CMAKE_BUILD_TYPE "Debug")
+
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/scripts/cmake")
 find_package(FLEX)
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")

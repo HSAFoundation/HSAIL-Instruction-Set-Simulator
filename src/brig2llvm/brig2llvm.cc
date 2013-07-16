@@ -1276,7 +1276,7 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
   llvm::Type *type = runOnType(C, S);
   bool isConst = S.isConst();
   llvm::GlobalValue::LinkageTypes linkage = runOnLinkage(S.getLinkage());
-  llvm::Twine name(getStringRef(S.getName()));
+  llvm::StringRef name = getStringRef(S.getName());
 
   llvm::Constant *init = NULL;
   if (S.hasInitializer()) {

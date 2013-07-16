@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 2.8 )
 project (HSA_RUNTIME)
-SET(CMAKE_BUILD_TYPE "Debug")
+
 SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/scripts/cmake")
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
 
