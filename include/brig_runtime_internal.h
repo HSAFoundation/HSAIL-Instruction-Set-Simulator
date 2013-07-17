@@ -667,17 +667,17 @@ template<> inline bool isNan(double d) { return std::isnan(d); }
 // i386.
 inline bool isSNan(const f32 &f) {
   if (!isNan(f)) return false;
-  union { const f32 *f; const b32 *b; } Conv = { &f };
+  b32 b = *(const b32 *) &f;
   b32 mask = (1U << 22);
   // SNan has the most significant fraction bit CLEAR
-  return !(*Conv.b & mask);
+  return !(b & mask);
 }
 inline bool isSNan(const f64 &f) {
   if (!isNan(f)) return false;
-  union { const f64 *f; const b64 *b; } Conv = { &f };
+  b64 b = *(const b64 *) &f;
   b64 mask = (1ULL << 51);
   // SNan has the most significant fraction bit CLEAR
-  return !(*Conv.b & mask);
+  return !(b & mask);
 }
 
 template<class T> inline bool isQNan(T t) { return isNan(t) && !isSNan(t); }
