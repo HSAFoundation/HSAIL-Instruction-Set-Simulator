@@ -146,7 +146,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   /* D ## NARY(INST, f16x2) */                  \
   /* D ## NARY(INST, f16x4) */                  \
   D ## NARY(INST, f32x2)
-  
+
 #define PackInst(D)                             \
   D ## Pack(u8x4, u32)                          \
   D ## Pack(u8x8, u32)                          \
@@ -191,8 +191,8 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
                                                 \
   D ## Pack(f32x2, f64)                         \
   D ## Pack(f32x4, f64)                         \
-  D ## Pack(f64x2, f64)   
-  
+  D ## Pack(f64x2, f64)
+
 #define UnpackInst2(D)                           \
   D ## Unpack(u32, u8x4)                         \
   D ## Unpack(u32, u8x8)                         \
@@ -235,7 +235,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## Unpack(f32, f32x2)                         \
   D ## Unpack(f32, f32x4)                         \
   D ## Unpack(f64, f64x2)
-                                                                                    
+
 #define FloatVectorInst(D,INST,NARY)            \
   /* NARY ## Vector(D, INST, f16x2) */          \
   /* NARY ## Vector(D, INST, f16x4) */          \
@@ -277,16 +277,18 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## Atomic ## NARY(INST, u32)                \
   D ## Atomic ## NARY(INST, u64)
 
-#define CmpImpl(FUNC,PRED)                                                       \
-  template<class R, class T> static R Cmp_ ## FUNC (T x, T y) {                  \
-    return cmpResult<R>(PRED);                                                   \
-  }                                                                              \
-  template<class R, class T> static R Cmp_ ## FUNC ## _pp_ (T x, T y) {          \
-                                                                                 \
-    R result;                                                                    \
-    for (int i=0;  i < R::Len; i++)                                              \
-      result[i] = Cmp_ ## FUNC<typename R::Base, typename T::Base>(x[i], y[i]);  \
-    return result;                                                               \
+#define CmpImpl(FUNC,PRED)                                              \
+  template<class R, class T> static R Cmp_ ## FUNC (T x, T y) {         \
+    return cmpResult<R>(PRED);                                          \
+  }                                                                     \
+  template<class R, class T> static R Cmp_ ## FUNC ## _pp_ (T x, T y) { \
+                                                                        \
+    R result;                                                           \
+    for (int i=0;  i < R::Len; i++) {                                   \
+      result[i] =                                                       \
+        Cmp_ ## FUNC<typename R::Base, typename T::Base>(x[i], y[i]);   \
+    }                                                                   \
+    return result;                                                      \
   }
 
 #define CmpInst(FUNC,PRED)                              \
@@ -389,7 +391,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   FICvt(D, Cvt_downi, FE_DOWNWARD)              \
   FICvt(D, Cvt_zeroi, FE_TOWARDZERO)            \
   FICvt(D, Cvt_neari, FE_TONEAREST)
-  
+
 #define RFICvtSat(D)                            \
   /* Sat int rounding */                        \
   FICvtSat(D, Cvt_ups,   FE_UPWARD)             \
@@ -402,8 +404,8 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   IFBCvt(F, D, Cvt_down, FE_DOWNWARD)           \
   IFBCvt(F, D, Cvt_zero, FE_TOWARDZERO)         \
   IFBCvt(F, D, Cvt_near, FE_TONEAREST)
-  
-// b1 to f conversion must not specify 
+
+// b1 to f conversion must not specify
 // a rounding
 #define IFBCvt(B,D,FUNC,ROUND)                  \
   B ## Cvt(D, FUNC, ROUND, u8)                  \
@@ -419,11 +421,11 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   /* ICvt(D, FUNC, ROUND, f16) */               \
   ICvt(D, FUNC, ROUND, f32)                     \
   ICvt(D, FUNC, ROUND, f64)
-  
+
 #define FICvtSat(D,FUNC,ROUND)                  \
   /* ICvtSat(D, FUNC, ROUND, f16) */            \
   ICvtSat(D, FUNC, ROUND, f32)                  \
-  ICvtSat(D, FUNC, ROUND, f64)  
+  ICvtSat(D, FUNC, ROUND, f64)
 
 #define ICvt(D,FUNC,ROUND,TYPE)                 \
   D ## Cvt(FUNC, ROUND, u8,  TYPE)              \
@@ -434,7 +436,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## Cvt(FUNC, ROUND, s32, TYPE)              \
   D ## Cvt(FUNC, ROUND, u64, TYPE)              \
   D ## Cvt(FUNC, ROUND, s64, TYPE)
-  
+
 #define ICvtSat(D,FUNC,ROUND,TYPE)              \
   D ## CvtSat(FUNC, ROUND, u8,  TYPE)           \
   D ## CvtSat(FUNC, ROUND, s8,  TYPE)           \
@@ -443,8 +445,8 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   D ## CvtSat(FUNC, ROUND, u32, TYPE)           \
   D ## CvtSat(FUNC, ROUND, s32, TYPE)           \
   D ## CvtSat(FUNC, ROUND, u64, TYPE)           \
-  D ## CvtSat(FUNC, ROUND, s64, TYPE)  
-  
+  D ## CvtSat(FUNC, ROUND, s64, TYPE)
+
 
 #define FCvt(D,FUNC,ROUND,TYPE)                 \
   /* D ## Cvt(FUNC, ROUND, f16, TYPE) */        \
@@ -455,11 +457,11 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
   extern "C" RET FUNC ## _ ## RET ## _ ## TYPE (TYPE t) { \
     return Cvt<RET>(t, ROUND);                      \
   }
-  
+
 #define defineCvtSat(FUNC,ROUND,RET,TYPE)                 \
   extern "C" RET FUNC ## _ ## RET ## _ ## TYPE (TYPE t) { \
     return Cvt_sat<RET>(t, ROUND);                        \
-  }  
+  }
 
 #define defineUnary(FUNC,TYPE)                  \
   extern "C" TYPE FUNC ## _ ## TYPE (TYPE t) {  \
@@ -549,8 +551,8 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
                                                 STYPE src1,  \
                                                 u32   src2){ \
     return Pack(src0, src1, src2);                           \
-  }                                               
-  
+  }
+
 #define declareUnpack(DTYPE,STYPE)                           \
   extern "C" DTYPE Unpack ## _ ## DTYPE ## _ ## STYPE(       \
                                                 STYPE src0,  \
@@ -561,7 +563,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
                                                 STYPE src0,  \
                                                 u32 src1){   \
     return Unpack<DTYPE, STYPE>(src0,src1);                  \
-  }                                               
+  }
 
 
 #define declareUnary(FUNC,TYPE)                 \
@@ -615,7 +617,7 @@ inline void ForEach(typename T::SForEachFn MapFn, T x, T y, unsigned z) {
 
 #define UnsignedVectorMulHi(D)              \
   UnsignedVectorInst(D, MulHi, Binary)      \
-  BinaryVector(D, MulHi, u64x2)      
+  BinaryVector(D, MulHi, u64x2)
 
 template <bool S> struct IntTypes;
 template<> struct IntTypes<true> {
