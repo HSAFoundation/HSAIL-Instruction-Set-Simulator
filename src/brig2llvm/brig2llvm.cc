@@ -190,7 +190,7 @@ static unsigned getRegOffset(const BrigString *name) {
   return offset;
 }
 
-class FunScope;
+struct FunScope;
 static void insertEnterFn(llvm::BasicBlock &, const FunScope &);
 static void insertDeclareVariable(llvm::BasicBlock &,
                                   const SymbolId,
