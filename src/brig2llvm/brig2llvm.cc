@@ -1356,7 +1356,10 @@ BrigProgram GenLLVM::getLLVMModule(const BrigModule &M,
   // 16-bytes, but the default LLVM stack alignment for i386 is only 8-bytes.
   // An insufficiently aligned stack will yield segmentation faults when
   // LLVM-generated code calls into brig_runtime.cc. Saving a xmm register to
-  // the stack with the movaps instruction is particularly problematic.
+  // the stack with the movaps instruction is particularly problematic. The
+  // underlying issue will be fixed upstream in LLVM 3.4 by svn 186501 from
+  // PR126636. Consequently, the normalization can be removed when the simulator
+  // updates to LLVM 3.4.
   mod->setTargetTriple(llvm::Triple::normalize(llvm::sys::getProcessTriple()));
 
   llvm::DIContext *debugInfo = runOnDebugInfo(M);
