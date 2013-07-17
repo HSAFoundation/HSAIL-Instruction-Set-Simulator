@@ -138,6 +138,7 @@ add_custom_target( build_libhsail ALL
   COMMAND ${GIT_EXECUTABLE} pull https://github.com/HSAFoundation/HSAIL-Tools.git
   COMMAND ${CMAKE_MAKE_PROGRAM} ${MAKE_OPTIONS}
   WORKING_DIRECTORY ${HSAIL_TOOLS_SRC_DIR} )
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${HSAIL_TOOLS_BINARY_DIR})
 
 set(brig_runtime_test_SOURCES
   test/brig_runtime_test.cc
