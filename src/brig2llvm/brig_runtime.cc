@@ -126,7 +126,7 @@ template<class T> static T TruncVector(T t) { return map(Trunc, t); }
 FloatInst(define, Trunc, Unary)
 FloatVectorInst(define, Trunc, Unary)
 
-template<class T> static T Rint(T t)  { 
+template<class T> static T Rint(T t)  {
   int oldMode = fegetround();
   fesetround(FE_TONEAREST);
   volatile T result = T(nearbyint(fixFTZ(t)));
@@ -593,7 +593,8 @@ FloatInst(define, NFma, Ternary)
 template<class T> static T CopySign(T x, T y) { return copysign(x, y); }
 FloatInst(define, CopySign, Binary)
 
-template<class T> static b1 Class(T x, b32 y) {
+// Pass by reference to avoid SNAN to QNAN conversion on i386.
+template<class T> static b1 Class(const T &x, b32 y) {
   int fpclass = std::fpclassify(x);
   if (y & SNan && isSNan(x)) return true;
   if (y & QNan && isQNan(x)) return true;
@@ -711,11 +712,11 @@ extern "C" u16x2 Sadhi_u16x2_u8x4(u8x4 w, u8x4 x, u16x2 y) {
   u32 temp_result = 0;
   for (unsigned i = 0; i < 4; ++i)
     temp_result += Sad_u32_u32(w[i], x[i], 0);
-    
+
   u16x2 result = y;
   result[1] += temp_result;
-  
-  return result;    
+
+  return result;
 }
 
 CmpInst(eq, x == y)

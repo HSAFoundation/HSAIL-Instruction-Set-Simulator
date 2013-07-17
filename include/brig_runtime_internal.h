@@ -663,20 +663,21 @@ template<class T> inline bool isNan(T t) { return false; }
 template<> inline bool isNan(float f) { return std::isnan(f); }
 template<> inline bool isNan(double d) { return std::isnan(d); }
 
-template<class T> inline bool isSNan(T t) { return false; }
-template<> inline bool isSNan(f32 f) {
+// Pass by reference and use type-punning to avoid SNAN to QNAN conversion on
+// i386.
+inline bool isSNan(const f32 &f) {
   if (!isNan(f)) return false;
-  union { f32 f; b32 b; } Conv = { f };
+  union { const f32 *f; const b32 *b; } Conv = { &f };
   b32 mask = (1U << 22);
   // SNan has the most significant fraction bit CLEAR
-  return !(Conv.b & mask);
+  return !(*Conv.b & mask);
 }
-template<> inline bool isSNan(f64 f) {
+inline bool isSNan(const f64 &f) {
   if (!isNan(f)) return false;
-  union { f64 f; b64 b; } Conv = { f };
+  union { const f64 *f; const b64 *b; } Conv = { &f };
   b64 mask = (1ULL << 51);
   // SNan has the most significant fraction bit CLEAR
-  return !(Conv.b & mask);
+  return !(*Conv.b & mask);
 }
 
 template<class T> inline bool isQNan(T t) { return isNan(t) && !isSNan(t); }
