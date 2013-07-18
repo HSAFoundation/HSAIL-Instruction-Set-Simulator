@@ -680,7 +680,8 @@ inline bool isSNan(const f64 &f) {
   return !(b & mask);
 }
 
-template<class T> inline bool isQNan(T t) { return isNan(t) && !isSNan(t); }
+template<class T>
+inline bool isQNan(const T &t) { return isNan(t) && !isSNan(t); }
 
 template<class T> inline bool isDivisionError(T x, T y) {
   if (y == 0) return true;
