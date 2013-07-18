@@ -755,7 +755,7 @@ Cmp(define, snan, f64)
 // the destination type, with NaN converted to 0
 // Integer rounding:
 // f32 to Int
-template<class R> static R Cvt(f32 f, int mode) {
+template<class R> static R Cvt(volatile f32 f, int mode) {
   if (isPosInf(f) || isNegInf(f) || isNan(f) ||
       f <= getMin<R>() || f >= getMax<R>())
     return 0;  // should be undefined value
@@ -767,7 +767,7 @@ template<class R> static R Cvt(f32 f, int mode) {
   fesetround(oldMode);
   return result;
 }
-template<class R> static R Cvt_sat(f32 f, int mode) {
+template<class R> static R Cvt_sat(volatile f32 f, int mode) {
   if (isPosInf(f)) return getMax<R>();
   if (isNegInf(f)) return getMin<R>();
   if (f > getMax<R>()) return getMax<R>();
@@ -784,7 +784,7 @@ template<class R> static R Cvt_sat(f32 f, int mode) {
 template<> bool Cvt(f32 f, int mode) { return f != 0.0f; }
 // Integer rounding:
 // f64 to Int
-template<class R> static R Cvt(f64 f, int mode) {
+template<class R> static R Cvt(volatile f64 f, int mode) {
   if (isPosInf(f) || isNegInf(f) || isNan(f) ||
       f <= getMin<R>() || f >= getMax<R>())
     return 0;   // should be undefined value
@@ -796,7 +796,7 @@ template<class R> static R Cvt(f64 f, int mode) {
   fesetround(oldMode);
   return result;
 }
-template<class R> static R Cvt_sat(f64 f, int mode) {
+template<class R> static R Cvt_sat(volatile f64 f, int mode) {
   if (isPosInf(f)) return getMax<R>();
   if (isNegInf(f)) return getMin<R>();
   if (f > getMax<R>()) return getMax<R>();
@@ -824,7 +824,7 @@ template<> f64 Cvt(f32 f, int mode) {
 
 // Floating point rounding:
 // f64 to f32
-template<> f32 Cvt(f64 f, int mode) {
+template<> f32 Cvt(volatile f64 f, int mode) {
   int oldMode = fegetround();
   fesetround(mode);
   volatile f32 result = f32(f);
