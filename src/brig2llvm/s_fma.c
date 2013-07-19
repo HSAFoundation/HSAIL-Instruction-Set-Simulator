@@ -281,7 +281,3 @@ fma(double x, double y, double z)
 	else
 		return (add_and_denormalize(r.hi, adj, spread));
 }
-
-#if (LDBL_MANT_DIG == 53)
-__weak_reference(fma, fmal);
-#endif
