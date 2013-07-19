@@ -125,13 +125,9 @@ SET( MAKE_OPTIONS
      " BUILD_DIR=${HSAIL_TOOLS_BINARY_DIR}"
      " CXX=${CMAKE_CXX_COMPILER}"
      " AR=${CMAKE_AR}"
-     " CC=${CMAKE_C_COMPILER}")
-
-string(TOUPPER "${CMAKE_BUILD_TYPE}" uppercase_CMAKE_BUILD_TYPE)
-
-if (uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-  SET( MAKE_OPTIONS ${MAKE_OPTIONS} " _DBG=1")
-endif (uppercase_CMAKE_BUILD_TYPE STREQUAL "DEBUG")
+     " CC=${CMAKE_C_COMPILER}"
+     " CXXFLAGS=${CMAKE_CXX_FLAGS}"
+     " LDFLAGS=${CMAKE_EXE_LINKER_FLAGS}")
 
 add_custom_target( build_libhsail ALL
   DEPENDS brig2llvm
