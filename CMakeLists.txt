@@ -190,4 +190,8 @@ set(debug_SOURCES demo/debug.cc)
 add_executable(debug ${debug_SOURCES})
 target_link_libraries(debug hsa)
 
+set(dumpDebugInfo_SOURCES demo/dumpDebugInfo.cc)
+add_executable(dumpDebugInfo ${dumpDebugInfo_SOURCES})
+target_link_libraries(dumpDebugInfo brig2llvm)
+
 add_subdirectory(test)
