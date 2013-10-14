@@ -432,25 +432,25 @@ TestAll(UnpackInst, UnpackHi, Binary)
 
 template<class R, class T> static void PackLogic(R result, R src0,
                                                  T src1,   u32 src2) {
-                                                 
+
   if (isNan(src1) || isNan(src2) ||
-      isInf(src1) || isInf(src2)) 
+      isInf(src1) || isInf(src2))
     return;
-    
+
   unsigned Len = R::Len;
   if (src2 >= Len)
     return;
-  
+
   for (unsigned idx = 0; idx < Len; idx++) {
     if (isNan(src0[idx]) ||
         isInf(src0[idx]))
       return;
-      
+
     if (idx == src2)
       EXPECT_EQ(typename R::Base(src1), result[src2]);
     else
-      EXPECT_EQ(src0[idx], result[idx]);        
-  }        
+      EXPECT_EQ(src0[idx], result[idx]);
+  }
 }
 PackInst(declare)
 TestPackInst(Pack)
@@ -461,12 +461,12 @@ template<class R, class T> static void UnpackLogic(R result, T src0, u32 src1) {
     return;
   if (src1 >= Len)
     return;
-  
+
   if (isNan(src0[src1]) ||
       isInf(src0[src1]))
     return;
 
-  EXPECT_EQ(R(src0[src1]), result);    
+  EXPECT_EQ(R(src0[src1]), result);
 }
 UnpackInst2(declare)
 TestUnpackInst2(Unpack)
@@ -557,7 +557,7 @@ template<class T> static void BitInsertLogic(T result, T a, T b, b32 c, b32 d) {
   b32 width  = d & b32(Int<T>::Bits - 1);
   b32 offset = c & b32(Int<T>::Bits - 1);
   Unsigned mask = (1 << width) - 1;
-  
+
   EXPECT_EQ(result & (mask << offset), (b & mask) << offset);
   EXPECT_EQ(result & ~(mask << offset), a & ~(mask << offset));
 }
@@ -597,7 +597,6 @@ template<class T> static void LastBit_u32Logic(T result, T a) {
     return;
   }
 
-  typedef typename Int<T>::Unsigned Unsigned;
   T mask = 1;
   while (!(a & mask)) mask <<= 1;
   EXPECT_EQ(mask, T(1) << result);
@@ -904,9 +903,9 @@ static void ByteAlign_b32_Logic(b32 result, b32 a, b32 b, b32 c ) {
       if (i + c > 3)
         EXPECT_EQ((b >> (i+c-4)*8) & 0xFF,
                   (result >> i*8)  & 0xFF);
-      else 
+      else
         EXPECT_EQ((a >> (i+c)*8)  & 0xFF,
-                  (result >> i*8) & 0xFF);  
+                  (result >> i*8) & 0xFF);
     }
   }
 }
@@ -956,7 +955,7 @@ static void SadHi_u16x2_u8x4_Logic(u16x2 result, u8x4 a, u8x4 b, u16x2 c) {
              c[1]) & 0xFFFF,
              result[1]);
   EXPECT_EQ( c[0],
-             result[0]);            
+             result[0]);
 }
 extern "C" u16x2 Sadhi_u16x2_u8x4(u8x4, u8x4, u16x2);
 MakeSadhiVectorTest()
@@ -1169,10 +1168,10 @@ static void Cvt_f64_f32_Logic(f64 result, f32 a) {
 extern "C" f64 Cvt_f64_f32(f32);
 MakeTest(Cvt_f64_f32, Cvt_f64_f32_Logic)
 
-extern "C" void PackCvtLogic(u8x4 result, 
-                             f32 src0, 
-                             f32 src1, 
-                             f32 src2, 
+extern "C" void PackCvtLogic(u8x4 result,
+                             f32 src0,
+                             f32 src1,
+                             f32 src2,
                              f32 src3) {
   if (isNan(src0) || isNegInf(src0) || src0 <= 0.0f) {
     EXPECT_EQ(0, result[0]);
@@ -1181,31 +1180,31 @@ extern "C" void PackCvtLogic(u8x4 result,
   } else {
     EXPECT_EQ(result[0], u8(nearbyint(src0)));
   }
-    
+
   if (isNan(src1) || isNegInf(src1) || src1 <= 0.0f) {
     EXPECT_EQ(0, result[1]);
   } else if (isPosInf(src1) || src1 >= 255.0) {
     EXPECT_EQ(255, result[1]);
   } else {
-    EXPECT_EQ(result[1], u8(nearbyint(src1))); 
+    EXPECT_EQ(result[1], u8(nearbyint(src1)));
   }
-    
+
   if (isNan(src2) || isNegInf(src2) || src2 <= 0.0f) {
     EXPECT_EQ(0, result[2]);
   } else if (isPosInf(src2) || src2 >= 255.0) {
     EXPECT_EQ(255, result[2]);
   } else {
-    EXPECT_EQ(result[2], u8(nearbyint(src2))); 
+    EXPECT_EQ(result[2], u8(nearbyint(src2)));
   }
-    
+
   if (isNan(src3) || isNegInf(src3) || src3 <= 0.0f) {
     EXPECT_EQ(0, result[3]);
   } else if (isPosInf(src3) || src3 >= 255.0) {
-    EXPECT_EQ(255, result[3]);              
+    EXPECT_EQ(255, result[3]);
   } else {
-    EXPECT_EQ(result[3], u8(nearbyint(src3))); 
-  }               
-} 
+    EXPECT_EQ(result[3], u8(nearbyint(src3)));
+  }
+}
 extern "C" u8x4 PackCvt_u8x4_f32(f32, f32, f32, f32);
 MakeTest(PackCvt_u8x4_f32, PackCvtLogic)
 
@@ -1215,7 +1214,7 @@ extern "C" void UnpackCvtLogic(f32 result,
   if (src1 > 3)
     EXPECT_FLOAT_EQ(result, 0.0);
   else
-    EXPECT_FLOAT_EQ(result, src0[src1]);                              
+    EXPECT_FLOAT_EQ(result, src0[src1]);
 }
 extern "C" f32 UnpackCvt_f32_u8x4(u8x4, u32);
 MakeVectorTest(UnpackCvt_f32_u8x4, UnpackCvtLogic)
