@@ -9019,3 +9019,30 @@ TEST(DebugTest, Square) {
   delete in;
   delete out;
 }
+
+TEST(BrigKernelTest, SWA) {
+
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$large;\n"
+    "\n"
+    "function &swa (arg_f64 %_result) (arg_u64 %_this,  arg_f64 %_val);\n"
+    "kernel &run(){\n"
+    " {\n"
+    "   arg_f64 %_outval;\n"
+    "   arg_u64 %__this;\n"
+    "   arg_f64 %_inval;\n"
+    "   call &swa (%_outval) (%__this, %_inval);\n"
+    " }\n"
+    "};\n"
+    "\n"
+    "function &swa (arg_f64 %_result) (arg_u64 %_this, arg_f64 %_val) {\n"
+    "  ret;\n"
+    "};");
+    EXPECT_TRUE(BP);
+  if(!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("run");
+  void *args[] = { NULL };
+  BE.launch(fun, args);
+}

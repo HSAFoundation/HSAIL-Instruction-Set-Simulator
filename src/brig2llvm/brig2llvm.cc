@@ -1202,6 +1202,9 @@ static llvm::Function *createFunctionDecl(llvm::Module &M,
 
   if (F.isKernel()) name = "kernel." + name;
 
+  if(llvm::Function *fun = M.getFunction(name.str()))
+    return fun;
+
   return llvm::Function::Create(funTy, linkage, name, &M);
 }
 
