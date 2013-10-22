@@ -18,6 +18,8 @@
 #include <cmath>
 #include <cstdlib>
 
+#include <unistd.h>
+
 namespace hsa {
 namespace brig {
 
@@ -1041,12 +1043,48 @@ extern "C" u64 Clock_u64(void) {
 #endif
 }
 
+extern "C" u32 Dim_u32(void) {
+  return __brigThreadInfo->workdim;
+}
+
 extern "C" u32 WorkItemAbsId_u32(u32 x) {
+  if(x >= Dim_u32()) return 0;
   return __brigThreadInfo->workItemAbsId[x];
 }
 
 extern "C" u32 WorkGroupSize_u32(u32 x) {
+  if(x >= Dim_u32()) return 1;
   return __brigThreadInfo->workGroupSize[x];
+}
+
+extern "C" u32 WorkItemId_u32(u32 x) {
+  if(x >= Dim_u32()) return 0;
+  return WorkItemAbsId_u32(x) % WorkGroupSize_u32(x);
+}
+
+extern "C" u32 WorkGroupId_u32(u32 x) {
+  if(x >= Dim_u32()) return 0;
+  return WorkItemAbsId_u32(x) / WorkGroupSize_u32(x);
+}
+
+extern "C" u32 LaneId_u32(void) {
+  return 0;
+}
+
+extern "C" u32 MaxWaveId_u32(void) {
+  return 0;
+}
+
+extern "C" u32 WaveId_u32(void) {
+  return 0;
+}
+
+extern "C" u32 MaxCuId_u32(void) {
+  return sysconf(_SC_NPROCESSORS_ONLN) - 1;
+}
+
+extern "C" u32 CuId_u32(void) {
+  return sched_getcpu();
 }
 
 }  // namespace brig
