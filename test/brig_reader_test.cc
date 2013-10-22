@@ -8974,7 +8974,7 @@ TEST(BrigInstTest, Clock) {
   uint64_t time = 0;
   uint64_t *result = new uint64_t(0);
   void *args[] = { &result };
-  for(unsigned i = 0; i < 1000; ++i) {
+  for(unsigned i = 0; i < 1024; ++i) {
     BE.launch(fun, args);
     EXPECT_LT(time, *result);
     time = *result;
@@ -8982,13 +8982,117 @@ TEST(BrigInstTest, Clock) {
   delete result;
 }
 
+TEST(BrigInstTest, LaneId) {
+  const uint32_t testVec[] = { 0 };
+  testInst("laneid_u32", testVec);
+}
+
+TEST(BrigInstTest, MaxWaveId) {
+  const uint32_t testVec[] = { 0 };
+  testInst("maxwaveid_u32", testVec);
+}
+
+TEST(BrigInstTest, WaveId) {
+  const uint32_t testVec[] = { 0 };
+  testInst("waveid_u32", testVec);
+}
+
+TEST(BrigInstTest, CuId) {
+
+  uint32_t *maxCuId = new uint32_t(0);
+  {
+    hsa::brig::BrigProgram BP = TestHSAIL(
+      "version 0:96:$full:$large;\n"
+      "\n"
+      "kernel &getMaxCuId(kernarg_s64 %result)\n"
+      "{\n"
+      "        ld_kernarg_u64 $d0, [%result];\n"
+      "        maxcuid_u32 $s1;\n"
+      "        st_u32 $s1, [$d0] ;\n"
+      "        ret;\n"
+      "};\n");
+    EXPECT_TRUE(BP);
+    if (!BP) return;
+
+    hsa::brig::BrigEngine BE(BP);
+    llvm::Function *fun = BP->getFunction("getMaxCuId");
+
+    void *args[] = { &maxCuId };
+    BE.launch(fun, args);
+    EXPECT_GT(*maxCuId, 0);
+  }
+
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$large;\n"
+    "\n"
+    "kernel &getCuId(kernarg_s64 %result)\n"
+    "{\n"
+    "        ld_kernarg_u64 $d0, [%result];\n"
+    "        cuid_u32 $s1;\n"
+    "        st_u32 $s1, [$d0] ;\n"
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if (!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("getCuId");
+
+  uint32_t *result = new uint32_t(0);
+  void *args[] = { &result };
+  for(unsigned i = 0; i < 1024; ++i) {
+    BE.launch(fun, args);
+    EXPECT_LE(*result, *maxCuId);
+  }
+
+  delete maxCuId;
+}
+
+TEST(BrigInstTest, WorkItemAndGroup) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$large;\n"
+    "\n"
+    "kernel &workItemAndGroupTest(kernarg_s64 %results)\n"
+    "{\n"
+    "        ld_kernarg_u64 $d0, [%results];\n"
+    "        workitemid_u32 $s0, 0;\n"
+    "        workgroupid_u32 $s1, 0;\n"
+    "        workgroupsize_u32 $s2, 0;\n"
+    "        mul_u32 $s3, $s2, $s1;\n"
+    "        add_u32 $s4, $s3, $s0;\n"
+    "        mul_u32 $s5, $s4, 4;\n"
+    "        cvt_u64_u32 $d1, $s5;\n"
+    "        add_u64 $d2, $d0, $d1;\n"
+    "        st_u32 0x31415926, [$d2];\n"
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if (!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("workItemAndGroupTest");
+
+  enum { Dim = 32 };
+  uint32_t *results = new uint32_t[1024];
+  void *args[] = { &results };
+  BE.launch(fun, args, Dim, Dim);
+  for(unsigned i = 0; i < Dim; ++i) {
+    for(unsigned j = 0; j < Dim; ++j) {
+      EXPECT_EQ(results[i * Dim + j], 0x31415926);
+    }
+  }
+  delete[] results;
+}
+
 TEST(BrigInstTest, PackedCmov) {
   {
-    const uint32_t testVec[] = { 0x12dc5601U, 0x1000100U, 0x12345678U, 0xfedcba01U };
+    const uint32_t testVec[] = { 0x12dc5601U, 0x1000100U, 0x12345678U,
+                                 0xfedcba01U };
     testInst("cmov_u8x4", testVec);
   }
   {
-    const uint32_t testVec[] = { 0x12dc5601, 0x1000100, 0x12345678, 0xfedcba01 };
+    const uint32_t testVec[] = { 0x12dc5601, 0x1000100, 0x12345678,
+                                 0xfedcba01 };
     testInst("cmov_s8x4", testVec);
   }
 }
