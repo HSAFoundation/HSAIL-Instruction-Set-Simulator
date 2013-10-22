@@ -55,6 +55,35 @@ extern "C" void disableFtzMode(void) {
 #endif  // defined(__arm__)
 }
 
+#if defined(__i386__) || defined(__x86_64__)
+static u64 rdtscp(u32 &cpuId) {
+  u32 tickLow, tickHigh;
+  __asm__ __volatile__("rdtscp" :
+                       "=a"(tickLow), "=d"(tickHigh), "=c"(cpuId));
+  return ((u64) tickHigh << 32) | tickLow;
+}
+#endif // defined(__i386__) || defined(__x86_64__)
+
+static u64 rdtsc(void) {
+#if defined(__i386__) || defined(__x86_64__)
+  u32 cpuId;
+  return rdtscp(cpuId);
+#endif // defined(__i386__) || defined(__x86_64__)
+}
+
+// On RHEL 5, neither sched_getcpu nor the getcpu syscall are
+// available. Consequently, on i386 and x86-64 architectures, we determine the
+// CPU by invoking the rdtscp instruction directly. sched_getcpu was introduced
+// in glibc 2.6. RHEL 5 uses 2.5. The getcpu syscall was introduced in Linux
+// 2.6.19. RHEL 5 uses 2.6.18.
+static u32 getCPU() {
+#if defined(__i386__) || defined(__x86_64__)
+  u32 cpuId;
+  rdtscp(cpuId);
+  return cpuId;
+#endif // defined(__i386__) || defined(__x86_64__)
+}
+
 // On i386, the x87 FPU does not respect the FTZ mode. We use the
 // -mfpmath=sse compile flag to ensure the compiler uses SSE floating
 // point instead of x87, but sometimes we call libraries that use the
@@ -1028,12 +1057,7 @@ extern "C" void Sync(void) {
 }
 
 extern "C" u64 Clock_u64(void) {
-#if defined(__i386__) || defined(__x86_64__)
-  u32 tickLow, tickHigh, cuId;
-  __asm__ __volatile__("rdtscp" :
-                       "=a"(tickLow), "=d"(tickHigh), "=c"(cuId));
-  return ((u64) tickHigh << 32) | tickLow;
-#endif // defined(__i386__) || defined(__x86_64__)
+  return rdtsc();
 }
 
 extern "C" u32 Dim_u32(void) {
@@ -1077,12 +1101,7 @@ extern "C" u32 MaxCuId_u32(void) {
 }
 
 extern "C" u32 CuId_u32(void) {
-#if defined(__i386__) || defined(__x86_64__)
-  u32 tickLow, tickHigh, cuId;
-  __asm__ __volatile__("rdtscp" :
-                       "=a"(tickLow), "=d"(tickHigh), "=c"(cuId));
-  return cuId;
-#endif // defined(__i386__) || defined(__x86_64__)
+  return getCPU();
 }
 
 }  // namespace brig
