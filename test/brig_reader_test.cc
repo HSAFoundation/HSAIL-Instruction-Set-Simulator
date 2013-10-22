@@ -9045,6 +9045,7 @@ TEST(BrigInstTest, CuId) {
     EXPECT_LE(*result, *maxCuId);
   }
 
+  delete result;
   delete maxCuId;
 }
 

@@ -1028,19 +1028,12 @@ extern "C" void Sync(void) {
 }
 
 extern "C" u64 Clock_u64(void) {
-#if defined(__x86_64__)
-  u32 tickLow, tickHigh;
-  __asm__ __volatile__("rdtsc" :
-                       "=a"(tickLow), "=d"(tickHigh));
+#if defined(__i386__) || defined(__x86_64__)
+  u32 tickLow, tickHigh, cuId;
+  __asm__ __volatile__("rdtscp" :
+                       "=a"(tickLow), "=d"(tickHigh), "=c"(cuId));
   return ((u64) tickHigh << 32) | tickLow;
-#endif
-
-#if defined(__i386__)
-  u64 tick;
-  __asm__ __volatile__("rdtsc" :
-                       "=A"(tick));
-  return tick;
-#endif
+#endif // defined(__i386__) || defined(__x86_64__)
 }
 
 extern "C" u32 Dim_u32(void) {
@@ -1084,7 +1077,12 @@ extern "C" u32 MaxCuId_u32(void) {
 }
 
 extern "C" u32 CuId_u32(void) {
-  return sched_getcpu();
+#if defined(__i386__) || defined(__x86_64__)
+  u32 tickLow, tickHigh, cuId;
+  __asm__ __volatile__("rdtscp" :
+                       "=a"(tickLow), "=d"(tickHigh), "=c"(cuId));
+  return cuId;
+#endif // defined(__i386__) || defined(__x86_64__)
 }
 
 }  // namespace brig
