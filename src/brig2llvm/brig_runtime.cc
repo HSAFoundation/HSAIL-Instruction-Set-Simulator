@@ -1025,6 +1025,22 @@ extern "C" void Sync(void) {
   __sync_synchronize();
 }
 
+extern "C" u64 Clock_u64(void) {
+#if defined(__x86_64__)
+  u32 tickLow, tickHigh;
+  __asm__ __volatile__("rdtsc" :
+                       "=a"(tickLow), "=d"(tickHigh));
+  return ((u64) tickHigh << 32) | tickLow;
+#endif
+
+#if defined(__i386__)
+  u64 tick;
+  __asm__ __volatile__("rdtsc" :
+                       "=A"(tick));
+  return tick;
+#endif
+}
+
 extern "C" u32 WorkItemAbsId_u32(u32 x) {
   return __brigThreadInfo->workItemAbsId[x];
 }
