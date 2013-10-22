@@ -31,6 +31,8 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include <cstdio>
+
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -93,6 +95,108 @@ static void insertGPUStateTy(llvm::LLVMContext &C) {
                         d_reg_type,
                         q_reg_type };
   llvm::StructType::create(C, tv1, std::string("struct.regs"), false);
+}
+
+static void insertGPURegDebugInfo(llvm::BasicBlock &entry,
+                                  llvm::DIBuilder &DB,
+                                  llvm::Value *regs,
+                                  llvm::DIType type,
+                                  unsigned offset,
+                                  char prefix,
+                                  unsigned num) {
+
+  char regName[16];
+  snprintf(regName, sizeof(regName), "hsa$%c%u", prefix, num);
+
+  llvm::DIFile file = DB.createFile("-", "");
+
+  llvm::Type *int64Ty = llvm::Type::getInt64Ty(entry.getContext());
+  llvm::Value *addr[] = {
+    llvm::ConstantInt::get(int64Ty, llvm::DIBuilder::OpPlus),
+    llvm::ConstantInt::get(int64Ty, offset)
+  };
+
+  llvm::DIVariable reg =
+    DB.createComplexVariable(llvm::dwarf::DW_TAG_auto_variable,
+                             file, regName, file, 0,
+                             type, addr);
+
+  DB.insertDeclare(regs, reg, &entry);
+}
+
+static llvm::DIType runOnTypeDebug(llvm::DIBuilder &DB, BrigType type) {
+
+  char prefix =
+    BrigInstHelper::isBitTy(type)      ? 'b' :
+    BrigInstHelper::isFloatTy(type)    ? 'f' :
+    BrigInstHelper::isUnsignedTy(type) ? 'u' :
+    BrigInstHelper::isSignedTy(type)   ? 's' :
+    'v';
+
+  size_t size = BrigInstHelper::getTypeSize(type);
+
+  char typeName[16];
+  snprintf(typeName, sizeof(typeName), "%c%lu", prefix, size);
+
+  unsigned encoding =
+    BrigInstHelper::isBitTy(type)      ?
+    size == 1 ? llvm::dwarf::DW_ATE_boolean : llvm::dwarf::DW_ATE_unsigned :
+    BrigInstHelper::isFloatTy(type)    ? llvm::dwarf::DW_ATE_float :
+    BrigInstHelper::isUnsignedTy(type) ? llvm::dwarf::DW_ATE_unsigned :
+    BrigInstHelper::isSignedTy(type)   ? llvm::dwarf::DW_ATE_signed :
+    llvm::dwarf::DW_AT_GNU_vector;
+
+  return DB.createBasicType(typeName, size, size, encoding);
+}
+
+static void insertGPUStateDebugInfo(llvm::BasicBlock &entry,
+                                    llvm::DIBuilder &DB,
+                                    llvm::Value *regs) {
+  llvm::DIType b1Ty   = runOnTypeDebug(DB, BRIG_TYPE_B1);
+  llvm::DIType b32Ty  = runOnTypeDebug(DB, BRIG_TYPE_B32);
+  llvm::DIType f32Ty  = runOnTypeDebug(DB, BRIG_TYPE_F32);
+  llvm::DIType b64Ty  = runOnTypeDebug(DB, BRIG_TYPE_B64);
+  llvm::DIType f64Ty  = runOnTypeDebug(DB, BRIG_TYPE_F64);
+  llvm::DIType b128Ty = runOnTypeDebug(DB, BRIG_TYPE_B128);
+
+  llvm::DIFile  file = DB.createFile("-", "");
+  llvm::Value *sFields[] = {
+    DB.createMemberType(file, "b32", file, 0, 32, 32, 0, 0, b32Ty),
+    DB.createMemberType(file, "f32", file, 0, 32, 32, 0, 0, f32Ty)
+  };
+  llvm::Value *dFields[] = {
+    DB.createMemberType(file, "b64", file, 0, 64, 32, 0, 0, b64Ty),
+    DB.createMemberType(file, "f64", file, 0, 64, 32, 0, 0, f64Ty)
+  };
+
+  llvm::DIArray sRegArray = DB.getOrCreateArray(sFields);
+  llvm::DIArray dRegArray = DB.getOrCreateArray(dFields);
+
+  llvm::DIType sRegTy =
+    DB.createUnionType(file, "sReg", file, 0, 32, 32, 0, sRegArray);
+  llvm::DIType dRegTy =
+    DB.createUnionType(file, "dReg", file, 0, 64, 32, 0, dRegArray);
+
+  unsigned offset = 0;
+  for (unsigned i = 0; i < 8; ++i) {
+    insertGPURegDebugInfo(entry, DB, regs, b1Ty, offset, 'c', i);
+    offset += 1;
+  }
+
+  for (unsigned i = 0; i < 128; ++i) {
+    insertGPURegDebugInfo(entry, DB, regs, sRegTy, offset, 's', i);
+    offset += 4;
+  }
+
+  for (unsigned i = 0; i < 64; ++i) {
+    insertGPURegDebugInfo(entry, DB, regs, dRegTy, offset, 'd', i);
+    offset += 8;
+  }
+
+  for (unsigned i = 0; i < 32; ++i) {
+    insertGPURegDebugInfo(entry, DB, regs, b128Ty, offset, 'q', i);
+    offset += 16;
+  }
 }
 
 static void insertSetThreadInfo(llvm::LLVMContext &C, llvm::Module *M) {
@@ -220,7 +324,7 @@ struct ModScope {
 };
 
 struct FunScope {
-  typedef std::map<uint32_t, llvm::BasicBlock *> CBMap ;
+  typedef std::map<uint32_t, llvm::BasicBlock *> CBMap;
   typedef CBMap::const_iterator CBIt;
 
  private:
@@ -289,20 +393,42 @@ struct FunScope {
     inst_iterator firstInst = firstCB.begin();
     llvm::DILineInfo info = getLineInfo(helper.getAddr(firstInst));
     llvm::DIFile file = getDIFile(info);
+
+    std::vector<llvm::Value *> args;
+    args.push_back(NULL);
+    for (BrigSymbol brigArg = brigFun.arg_begin(),
+           E = brigFun.arg_end(); brigArg != E; ++brigArg) {
+      args.push_back(runOnTypeDebug(parent.DB, brigArg.getType()));
+    }
+
     llvm::DICompositeType debugFunTy =
-      parent.DB.createSubroutineType(file, llvm::DIArray());
-    sub =
-      parent.DB.createFunction(file,
-                               llvmFun->getName(),
-                               llvmFun->getName(),
-                               file,
-                               1,
-                               debugFunTy,
-                               false,
-                               true,
-                               info.getLine(),
-                               true,
-                               llvmFun);
+      parent.DB.createSubroutineType(file, parent.DB.getOrCreateArray(args));
+    sub = parent.DB.createFunction(file,
+                                   llvmFun->getName(),
+                                   llvmFun->getName(),
+                                   file,
+                                   1,
+                                   debugFunTy,
+                                   false,
+                                   true,
+                                   info.getLine(),
+                                   true,
+                                   llvmFun);
+
+    insertGPUStateDebugInfo(entry, parent.DB, regs);
+
+    unsigned argNo = 0;
+    for (BrigSymbol brigArg = brigFun.arg_begin(),
+           E = brigFun.arg_end(); brigArg != E; ++brigArg) {
+      insertDebugDeclareLocal(entry, brigArg, llvm::dwarf::DW_TAG_arg_variable,
+                              sub, argNo++);
+    }
+
+    for (BrigSymbol local = brigFun.local_begin(),
+           E = brigFun.local_end(); local != E; ++local) {
+      insertDebugDeclareLocal(entry, local, llvm::dwarf::DW_TAG_auto_variable,
+                              sub);
+    }
   }
 
   llvm::Value *lookupSymbol(const void *symbol) const {
@@ -350,6 +476,26 @@ struct FunScope {
     llvm::DILexicalBlockFile LB =
       parent.DB.createLexicalBlockFile(sub, file);
     return llvm::DebugLoc::get(info.getLine(), info.getColumn(), LB);
+  }
+
+  void insertDebugDeclareLocal(llvm::BasicBlock &entry, BrigSymbol &local,
+                               unsigned tag, llvm::DIDescriptor scope,
+                               unsigned argNo = 0) {
+    bool isArg = tag == llvm::dwarf::DW_TAG_arg_variable;
+    llvm::DIFile file = parent.DB.createFile("-", "");
+    llvm::StringRef name = getStringRef(local.getName());
+    llvm::DIType dTy = runOnTypeDebug(parent.DB, local.getType());
+    if(isArg)
+      dTy = parent.DB.createReferenceType(llvm::dwarf::DW_TAG_reference_type,
+                                          dTy);
+    llvm::DIVariable dVar =
+      parent.DB.createLocalVariable(tag,
+                                    scope, name, file, 0,
+                                    dTy, true, 0, argNo);
+
+    llvm::Value *v = parent.symbolMap[local.getAddr()];
+    if(!isArg) parent.DB.insertDeclare(v, dVar, &entry);
+    else parent.DB.insertDbgValueIntrinsic(v, 0, dVar, &entry);
   }
 
   size_t getFunId() const { return id; }
@@ -425,7 +571,7 @@ static llvm::Value *getVectorOperand(llvm::BasicBlock &B,
   for (unsigned i = 0; i < numElements; ++i) {
     llvm::Value *regAddr =
       getRegAddr(B, helper.getRegName(op, i), helper, scope);
-    llvm::Value *element = new llvm::LoadInst(regAddr, "", false, &B);
+    llvm::Value *element = new llvm::LoadInst(regAddr, "", true, &B);
     llvm::Value *idx = llvm::ConstantInt::get(int32Ty, i);
     vec = llvm::InsertElementInst::Create(vec, element, idx, "", &B);
   }
@@ -442,7 +588,7 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
 
   if (hasAddr(op)) {
     llvm::Value *valAddr = getOperandAddr(B, op, helper, scope);
-    llvm::Value *val = new llvm::LoadInst(valAddr, "", false, &B);
+    llvm::Value *val = new llvm::LoadInst(valAddr, "", true, &B);
     return val;
   }
 
@@ -502,7 +648,7 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
     if (adderOp->reg) {
       llvm::Value *regAddr =
         getRegAddr(B, helper.getRegName(adderOp), helper, scope);
-      llvm::Value *regValue = new llvm::LoadInst(regAddr, "", false, &B);
+      llvm::Value *regValue = new llvm::LoadInst(regAddr, "", true, &B);
 
       if (regValue->getType() == type) {
         base = regValue;
@@ -1135,7 +1281,7 @@ static llvm::Value *getParameter(llvm::BasicBlock *bb,
     llvm::ConstantInt::get(llvm::Type::getInt32Ty(C), paramNo);
   llvm::Value *gep = llvm::GetElementPtrInst::Create(argArray, offset, "", bb);
 
-  llvm::Value *load = new llvm::LoadInst(gep, "", bb);
+  llvm::Value *load = new llvm::LoadInst(gep, "", true, bb);
   return new llvm::BitCastInst(load, paramTy, "", bb);
 }
 
