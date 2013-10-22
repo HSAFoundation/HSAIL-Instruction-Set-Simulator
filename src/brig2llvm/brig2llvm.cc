@@ -133,10 +133,10 @@ static llvm::DIType runOnTypeDebug(llvm::DIBuilder &DB, BrigType type) {
     BrigInstHelper::isSignedTy(type)   ? 's' :
     'v';
 
-  size_t size = BrigInstHelper::getTypeSize(type);
+  unsigned size = (unsigned) BrigInstHelper::getTypeSize(type);
 
   char typeName[16];
-  snprintf(typeName, sizeof(typeName), "%c%lu", prefix, size);
+  snprintf(typeName, sizeof(typeName), "%c%u", prefix, size);
 
   unsigned encoding =
     BrigInstHelper::isBitTy(type)      ?
