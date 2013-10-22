@@ -8955,7 +8955,7 @@ TEST(AtomicNoRetTest, Min) {
 }
 
 TEST(BrigInstTest, Clock) {
-    hsa::brig::BrigProgram BP = TestHSAIL(
+  hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$large;\n"
     "\n"
     "kernel &clock_test(kernarg_s64 %result)\n"
@@ -8965,21 +8965,21 @@ TEST(BrigInstTest, Clock) {
     "        st_u64 $d1, [$d0] ;\n"
     "        ret;\n"
     "};\n");
-    EXPECT_TRUE(BP);
-    if (!BP) return;
+  EXPECT_TRUE(BP);
+  if (!BP) return;
 
-    hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("clock_test");
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("clock_test");
 
-    uint64_t time = 0;
-    uint64_t *result = new uint64_t(0);
-    void *args[] = { &result };
-    for(unsigned i = 0; i < 1000; ++i) {
-      BE.launch(fun, args);
-      EXPECT_LT(time, *result);
-      time = *result;
-    }
-    delete result;
+  uint64_t time = 0;
+  uint64_t *result = new uint64_t(0);
+  void *args[] = { &result };
+  for(unsigned i = 0; i < 1000; ++i) {
+    BE.launch(fun, args);
+    EXPECT_LT(time, *result);
+    time = *result;
+  }
+  delete result;
 }
 
 TEST(BrigInstTest, PackedCmov) {
