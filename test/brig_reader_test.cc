@@ -355,7 +355,8 @@ static hsa::brig::BrigProgram makeTest(unsigned args, const char *inst,
 }
 
 template<class T, size_t N>
-static void testInst(const char *inst, const T(&testVec)[N]) {
+static void testInst(const char *inst, const T(&testVec)[N],
+                     unsigned blockDim = 1, unsigned threadDim = 1) {
   hsa::brig::BrigProgram BP = makeTest(N - 1, inst, sizeof(T) * 8);
   EXPECT_TRUE(BP);
   if (!BP) return;
@@ -375,7 +376,7 @@ static void testInst(const char *inst, const T(&testVec)[N]) {
   void *args[] = { &input1, &input2, &input3, &output, &arraySize};
   llvm::Function *fun = BP->getFunction("__OpenCL_vec_test_kernel");
   hsa::brig::BrigEngine BE(BP);
-  BE.launch(fun, args);
+  BE.launch(fun, args, blockDim, threadDim);
 
   EXPECT_EQ(testVec[0], output[0]);
 
@@ -9049,6 +9050,11 @@ TEST(BrigInstTest, CuId) {
   delete maxCuId;
 }
 
+TEST(BrigInstTest, Dim) {
+  const uint32_t testVec[] = { 1 };
+  testInst("dim_u32", testVec);
+}
+
 TEST(BrigInstTest, WorkItemAndGroup) {
   hsa::brig::BrigProgram BP = TestHSAIL(
     "version 0:96:$full:$large;\n"
@@ -9074,15 +9080,80 @@ TEST(BrigInstTest, WorkItemAndGroup) {
   llvm::Function *fun = BP->getFunction("workItemAndGroupTest");
 
   enum { Dim = 32 };
-  uint32_t *results = new uint32_t[1024];
+  uint32_t *results = new uint32_t[Dim * Dim];
+  for(unsigned i = 0; i < Dim * Dim; ++i) results[i] = 0;
+
   void *args[] = { &results };
   BE.launch(fun, args, Dim, Dim);
   for(unsigned i = 0; i < Dim; ++i) {
     for(unsigned j = 0; j < Dim; ++j) {
-      EXPECT_EQ(results[i * Dim + j], 0x31415926);
+      EXPECT_EQ(0x31415926, results[i * Dim + j]);
     }
   }
   delete[] results;
+}
+
+TEST(BrigInstTest, WorkItemAbsId) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$large;\n"
+    "\n"
+    "kernel &workItemFlatAbsIdTest(kernarg_s64 %results)\n"
+    "{\n"
+    "        ld_kernarg_u64 $d0, [%results];\n"
+    "        workitemflatabsid_u32 $s0;\n"
+    "        mul_u32 $s1, $s0, 4;\n"
+    "        cvt_u64_u32 $d1, $s1;\n"
+    "        add_u64 $d2, $d0, $d1;\n"
+    "        workitemflatid_u32 $s2;\n"
+    "        st_u32 $s2, [$d2];\n"
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if (!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("workItemFlatAbsIdTest");
+
+  enum { Dim = 32 };
+  uint32_t *results = new uint32_t[Dim * Dim];
+  for(unsigned i = 0; i < Dim * Dim; ++i) results[i] = 0;
+
+  void *args[] = { &results };
+  BE.launch(fun, args, Dim, Dim);
+  for(unsigned i = 0; i < Dim; ++i) {
+    for(unsigned j = 0; j < Dim; ++j) {
+      EXPECT_EQ(j, results[i * Dim + j]);
+    }
+  }
+  delete[] results;
+}
+
+TEST(BrigInstTest, GridSize) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$large;\n"
+    "\n"
+    "kernel &gridSizeTest(kernarg_s64 %results)\n"
+    "{\n"
+    "        ld_kernarg_u64 $d0, [%results];\n"
+    "        gridsize_u32 $s0, 0\n;"
+    "        st_u32 $s0, [$d0];\n"
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if (!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("gridSizeTest");
+
+  uint32_t *result = new uint32_t(0);
+  void *args[] = { &result };
+
+  for(unsigned i = 1; i < 1024; ++i) {
+    BE.launch(fun, args, i);
+    EXPECT_EQ(i, *result);
+  }
+
+  delete result;
 }
 
 TEST(BrigInstTest, PackedCmov) {
