@@ -30,7 +30,7 @@ typedef vector<Device *> DeviceList;
 class SimKernel : public Kernel {
  public:
 
-  SimKernel(llvm::Function *F) : F_(F) {}
+  SimKernel(llvm::Function *F, hsa::brig::BrigEngine *BE) : F_(F), BE_(BE) {}
 
   virtual void *allocateGroupMemory(size_t, size_t) {
     return NULL;
@@ -57,17 +57,18 @@ class SimKernel : public Kernel {
   }
 
   llvm::Function *F_;
+  hsa::brig::BrigEngine *BE_;
 };
 
 class SimProgram : public Program {
  public:
 
   SimProgram(hsa::brig::BrigModule &mod) :
-    BP_(hsa::brig::GenLLVM::getLLVMModule(mod)) {}
+    BP_(hsa::brig::GenLLVM::getLLVMModule(mod)), BE_(BP_) {}
 
   virtual Kernel *compileKernel(const char *kernelName, const char *) {
     llvm::Function *fun = BP_.getFunction(kernelName + 1);
-    return fun ? new SimKernel(fun) : NULL;
+    return fun ? new SimKernel(fun, &BE_) : NULL;
   }
 
   virtual void addDevice(Device *device) {}
@@ -82,6 +83,7 @@ class SimProgram : public Program {
 
  private:
   hsa::brig::BrigProgram BP_;
+  hsa::brig::BrigEngine BE_;
 };
 
 class SimQueue : public Queue {
@@ -122,11 +124,9 @@ class SimQueue : public Queue {
       args.push_back(&kernArgs[i]);
 
     llvm::Function *fun = sk->F_;
-    llvm::Module *mod = fun->getParent();
-    hsa::brig::BrigEngine BE(mod);
     uint32_t blockNum = attrs.grid[0] * attrs.grid[1] * attrs.grid[2];
     uint32_t threadNum = attrs.group[0] * attrs.group[1] * attrs.group[2];
-    BE.launch(fun, args, blockNum, threadNum);
+    sk->BE_->launch(fun, args, blockNum, threadNum);
     return NULL;
   }
 
