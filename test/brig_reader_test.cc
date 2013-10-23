@@ -9184,6 +9184,11 @@ TEST(BrigInstTest, GridGroups) {
   delete result;
 }
 
+TEST(BrigInstTest, Nop) {
+  const uint32_t testVec[] = { 0 };
+  testInst("nop ; //", testVec);
+}
+
 TEST(BrigInstTest, PackedCmov) {
   {
     const uint32_t testVec[] = { 0x12dc5601U, 0x1000100U, 0x12345678U,
