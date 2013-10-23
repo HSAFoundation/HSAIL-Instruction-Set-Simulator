@@ -1133,8 +1133,8 @@ extern "C" u32 CuId_u32(void) {
 
 extern "C" void Nop(void) {}
 
-extern "C" u32 Null_u32(void) { return 0; }
-extern "C" u64 Null_u64(void) { return 0; }
+extern "C" u32 NullPtr_u32(void) { return 0; }
+extern "C" u64 NullPtr_u64(void) { return 0; }
 
 }  // namespace brig
 }  // namespace hsa

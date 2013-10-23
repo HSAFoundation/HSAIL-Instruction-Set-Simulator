@@ -9189,6 +9189,11 @@ TEST(BrigInstTest, Nop) {
   testInst("nop ; //", testVec);
 }
 
+TEST(BrigInstTest, NullPtr) {
+  const uint32_t testVec32[] = { 0 };
+  testInst("nullptr_u32", testVec32);
+}
+
 TEST(BrigInstTest, PackedCmov) {
   {
     const uint32_t testVec[] = { 0x12dc5601U, 0x1000100U, 0x12345678U,
