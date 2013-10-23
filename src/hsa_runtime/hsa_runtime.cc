@@ -66,7 +66,7 @@ class SimProgram : public Program {
     BP_(hsa::brig::GenLLVM::getLLVMModule(mod)) {}
 
   virtual Kernel *compileKernel(const char *kernelName, const char *) {
-    llvm::Function *fun = BP_->getFunction(kernelName + 1);
+    llvm::Function *fun = BP_.getFunction(kernelName + 1);
     return fun ? new SimKernel(fun) : NULL;
   }
 

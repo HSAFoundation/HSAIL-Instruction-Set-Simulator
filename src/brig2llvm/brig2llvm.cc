@@ -62,6 +62,11 @@ SymbolInfo::SymbolInfo(std::string name, const BrigSymbol &S, bool isGlobal) :
     seg(S.getStorageClass()),
     isGlobal(isGlobal) {}
 
+llvm::Function *BrigProgram::getFunction(llvm::StringRef name) const {
+  llvm::Twine mangledName = "kernel." + name;
+  return M->getFunction(mangledName.str());
+}
+
 void BrigProgram::delModule(llvm::Module *M) {
   if (!M) return;
   llvm::LLVMContext *C = &M->getContext();
@@ -159,7 +164,7 @@ static void insertGPUStateDebugInfo(llvm::BasicBlock &entry,
   llvm::DIType f64Ty  = runOnTypeDebug(DB, BRIG_TYPE_F64);
   llvm::DIType b128Ty = runOnTypeDebug(DB, BRIG_TYPE_B128);
 
-  llvm::DIFile  file = DB.createFile("-", "");
+  llvm::DIFile file = DB.createFile("-", "");
   llvm::Value *sFields[] = {
     DB.createMemberType(file, "b32", file, 0, 32, 32, 0, 0, b32Ty),
     DB.createMemberType(file, "f32", file, 0, 32, 32, 0, 0, f32Ty)
@@ -1289,7 +1294,7 @@ static llvm::Value *getParameter(llvm::BasicBlock *bb,
 // We create a trampoline with the function signature:
 // void fun(char **argv)
 // The real function arguments are encoded in the argv array.
-static void makeKernelTrampoline(llvm::Function *fun, llvm::StringRef name,
+static void makeKernelTrampoline(llvm::Function *fun,
                                  const FunScope &scope) {
 
   llvm::LLVMContext &C = fun->getContext();
@@ -1303,6 +1308,7 @@ static void makeKernelTrampoline(llvm::Function *fun, llvm::StringRef name,
     llvm::FunctionType::get(voidTy, trampArgs, false);
   llvm::GlobalValue::LinkageTypes linkage = fun->getLinkage();
 
+  llvm::Twine name = "kernel." + fun->getName();
   llvm::Function *trampFun =
     llvm::Function::Create(trampFunTy, linkage, name, fun->getParent());
   llvm::BasicBlock *bb = llvm::BasicBlock::Create(C, "", trampFun);
@@ -1346,8 +1352,6 @@ static llvm::Function *createFunctionDecl(llvm::Module &M,
   llvm::StringRef nameRef = getStringRef(F.getName());
   llvm::Twine name(nameRef);
 
-  if (F.isKernel()) name = "kernel." + name;
-
   if(llvm::Function *fun = M.getFunction(name.str()))
     return fun;
 
@@ -1377,8 +1381,7 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
     runOnCB(*fun, cb, fScope);
   }
 
-  llvm::StringRef nameRef = getStringRef(F.getName());
-  if (F.isKernel()) makeKernelTrampoline(fun, nameRef, fScope);
+  if (F.isKernel()) makeKernelTrampoline(fun, fScope);
 }
 
 template<class T>
@@ -1548,7 +1551,8 @@ std::string GenLLVM::getLLVMString(const BrigModule &M,
 
   std::string output;
   llvm::raw_string_ostream ros(output);
-  BP->print(ros, NULL);
+  llvm::Module *mod = BP;
+  mod->print(ros, NULL);
 
   return output;
 }

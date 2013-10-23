@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
   hsa::brig::BrigEngine BE(BP);
 
   const char *funName = "fibKernel";
-  llvm::Function *fun = BP->getFunction(funName);
+  llvm::Function *fun = BP.getFunction(funName);
   if (!fun) {
     std::cerr << argv[0] << ": Kernel &" << funName << " missing\n";
     return 0;

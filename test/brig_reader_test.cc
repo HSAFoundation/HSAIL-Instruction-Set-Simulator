@@ -121,7 +121,7 @@ TEST(BrigKernelTest, Cosine) {
   *arg_val1 = 0.0f;
 
   void *args[] = { &arg_val0, &arg_val1 };
-  llvm::Function *fun = BP->getFunction("__Get_ncos");
+  llvm::Function *fun = BP.getFunction("__Get_ncos");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -189,7 +189,7 @@ TEST(BrigKernelTest, Fib) {
   int *r = new int;
   int *n = new int;
   void *args[] = { &r, n };
-  llvm::Function *fun = BP->getFunction("fibKernel");
+  llvm::Function *fun = BP.getFunction("fibKernel");
 
 
   int fib1 = 1;
@@ -247,7 +247,7 @@ TEST(BrigKernelTest, VectorCopy) {
   uint32_t arg_val2 = arraySize;
 
   void *args[] = { &arg_val0, &arg_val1, &arg_val2 };
-  llvm::Function *fun = BP->getFunction("__OpenCL_vec_copy_kernel");
+  llvm::Function *fun = BP.getFunction("__OpenCL_vec_copy_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -374,7 +374,7 @@ static void testInst(const char *inst, const T(&testVec)[N],
   }
 
   void *args[] = { &input1, &input2, &input3, &output, &arraySize};
-  llvm::Function *fun = BP->getFunction("__OpenCL_vec_test_kernel");
+  llvm::Function *fun = BP.getFunction("__OpenCL_vec_test_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args, blockDim, threadDim);
 
@@ -747,7 +747,7 @@ static void testSubwords(const char *type, const T &result, const char *value) {
   *arg_val0 = 0;
 
   void *args[] = { &arg_val0 };
-  llvm::Function *fun = BP->getFunction("__OpenCL_subwords_kernel");
+  llvm::Function *fun = BP.getFunction("__OpenCL_subwords_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -854,7 +854,7 @@ TEST(BrigKernelTest, EuclideanGCD) {
   int temp[4] = {4,4,5,1};
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__run");
+  llvm::Function *fun = BP.getFunction("__run");
 
   for (int i = 0; i < 4; i++) {
     void *args[] = { &divisor, number1 + i, number2 + i };
@@ -919,7 +919,7 @@ TEST(BrigKernelTest, VectorAddArray) {
   }
 
   void *args[] = { &arg_val0, &arg_val1, &arg_val2, &arraySize };
-  llvm::Function *fun = BP->getFunction("__OpenCL_vec_add_kernel");
+  llvm::Function *fun = BP.getFunction("__OpenCL_vec_add_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -963,7 +963,7 @@ TEST(BrigKernelTest, SExtZExt) {
   *zext = 7;
 
   void *args[] = { &input, &sext, &zext };
-  llvm::Function *fun = BP->getFunction("SextZext");
+  llvm::Function *fun = BP.getFunction("SextZext");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -1027,7 +1027,7 @@ TEST(BrigKernelTest, SubWordArray) {
   char **array = new char *;
   {
     void *args[] = { &array };
-    llvm::Function *fun = BP->getFunction("getArrayPtr");
+    llvm::Function *fun = BP.getFunction("getArrayPtr");
     BE.launch(fun, args);
     EXPECT_TRUE(array);
   }
@@ -1038,7 +1038,7 @@ TEST(BrigKernelTest, SubWordArray) {
 
   {
     void *args[] = { &size };
-    llvm::Function *fun = BP->getFunction("SubWordArray");
+    llvm::Function *fun = BP.getFunction("SubWordArray");
     BE.launch(fun, args);
 
     for (unsigned i = 0; i < size; ++i) {
@@ -1063,7 +1063,7 @@ TEST(BrigKernelTest, EmptyCB) {
   EXPECT_TRUE(BP);
   if (!BP) return;
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("EmptyCB");
+  llvm::Function *fun = BP.getFunction("EmptyCB");
   llvm::ArrayRef<void *> args;
   BE.launch(fun, args);
 }
@@ -1154,7 +1154,7 @@ TEST(BrigKernelTest, CRC32) {
   unsigned *r = new unsigned;
   unsigned *l = new unsigned(len);
   void *args[] = { &r, &a, l};
-  llvm::Function *fun = BP->getFunction("CRC32Kernel");
+  llvm::Function *fun = BP.getFunction("CRC32Kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -1222,7 +1222,7 @@ TEST(BrigKernelTest, FizzBuzz) {
   int *r = new int[size];
   int *n = new int(size);
 
-  llvm::Function *fun = BP->getFunction("__fizzbuzz");
+  llvm::Function *fun = BP.getFunction("__fizzbuzz");
   void *args[] = { &r, n };
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
@@ -1293,7 +1293,7 @@ TEST(BrigKernelTest, InsertionSorter) {
 
   unsigned *l = new unsigned(arraySize);
   void *args[] = { &r, l};
-  llvm::Function *fun = BP->getFunction("insertionsortKernel");
+  llvm::Function *fun = BP.getFunction("insertionsortKernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
   for (unsigned i = 0; i < arraySize - 1; ++i) {
@@ -1364,7 +1364,7 @@ TEST(BrigKernelTest,  zeller) {
   for (int i = 0; i < 4; i++) {
     hsa::brig::BrigEngine BE(BP);
     void *args[] = { &r_arg, m_arg+i, d_arg+i,y_arg+i };
-    llvm::Function *fun = BP->getFunction("zeller");
+    llvm::Function *fun = BP.getFunction("zeller");
     BE.launch(fun, args);
     EXPECT_EQ(*r_arg,temp[i]);
   }
@@ -1396,7 +1396,7 @@ TEST(BrigKernelTest, ThreadTest) {
 
   hsa::brig::BrigEngine BE(BP);
   void *args[] = { &tids };
-  llvm::Function *fun = BP->getFunction("threadTest");
+  llvm::Function *fun = BP.getFunction("threadTest");
   BE.launch(fun, args, 1, threads);
 
   for (unsigned i = 0; i < threads; ++i) {
@@ -1443,7 +1443,7 @@ TEST(BrigKernelTest, IndirectBranches) {
     unsigned *r = new unsigned;
     unsigned *n = new unsigned;
     void *args[] = { &r, n};
-    llvm::Function *fun = BP->getFunction("indirectBranchesKernel");
+    llvm::Function *fun = BP.getFunction("indirectBranchesKernel");
     hsa::brig::BrigEngine BE(BP);
 
     {
@@ -1515,7 +1515,7 @@ TEST(BrigKernelTest, IndirectBranches) {
     unsigned *r = new unsigned;
     unsigned *n = new unsigned;
     void *args[] = { &r, n};
-    llvm::Function *fun = BP->getFunction("indirectBranchesKernel");
+    llvm::Function *fun = BP.getFunction("indirectBranchesKernel");
     hsa::brig::BrigEngine BE(BP);
     {
       *r = 0;
@@ -1590,7 +1590,7 @@ TEST(BrigKernelTest, IndirectBranches) {
     unsigned *r = new unsigned;
     unsigned *n = new unsigned;
     void *args[] = { &r, n};
-    llvm::Function *fun = BP->getFunction("indirectBranchesKernel");
+    llvm::Function *fun = BP.getFunction("indirectBranchesKernel");
     hsa::brig::BrigEngine BE(BP);
 
     {
@@ -1679,7 +1679,7 @@ TEST(BrigKernelTest, DISABLED_IndirectCall) {
   int *r = new int;
   int *n = new int(5);
   void *args[] = { &r, n };
-  llvm::Function *fun = BP->getFunction("indirectCallKernel");
+  llvm::Function *fun = BP.getFunction("indirectCallKernel");
 
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
@@ -1761,7 +1761,7 @@ static void testInstCvt(const char *inst, const char *destTypeLength,
   T *src = new T(input);
   R *dest = new R;
   void *args[] = {&dest, src};
-  llvm::Function *fun = BP->getFunction("__Cvt_rounding_mode_test_kernel");
+  llvm::Function *fun = BP.getFunction("__Cvt_rounding_mode_test_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
   EXPECT_EQ(result, *dest);
@@ -3844,7 +3844,7 @@ for(unsigned i = 0; i < 2; ++i) {
   *arg_val0 = 0;
 
   void *args[] = { &arg_val0 };
-  llvm::Function *fun = BP->getFunction("__OpenCL_Global_Initializer_kernel");
+  llvm::Function *fun = BP.getFunction("__OpenCL_Global_Initializer_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -4685,7 +4685,7 @@ static void testGlobalArray(const char *type,
   uint64_t *bitsLen = new uint64_t(bits);
 
   void *args[] = { &arg_val0, n, bitsLen };
-  llvm::Function *fun = BP->getFunction("__OpenCL_Global_Array_kernel");
+  llvm::Function *fun = BP.getFunction("__OpenCL_Global_Array_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -4754,7 +4754,7 @@ TEST(BrigInstTest, WaveSize) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("waveTest");
+    llvm::Function *fun = BP.getFunction("waveTest");
     unsigned *waveSize = new unsigned(0);
     void *args[] = { &waveSize };
     BE.launch(fun, args);
@@ -4804,7 +4804,7 @@ TEST(BrigKernelTest, Ftz2) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("ftzTest");
+  llvm::Function *fun = BP.getFunction("ftzTest");
   float *arg1 = new float(7.0f);
   void *args[] = { &arg1 };
   BE.launch(fun, args);
@@ -4857,7 +4857,7 @@ TEST(BrigInstTest, CombineV2_b32) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("regV2");
+  llvm::Function *fun = BP.getFunction("regV2");
   unsigned *x = new unsigned(0x12345678);
   unsigned *y = new unsigned(0x9ABCDEF0);
   uint32_t *output = new uint32_t[2];
@@ -4887,7 +4887,7 @@ TEST(BrigInstTest, CombineV2_b64) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("regV2");
+  llvm::Function *fun = BP.getFunction("regV2");
   uint64_t *x = new uint64_t(0x1234567887654321ULL);
   uint64_t *y = new uint64_t(0x9ABCDEF00FEDCBA9ULL);
   uint64_t *output = new uint64_t[2];
@@ -4920,7 +4920,7 @@ TEST(BrigInstTest, CombineV4) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("regV4");
+  llvm::Function *fun = BP.getFunction("regV4");
   unsigned *w = new unsigned(0x01020304);
   unsigned *x = new unsigned(0x05060708);
   unsigned *y = new unsigned(0x090A0B0C);
@@ -4955,7 +4955,7 @@ TEST(BrigInstTest, Testb128) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("MovB128");
+  llvm::Function *fun = BP.getFunction("MovB128");
   uint64_t *output = new uint64_t[2];
   memset(output, 0, sizeof(uint64_t) * 2);
   void *args[] = { &output };
@@ -5012,7 +5012,7 @@ static void testPacked(const char *type,
   T *arg_val0 = new T(0);
 
   void *args[] = { &arg_val0, input };
-  llvm::Function *fun = BP->getFunction("packed_kernel");
+  llvm::Function *fun = BP.getFunction("packed_kernel");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -5110,7 +5110,7 @@ static void testPackedConstants(unsigned bits,
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("packedConstants");
+  llvm::Function *fun = BP.getFunction("packedConstants");
   T *output = new T;
   *output = 0;
   void *args[] = { &output };
@@ -5207,7 +5207,7 @@ TEST(BrigKernelTest, VariadicFunction) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("adder");
+  llvm::Function *fun = BP.getFunction("adder");
   float *output = new float;
   *output = 0;
 
@@ -5311,7 +5311,7 @@ static void testSt(const char *type1,
   *arg_val0 = 0;
 
   void *args[] = { &arg_val0 };
-  llvm::Function *fun = BP->getFunction("testSt");
+  llvm::Function *fun = BP.getFunction("testSt");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -5396,7 +5396,7 @@ TEST(BrigKernelTest, Atomic) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction2_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -5429,7 +5429,7 @@ TEST(BrigKernelTest, AtomicNoRet) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction2_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -5454,7 +5454,7 @@ TEST(BrigInstTest, Barrier) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("BarrierTest");
+  llvm::Function *fun = BP.getFunction("BarrierTest");
   void *args[] = { 0 };
   for (unsigned blocks = 1; blocks < 16; ++blocks)
     for (unsigned threads = 1; threads < 16; ++threads)
@@ -5474,7 +5474,7 @@ TEST(BrigInstTest, Sync) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("SyncTest");
+  llvm::Function *fun = BP.getFunction("SyncTest");
   void *args[] = { 0 };
   BE.launch(fun, args);
 }
@@ -5520,7 +5520,7 @@ static void testLd(const char *type1,
   *arg_val0 = 0;
 
   void *args[] = { &arg_val0 };
-  llvm::Function *fun = BP->getFunction("testLd");
+  llvm::Function *fun = BP.getFunction("testLd");
   hsa::brig::BrigEngine BE(BP);
   BE.launch(fun, args);
 
@@ -5604,7 +5604,7 @@ TEST(BrigInstTest, VectorBitalign) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -5630,7 +5630,7 @@ TEST(BrigInstTest, VectorBitalign) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
     uint32_t *arg0 = new uint32_t( 0 );
     uint32_t *arg1 = new uint32_t(0x55443322);
     void *args[] = { &arg0, arg1 };
@@ -5656,7 +5656,7 @@ TEST(BrigInstTest, VectorBitalign) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
     uint32_t *arg0 = new uint32_t( 0 );
     uint32_t *arg1 = new uint32_t(0x55443322);
     void *args[] = { &arg0, arg1 };
@@ -5685,7 +5685,7 @@ TEST(BrigInstTest, VectorBytealign) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -5711,7 +5711,7 @@ TEST(BrigInstTest, VectorBytealign) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
     uint32_t *arg0 = new uint32_t( 0 );
     uint32_t *arg1 = new uint32_t(0x55443322);
     void *args[] = { &arg0, arg1 };
@@ -5737,7 +5737,7 @@ TEST(BrigInstTest, VectorBytealign) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+    llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
     uint32_t *arg0 = new uint32_t( 0 );
     uint32_t *arg1 = new uint32_t(0x55443322);
     void *args[] = { &arg0, arg1 };
@@ -5947,7 +5947,7 @@ TEST(Instruction2Test, Popcount) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -6005,7 +6005,7 @@ TEST(Instruction2Test, FirstBit) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -6033,7 +6033,7 @@ TEST(Instruction2Test, FirstBit) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -6080,7 +6080,7 @@ TEST(Instruction2Test, LastBit) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -6115,7 +6115,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     uint32_t arg1 = uint32_t(hsa::brig::PosInf);
     void *args[] = { &arg0, &arg1};
@@ -6145,7 +6145,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     uint32_t arg1 = uint32_t(hsa::brig::NegInf);
     void *args[] = { &arg0, &arg1};
@@ -6175,7 +6175,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     uint32_t arg1 = uint32_t(hsa::brig::QNan);
     void *args[] = { &arg0, &arg1};
@@ -6206,7 +6206,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     uint32_t arg1 = uint32_t(hsa::brig::SNan);
     void *args[] = { &arg0, &arg1};
@@ -6238,7 +6238,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f32 arg1 = +0.0f;
     uint32_t arg2 = uint32_t(hsa::brig::PosZero);
@@ -6271,7 +6271,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f32 arg1 = -0.0f;
     uint32_t arg2 = uint32_t(hsa::brig::NegZero);
@@ -6304,7 +6304,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f32 arg1 = +1.0f;
     uint32_t arg2 = uint32_t(hsa::brig::PosNorm);
@@ -6337,7 +6337,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f32 arg1 = -1.0f;
     uint32_t arg2 = uint32_t(hsa::brig::NegNorm);
@@ -6370,7 +6370,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f32 arg1 = 1e-45f;
     uint32_t arg2 = uint32_t(hsa::brig::PosSubnorm);
@@ -6403,7 +6403,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f32 arg1 = -1e-45f;
     uint32_t arg2 = uint32_t(hsa::brig::NegSubnorm);
@@ -6436,7 +6436,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint64_t* arg0  = new uint64_t(0);
     uint32_t arg1 = uint32_t(hsa::brig::PosInf);
     void *args[] = { &arg0, &arg1};
@@ -6466,7 +6466,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint64_t* arg0  = new uint64_t(0);
     uint32_t arg1 = uint32_t(hsa::brig::NegInf);
     void *args[] = { &arg0, &arg1};
@@ -6496,7 +6496,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     uint32_t arg1 = uint32_t(hsa::brig::QNan);
     void *args[] = { &arg0, &arg1};
@@ -6527,7 +6527,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     uint32_t arg1 = uint32_t(hsa::brig::SNan);
     void *args[] = { &arg0, &arg1};
@@ -6559,7 +6559,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f64 arg1 = +0.0l;
     uint32_t arg2 = uint32_t(hsa::brig::PosZero);
@@ -6592,7 +6592,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f64 arg1 = -0.0l;
     uint32_t arg2 = uint32_t(hsa::brig::NegZero);
@@ -6625,7 +6625,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f64 arg1 = +1.0l;
     uint32_t arg2 = uint32_t(hsa::brig::PosNorm);
@@ -6658,7 +6658,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     f64 arg1 = -1.0l;
     uint32_t arg2 = uint32_t(hsa::brig::NegNorm);
@@ -6691,7 +6691,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     double arg1 = 1e-323l;
     uint32_t arg2 = uint32_t(hsa::brig::PosSubnorm);
@@ -6724,7 +6724,7 @@ TEST(Instruction2Test, Class) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t* arg0  = new uint32_t();
     double arg1 = -1e-323l;
     uint32_t arg2 = uint32_t(hsa::brig::NegSubnorm);
@@ -6851,7 +6851,7 @@ TEST(Instruction2Test, Fract) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction2_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction2_test_kernel");
   float *arg0 = new float(0.0f);
   float *arg1 = new float(4.6f);
   void *args[] = { &arg0, arg1 };
@@ -7406,7 +7406,7 @@ TEST(Instruction3Test, BitMask) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint64_t *arg0 = new uint64_t(0ULL);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7436,7 +7436,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7463,7 +7463,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7490,7 +7490,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7517,7 +7517,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7544,7 +7544,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     f32 *arg0 = new f32(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7571,7 +7571,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     f32 *arg0 = new f32(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7598,7 +7598,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7625,7 +7625,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7652,7 +7652,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     f32 *arg0 = new f32(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7679,7 +7679,7 @@ TEST(Instruction3Test, Cmp) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     f32 *arg0 = new f32(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7832,7 +7832,7 @@ TEST(Instruction3Test, Unpack) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint64_t *arg1 = new uint64_t(0xffff000076771111LL);
     void *args[] = { &arg0, arg1 };
@@ -7862,7 +7862,7 @@ TEST(Instruction3Test, UnpackCvt) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     f32 *arg0 = new f32(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7890,7 +7890,7 @@ TEST(Instruction3Test, UnpackCvt) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     f32 *arg0 = new f32(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7968,7 +7968,7 @@ TEST(Instruction4Test, Bitextract) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint64_t *arg0 = new uint64_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -7996,7 +7996,7 @@ TEST(Instruction4Test, Bitextract) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint64_t *arg0 = new uint64_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -8038,7 +8038,7 @@ TEST(Instruction4Test, Shuffle) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -8068,7 +8068,7 @@ TEST(Instruction4Test, Shuffle) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint64_t *arg0 = new uint64_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -8098,7 +8098,7 @@ TEST(Instruction4Test, Shuffle) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -8128,7 +8128,7 @@ TEST(Instruction4Test, Shuffle) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint64_t *arg0 = new uint64_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -8158,7 +8158,7 @@ TEST(Instruction4Test, Shuffle) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint64_t *arg0 = new uint64_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -8187,7 +8187,7 @@ TEST(Instruction4Test, Sad) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
   void *args[] = { &arg0, arg1 };
@@ -8215,7 +8215,7 @@ TEST(Instruction4Test, Sad_u32_u16x2) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
   void *args[] = { &arg0, arg1 };
@@ -8243,7 +8243,7 @@ TEST(Instruction4Test, Sad_u32_u8x4) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
   void *args[] = { &arg0, arg1 };
@@ -8271,7 +8271,7 @@ TEST(Instruction4Test, SadHi_u16x2_u8x4) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
   void *args[] = { &arg0, arg1 };
@@ -8299,7 +8299,7 @@ TEST(Instruction4Test, Cmov_32) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   uint32_t *arg1 = new uint32_t(0);
   void *args[] = { &arg0, arg1 };
@@ -8327,7 +8327,7 @@ TEST(Instruction4Test, Cmov_64) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction4_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction4_test_kernel");
   uint64_t *arg0 = new uint64_t(0);
   uint64_t *arg1 = new uint64_t(0);
   void *args[] = { &arg0, arg1 };
@@ -8369,7 +8369,7 @@ TEST(Instruction5Test, PackCvt) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__instruction5_test_kernel");
+  llvm::Function *fun = BP.getFunction("__instruction5_test_kernel");
   uint32_t *arg0 = new uint32_t(0);
   f32 *arg1 = new f32(3.4);
   f32 *arg2 = new f32(-1.6);
@@ -8407,7 +8407,7 @@ TEST(Instruction5Test, BitInsert) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction ("__test_kernel");
+    llvm::Function *fun = BP.getFunction ("__test_kernel");
     uint32_t *arg0 = new uint32_t(0);
     uint32_t *arg1 = new uint32_t(0);
     void *args[] = { &arg0, arg1 };
@@ -8449,7 +8449,7 @@ TEST(Instruction4Test, Pack) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("__test_kernel");
+    llvm::Function *fun = BP.getFunction("__test_kernel");
     uint64_t *arg0 = new uint64_t(0);
     uint64_t *arg1 = new uint64_t(0xffff000076771111ULL);
     void *args[] = { &arg0, arg1 };
@@ -8481,7 +8481,7 @@ TEST(AtomTest, And) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atom_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8514,7 +8514,7 @@ TEST(AtomTest, Or) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atom_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8547,7 +8547,7 @@ TEST(AtomTest, Xor) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atom_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8580,7 +8580,7 @@ TEST(AtomTest, Exch) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atom_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8613,7 +8613,7 @@ TEST(AtomTest, Add) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atom_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8646,7 +8646,7 @@ TEST(AtomTest, Sub) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atom_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(3);
   int32_t *arg2 = new int32_t(23);
@@ -8679,7 +8679,7 @@ TEST(AtomTest, Max) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atom_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(23);
   int32_t *arg2 = new int32_t(3);
@@ -8712,7 +8712,7 @@ TEST(AtomTest, Min) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atom_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atom_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(23);
   int32_t *arg2 = new int32_t(3);
@@ -8745,7 +8745,7 @@ TEST(AtomicNoRetTest, And) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atomicnoret_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8778,7 +8778,7 @@ TEST(AtomicNoRetTest, Or) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atomicnoret_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8811,7 +8811,7 @@ TEST(AtomicNoRetTest, Xor) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atomicnoret_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8844,7 +8844,7 @@ TEST(AtomicNoRetTest, Add) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atomicnoret_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(0xffffffff);
   int32_t *arg2 = new int32_t(0x12345678);
@@ -8877,7 +8877,7 @@ TEST(AtomicNoRetTest, Sub) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atomicnoret_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(23);
   int32_t *arg2 = new int32_t(3);
@@ -8910,7 +8910,7 @@ TEST(AtomicNoRetTest, Max) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atomicnoret_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(23);
   int32_t *arg2 = new int32_t(3);
@@ -8943,7 +8943,7 @@ TEST(AtomicNoRetTest, Min) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("__atomicnoret_test_kernel");
+  llvm::Function *fun = BP.getFunction("__atomicnoret_test_kernel");
   int32_t *arg0 = new int32_t(0);
   int32_t *arg1 = new int32_t(3);
   int32_t *arg2 = new int32_t(23);
@@ -8970,7 +8970,7 @@ TEST(BrigInstTest, Clock) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("clock_test");
+  llvm::Function *fun = BP.getFunction("clock_test");
 
   uint64_t time = 0;
   uint64_t *result = new uint64_t(0);
@@ -9016,7 +9016,7 @@ TEST(BrigInstTest, CuId) {
     if (!BP) return;
 
     hsa::brig::BrigEngine BE(BP);
-    llvm::Function *fun = BP->getFunction("getMaxCuId");
+    llvm::Function *fun = BP.getFunction("getMaxCuId");
 
     void *args[] = { &maxCuId };
     BE.launch(fun, args);
@@ -9037,7 +9037,7 @@ TEST(BrigInstTest, CuId) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("getCuId");
+  llvm::Function *fun = BP.getFunction("getCuId");
 
   uint32_t *result = new uint32_t(0);
   void *args[] = { &result };
@@ -9077,7 +9077,7 @@ TEST(BrigInstTest, WorkItemAndGroup) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("workItemAndGroupTest");
+  llvm::Function *fun = BP.getFunction("workItemAndGroupTest");
 
   enum { Dim = 32 };
   uint32_t *results = new uint32_t[Dim * Dim];
@@ -9112,7 +9112,7 @@ TEST(BrigInstTest, WorkItemAbsId) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("workItemFlatAbsIdTest");
+  llvm::Function *fun = BP.getFunction("workItemFlatAbsIdTest");
 
   enum { Dim = 32 };
   uint32_t *results = new uint32_t[Dim * Dim];
@@ -9143,7 +9143,7 @@ TEST(BrigInstTest, GridSize) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("gridSizeTest");
+  llvm::Function *fun = BP.getFunction("gridSizeTest");
 
   uint32_t *result = new uint32_t(0);
   void *args[] = { &result };
@@ -9171,7 +9171,7 @@ TEST(BrigInstTest, GridGroups) {
   if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("gridGroupsTest");
+  llvm::Function *fun = BP.getFunction("gridGroupsTest");
 
   uint32_t *result = new uint32_t(0);
   void *args[] = { &result };
@@ -9247,7 +9247,7 @@ TEST(DebugTest, Square) {
   if(!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("run");
+  llvm::Function *fun = BP.getFunction("run");
   float *out = new float(0);
   float *in = new float(4);
   void *args[] = { &out, &in };
@@ -9279,7 +9279,7 @@ TEST(BrigKernelTest, SWA) {
   if(!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
-  llvm::Function *fun = BP->getFunction("run");
+  llvm::Function *fun = BP.getFunction("run");
   void *args[] = { NULL };
   BE.launch(fun, args);
 }
