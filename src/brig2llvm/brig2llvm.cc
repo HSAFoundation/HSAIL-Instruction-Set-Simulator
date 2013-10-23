@@ -426,7 +426,7 @@ struct FunScope {
     for (BrigSymbol brigArg = brigFun.arg_begin(),
            E = brigFun.arg_end(); brigArg != E; ++brigArg) {
       insertDebugDeclareLocal(entry, brigArg, llvm::dwarf::DW_TAG_arg_variable,
-                              sub, argNo++);
+                              sub, ++argNo);
     }
 
     for (BrigSymbol local = brigFun.local_begin(),
