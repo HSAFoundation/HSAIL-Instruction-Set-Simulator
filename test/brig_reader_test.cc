@@ -9156,6 +9156,34 @@ TEST(BrigInstTest, GridSize) {
   delete result;
 }
 
+TEST(BrigInstTest, GridGroups) {
+  hsa::brig::BrigProgram BP = TestHSAIL(
+    "version 0:96:$full:$large;\n"
+    "\n"
+    "kernel &gridGroupsTest(kernarg_s64 %results)\n"
+    "{\n"
+    "        ld_kernarg_u64 $d0, [%results];\n"
+    "        gridgroups_u32 $s0, 0\n;"
+    "        st_u32 $s0, [$d0];\n"
+    "        ret;\n"
+    "};\n");
+  EXPECT_TRUE(BP);
+  if (!BP) return;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP->getFunction("gridGroupsTest");
+
+  uint32_t *result = new uint32_t(0);
+  void *args[] = { &result };
+
+  for(unsigned i = 1; i < 1024; ++i) {
+    BE.launch(fun, args, i);
+    EXPECT_EQ(i, *result);
+  }
+
+  delete result;
+}
+
 TEST(BrigInstTest, PackedCmov) {
   {
     const uint32_t testVec[] = { 0x12dc5601U, 0x1000100U, 0x12345678U,

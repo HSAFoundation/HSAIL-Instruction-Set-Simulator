@@ -1079,7 +1079,7 @@ extern "C" u32 WorkGroupSize_u32(u32 x) {
   return __brigThreadInfo->workGroupSize[x];
 }
 
-extern "C" u32 GridGroups(u32 x) {
+extern "C" u32 GridGroups_u32(u32 x) {
   return (GridSize_u32(x) + WorkGroupSize_u32(x) - 1) / WorkGroupSize_u32(x);
 }
 
