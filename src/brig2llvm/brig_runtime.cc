@@ -1069,9 +1069,22 @@ extern "C" u32 WorkItemAbsId_u32(u32 x) {
   return __brigThreadInfo->workItemAbsId[x];
 }
 
+extern "C" u32 GridSize_u32(u32 x) {
+  if(x > Dim_u32()) return 1;
+  return __brigThreadInfo->NDRangeSize[x];
+}
+
 extern "C" u32 WorkGroupSize_u32(u32 x) {
   if(x >= Dim_u32()) return 1;
   return __brigThreadInfo->workGroupSize[x];
+}
+
+extern "C" u32 GridGroups(u32 x) {
+  return (GridSize_u32(x) + WorkGroupSize_u32(x) - 1) / WorkGroupSize_u32(x);
+}
+
+extern "C" u32 CurrentWorkGroupSize_u32(u32 x) {
+  return WorkGroupSize_u32(x);
 }
 
 extern "C" u32 WorkItemId_u32(u32 x) {
@@ -1082,6 +1095,20 @@ extern "C" u32 WorkItemId_u32(u32 x) {
 extern "C" u32 WorkGroupId_u32(u32 x) {
   if(x >= Dim_u32()) return 0;
   return WorkItemAbsId_u32(x) / WorkGroupSize_u32(x);
+}
+
+extern "C" u32 WorkItemFlatAbsId_u32(void) {
+  return
+    WorkItemAbsId_u32(0) +
+    WorkItemAbsId_u32(1) * GridSize_u32(0) +
+    WorkItemAbsId_u32(2) * GridSize_u32(0) * GridSize_u32(1);
+}
+
+extern "C" u32 WorkItemFlatId_u32(void) {
+  return
+    WorkItemId_u32(0) +
+    WorkItemId_u32(1) * WorkGroupSize_u32(0) +
+    WorkItemId_u32(2) * WorkGroupSize_u32(0) * WorkGroupSize_u32(1);
 }
 
 extern "C" u32 LaneId_u32(void) {
@@ -1103,6 +1130,11 @@ extern "C" u32 MaxCuId_u32(void) {
 extern "C" u32 CuId_u32(void) {
   return getCPU();
 }
+
+extern "C" void Nop(void) {}
+
+extern "C" u32 Null_u32(void) { return 0; }
+extern "C" u64 Null_u64(void) { return 0; }
 
 }  // namespace brig
 }  // namespace hsa

@@ -207,7 +207,7 @@ struct WorkItemLoopThreadInfo : public ThreadInfo {
   uint32_t groupSize;
   pthread_barrier_t *barriers;
 
-  WorkItemLoopThreadInfo(uint32_t NDRangeSize, uint32_t workdim,
+  WorkItemLoopThreadInfo(uint32_t NDRangeSize[3], uint32_t workdim,
                          uint32_t workGroupSize[3], uint32_t workItemAbsId[3],
                          pthread_barrier_t *barrier,
                          void *const *args, size_t size,
@@ -232,10 +232,10 @@ static void *workItemLoop(void *vargs) {
   void **args = (void **) vargs;
   WorkItemLoopThreadInfo *thrInfo = (WorkItemLoopThreadInfo *) (args[0]);
   // compute size of the last group
-  uint32_t lastGroupSize = thrInfo->NDRangeSize % thrInfo->groupSize;
-  uint32_t lastGroupNum = (roundUp(thrInfo->NDRangeSize, thrInfo->groupSize) / thrInfo->groupSize) - 1;
+  uint32_t lastGroupSize = thrInfo->NDRangeSize[0] % thrInfo->groupSize;
+  uint32_t lastGroupNum = (roundUp(thrInfo->NDRangeSize[0], thrInfo->groupSize) / thrInfo->groupSize) - 1;
   if (lastGroupSize == 0) lastGroupSize = thrInfo->groupSize;
-  for (uint32_t absid = thrInfo->absidLow; absid < thrInfo->NDRangeSize; absid += thrInfo->absidStep ) {
+  for (uint32_t absid = thrInfo->absidLow; absid < thrInfo->NDRangeSize[0]; absid += thrInfo->absidStep ) {
     thrInfo->workItemAbsId[0] = absid;
     uint32_t workGroupNum = absid / thrInfo->groupSize;
     thrInfo->barrier = &thrInfo->barriers[workGroupNum];
@@ -267,7 +267,7 @@ void BrigEngine::launch(llvm::Function *EntryFn,
    *  current interface that would have to change.
    ***/
 
-  uint32_t NDRangeSize = blockNum * workGroupSize;
+  uint32_t NDRangeSize[3] = { blockNum * workGroupSize, 1, 1};
 
 
   assert(blockNum && workGroupSize && "Thread count too low");
@@ -308,8 +308,8 @@ void BrigEngine::launch(llvm::Function *EntryFn,
 
   // The final barrier might not have the full workGroupSize threads on it
   // (when we move to the input being NDRangeSize)
-  if (NDRangeSize % workGroupSize != 0) {
-    pthread_barrier_init(&barriers[blockNum-1], &barrierAttr, NDRangeSize % workGroupSize);
+  if (NDRangeSize[0] % workGroupSize != 0) {
+    pthread_barrier_init(&barriers[blockNum-1], &barrierAttr, NDRangeSize[0] % workGroupSize);
   }
 
   // create the workItemLoop pthreads
