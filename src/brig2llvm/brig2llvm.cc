@@ -1241,6 +1241,13 @@ static void updateDebugInfo(llvm::BasicBlock &B,
   for (BBIt it = B.begin(), E = B.end(); it != E; ++it)
     if (!it->hasMetadata())
       it->setDebugLoc(loc);
+
+  // Update previous BBs if they have no debug information of their own.  For
+  // example, HSA instruction-less BBs caused by labels at the beginning of
+  // functions.
+  if(llvm::BasicBlock *pred = B.getUniquePredecessor())
+    if(!pred->begin()->hasMetadata())
+      updateDebugInfo(*pred, inst, helper, scope);
 }
 
 static void runOnCB(llvm::Function &F, const BrigControlBlock &CB,
