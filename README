@@ -1,7 +1,10 @@
--- HSAIL Simulator Build Instruction --
+HSA Simulator
+
+----Build Instructions----
+
 The simulator and tests can be built with clang or gcc.
 
-To build 64-bit versions:
+To build a native version:
 - Create a build directory: (for example, build_linux)
     mkdir build_linux
 - Go to that directory :
@@ -11,7 +14,7 @@ To build 64-bit versions:
 - Build the project with make:
     make
 
-To build 32-bit versions:
+To build a 32-bit on 64-bit platforms:
 - Create build directory, for example build_linux
     mkdir build_linux
 - Go to that directory :
@@ -21,3 +24,259 @@ To build 32-bit versions:
 - Build the project with make:
     make
 
+----System Requirements----
+
+Building the simulator requires cmake, gcc, g++, make, git, and svn.
+
+Running the simulator requires SSE3 support.
+
+----Validated Platforms----
+
+The primary environment for the HSA Simulator project is a modern POSIX-based
+operating system. The HSA Simulator has been tested on CentOS 5 and 6 and Ubuntu
+12.04 and 12.10. For each operating system, the simulator has been validated on
+i386 and x86-64 architectures in both release and debug builds. The HSA
+simulator has been compiled and tested with gcc 4.1, gcc 4.4, gcc 4.5, gcc 4.6,
+gcc 4.7, gcc 4.8, and clang 3.2. All supported operating systems pass our tests
+using their default compiler.
+
+----Testing the simulator----
+
+Building the HSA simulator will generate nine test cases. The two most important
+tests are brig_reader_test and brig_runtime_test. Both are based on
+gtest. brig_runtime_test tests individual instructions for on a wide array of
+inputs. brig_runtime_test contains several long-running test cases that are
+disabled by default. Depending on the host, these tests can take between hours
+and days. To enable these tests run brig_runtime_test with the --gtest_filter=*
+option. brig_reader_test tests instructions and kernels in the context of a full
+HSA simulation. If both brig_reader_test and brig_runtime_test pass, the
+simulator is probably working correctly.
+
+The remaining tests are more idiosyncratic.
+
+barrierTest - tests the barrier instructions
+
+brig_reader_test - tests interoperability between assembler and
+    simulator. Starting with HSAIL, the brig_reader_test assembles the programs
+    to BRIG, then simulates the programs for various test inputs to ensure
+    semantic consistency.
+
+brig_runtime_test - Verifies each instruction has been implemented in accordance
+    with the HSA PRM using automatic test vector generation
+
+debug - tests the HSA runtime debug interface
+
+fcos - a stand-alone application that reports the the cos of angles form -pi
+    radians to pi radians at half pi intervals. Due to rounding error the cosine
+    of pi/2 is reported as a very small negative number instead of zero.
+
+fib - a recursive Fibonacci implementation based on an example in the HSA
+    PRM. This program demonstrates correct scoping for argument variables and
+    recursion.
+
+hsa_runtime_test - Tests the implementation of the HSA runtime API
+
+vectorCopy - performs a vector copy using the HSA simulator
+
+----Simulator Utilities----
+
+Building the simulator generates two utilities. These utilities are used to aid
+debugging and will not interest most users.
+
+brig_validate - Takes a brig file as an argument. If the brig is not valid
+prints an error message explaining the problems.
+
+dumpDebugInfo - Takes a brig file as an argument. Attempts to dump the debug
+information. The output file will have the same name as the input file with
+.debuginfo appended.
+
+----Current Limitations----
+
+* No support for 16-bit floating point arithmetic
+
+* Some invalid HSA code will pass through the finalizer and run
+
+* Some invalid HSA code will pass through the finalizer and fail at run-time
+
+* Known working compilers on Linux: gcc 4.1, gcc 4.4, gcc 4.5, gcc 4.6, gcc 4.7,
+  3.8, clang 3.2
+
+* Known working operating systems CentOS 5.8, CentOS 6.3, Ubuntu 12.04, and
+  Ubuntu 12.10.
+
+* Known working architectures x86-32 and x86-64.
+
+* Programs that crash on the GPU may crash the simulator
+
+* Image operations are not supported
+
+* Simulated programs can escape the simulator sandbox
+
+* Only a wavesize of one is supported
+
+* fbar operations are not supported
+
+* Arg memory is 64-bit on in the large machine model
+
+* S and SS vector packings are not implemented correctly
+
+* The insert instruction is not implemented correctly
+
+* Shared memory is shared between workgroups.
+
+* RegV2 and RegV4 operands are not correctly simulated when they are the
+  destination of an instruction.
+
+* Only one dimensional workgroups and grids are supported.
+
+----High-level Design Overview----
+
+The design of the simulator can be broken into four major components: the ELF
+reader, the BRIG façade, the LLVM code generator, and the BRIG
+runtime. Deserializing is handled by the ELF reader class. To facilitate code
+generation, there are a variety of BRIG façade classes. Each BRIG façade class
+interprets BRIG directly without modifying or copying it. The façade merely
+provides a convenient and object oriented abstraction on top of the underlying
+BRIG data structures. The LLVM code generator uses the methods provided by the
+façade to generate corresponding LLVM code. Control-flow is replicated directly
+in the LLVM code, but each HSAIL instruction is simulated by a function
+implemented in the BRIG runtime. The BRIG runtime is implemented in C++ to allow
+rapid development and extensive validation for individual instructions.
+
+----ELF Reader----
+
+src/brig2llvm/brig_reader.cc - implements the BrigReader class for deserializing
+BRIG from ELF files. BrigReader has no public constructor, but can be generated
+by either of two public static methods taking either a file name or a buffer and
+a length. Once a BrigReader is constructed successfully, each BRIG section can
+be retrieved by an accessor method (getDirectives(), getCode(), getOperands(),
+getDebug(), or getStrings()). The BrigReader class will accept multiple ELF
+section names (.brig_directives or .directives) in order to accommodate
+variation found in the ELF encoded BRIG files supplied by AMD.
+
+----BRIG Façade----
+
+src/brig2llvm/brig_module.cc - Implements the BrigModule class. The BrigModule
+class represents an entire program includes extensive validation code to ensure
+the input is valid. BrigModule has two pairs of public iterators:
+
+    BrigFunction begin() const;
+    BrigFunction end() const;
+
+    BrigSymbol global_begin() const;
+    BrigSymbol global_end() const;
+
+    The first pair iterates over functions and the second of global variables.
+
+src/brig2llvm/brig_function.cc - The BrigFunction class represents functions.
+
+    // Get the name of the function
+    const char *getName() const;
+
+    // Get the number of arguments
+    uint32_t getNumArgs() const;
+
+    // Is the function a declaration?
+    bool isDeclaration() const;
+
+    // Get the linkage type
+    BrigAttribute getLinkage() const;
+
+    // Is the function a kernel?
+    bool isKernel() const;
+
+    // Is the function not a kernel?
+    bool isFunction() const;
+
+    // Iterate over function arguments
+    BrigSymbol arg_begin() const;
+    BrigSymbol arg_end() const;
+
+    // Iterate over local variables in the function (scope is regenerated
+    // elsewhere)
+
+    BrigSymbol local_begin() const;
+    BrigSymbol local_end() const;
+
+    // Iterate over control blocks aka super blocks
+    // A control block is a single-entry multiple-exit code region.
+    // By contrast a basic block is a single-entry single-exit code region.
+    BrigControlBlock begin() const;
+    BrigControlBlock end() const;
+
+src/brig2llvm/brig_symbol.cc - The BrigSymbol class representing global
+variables, local variables, and arguments
+
+    // Get the name of a symbol, since names are not unique, this method is only
+    // used for generating debug information
+    const char *getName() const;
+
+    // Get the storage class
+    BrigStorageClass getStorageClass() const;
+
+    // Get the linkage type
+    BrigAttribute getLinkage() const;
+
+    // Check for various attributes
+    bool isConst() const;
+    bool isArray() const;
+    bool isFlexArray() const;
+
+    // Get the array dimensions if this is an array
+    uint32_t getArrayDim() const;
+
+    // Get the type of the symbol
+    BrigDataType getType() const;
+
+    // Check whether this is an image, sampler, or symbol
+    bool isImage() const;
+    bool isSampler() const;
+    bool isSymbol() const;
+
+    // Is there a static initializer?
+    bool hasInitializer() const;
+
+    // Return a constant pointer to the initialization data.
+    // The pointer should NOT be free'd or delete'd
+    template<class T> const T *getInit() const;
+
+src/brig2llvm/brig_control_block.cc - represents a control block
+
+    // Get the name of the control block to generate debug information
+    const char *getName() const;
+
+    // iterate over instructions in each control block
+    inst_iterator begin() const;
+    inst_iterator end() const;
+
+include/brig_util.h - a variety of utility methods for iterating over BRIG
+data-structures (dir_iterator, inst_iterator, and oper_iterator)
+
+src/brig2llvm/brig_inst_helper.cc - various methods for inspecting instructions
+
+----LLVM Codegen----
+
+src/brig2llvm/brig2llvm.cc - implements the BrigProgram class for converting
+BRIG to LLVM. The BrigProgram class employs the iterators and utility methods in
+the façade classes to walk the entire BRIG program and generate appropriate
+LLVM. Almost all instructions are implemented as calls to functions implemented
+in the BRIG runtime by the runOnComplexInst function. The exceptions are the
+brn, call, cbr, and ret instructions, which are implemented directly in
+LLVM. The runOnCB method converts from control blocks in the BRIG code to basic
+blocks for LLVM. The isSRet method handles descrepancies between the x86 and
+86-64 calling conventions. If new target platforms are added, this method may
+will need to be enhanced.
+
+src/brig2llvm/brig_engine.cc - glue code to dynamically compile the LLVM at
+runtime and spawn an appropriate number of threads
+
+---BRIG Runtime----
+
+src/brig2llvm/brig_runtime.cc - provides a C++ implementation for each HSAIL
+instruction. This code makes extensive use of macros and templates in order
+generate large numbers of similar instructions from a single implementation
+
+src/brig2llvm/s_fma.c - a high precision implementation of fused-multiply-add
+borrowed from FreeBSD under the BSD license. Our testing determined that the fma
+implementation in older versions of glibc was insufficiently accurate to meet
+the requirements of the HSA specification.
