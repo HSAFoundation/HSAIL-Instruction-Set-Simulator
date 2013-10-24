@@ -26,9 +26,10 @@ To build a 32-bit on 64-bit platforms:
 
 ----System Requirements----
 
-Building the simulator requires cmake, gcc, g++, make, git, and svn.
+Building the simulator requires cmake, cc, c++, make, git, svn, libelf, and
+libdwarf.
 
-Running the simulator requires SSE3 support.
+Running the simulator requires SSE3 support, libelf, and libdwarf.
 
 ----Validated Platforms----
 
