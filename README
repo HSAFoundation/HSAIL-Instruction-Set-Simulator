@@ -281,3 +281,15 @@ src/brig2llvm/s_fma.c - a high precision implementation of fused-multiply-add
 borrowed from FreeBSD under the BSD license. Our testing determined that the fma
 implementation in older versions of glibc was insufficiently accurate to meet
 the requirements of the HSA specification.
+
+----Environment Variables----
+
+SIMNOOPT - For better GDB debugging experience, the user should define the
+environment variable SIMNOOPT. When SIMNOOPT is defined, code optimization will
+be disabled to facilitate debugging with GDB. In other situations, the user
+might want to unset SIMNOOPT for better performance. Debugging without defining
+the SIMNOOPT variable may result in instructions appearing to execute out of
+order relative to the original HSAIL program. Conceptually, SIMNOOPT is
+equivalent to passing -O0 to a compiler. Since code optimization takes time,
+SIMNOOPT may improve performance when optimization time dominates execution
+time.
