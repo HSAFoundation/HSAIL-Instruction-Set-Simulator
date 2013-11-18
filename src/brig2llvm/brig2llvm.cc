@@ -346,6 +346,7 @@ struct FunScope {
            llvm::Function *llvmFun) :
     parent(parent), id(brigFun.getOffset()) {
 
+    // Create all basic blocks
     llvm::LLVMContext &C = llvmFun->getContext();
     const BrigControlBlock E = brigFun.end();
     for (BrigControlBlock cb = brigFun.begin(); cb != E; ++cb) {
@@ -359,7 +360,46 @@ struct FunScope {
     }
 
     llvm::BasicBlock &entry = llvmFun->getEntryBlock();
+    if (hasDebugInfo()) {
 
+      // Add DWARF function debug information
+      BrigControlBlock firstCB = brigFun.begin();
+      BrigInstHelper helper = firstCB.getInstHelper();
+      inst_iterator firstInst = firstCB.begin();
+      llvm::DILineInfo info = getLineInfo(helper.getAddr(firstInst));
+      llvm::DIFile file = getDIFile(info);
+
+      std::vector<llvm::Value *> args;
+      args.push_back(NULL);
+      for (BrigSymbol brigArg = brigFun.arg_begin(),
+             E = brigFun.arg_end(); brigArg != E; ++brigArg) {
+        args.push_back(runOnTypeDebug(parent.DB, brigArg.getType()));
+      }
+
+      llvm::DICompositeType debugFunTy =
+        parent.DB.createSubroutineType(file, parent.DB.getOrCreateArray(args));
+      sub = parent.DB.createFunction(file,
+                                     llvmFun->getName(),
+                                     llvmFun->getName(),
+                                     file,
+                                     1,
+                                     debugFunTy,
+                                     false,
+                                     true,
+                                     info.getLine(),
+                                     true,
+                                     llvmFun);
+
+      // Add DWARF rgument debug information
+      unsigned argNo = 0;
+      for (BrigSymbol brigArg = brigFun.arg_begin(),
+             E = brigFun.arg_end(); brigArg != E; ++brigArg) {
+        insertDebugDeclareLocal(entry, brigArg, llvm::dwarf::DW_TAG_arg_variable,
+                                sub, ++argNo);
+      }
+    }
+
+    // Create registers
     llvm::Module *M = llvmFun->getParent();
     llvm::Type *regsType = M->getTypeByName("struct.regs");
     regs = new llvm::AllocaInst(regsType, "gpu_reg_p", &entry);
@@ -373,13 +413,16 @@ struct FunScope {
                          DL.getTypeAllocSize(regsType),
                          DL.getPrefTypeAlignment(regsType));
 
+    // Add callback function debug information
     insertEnterFn(entry, *this);
 
+    // Add callback argument debug information
     for (BrigSymbol brigArg = brigFun.arg_begin(),
            E = brigFun.arg_end(); brigArg != E; ++brigArg) {
       insertDeclareVariable(entry, brigArg.getAddr(), false, *this);
     }
 
+    // Add callback local debug information
     for (BrigSymbol local = brigFun.local_begin(),
            E = brigFun.local_end(); local != E; ++local) {
       llvm::StringRef name = getStringRef(local.getName());
@@ -391,48 +434,17 @@ struct FunScope {
       insertDeclareVariable(entry, local.getAddr(), false, *this);
     }
 
-    if (!hasDebugInfo()) return;
+    if (hasDebugInfo()) {
 
-    BrigControlBlock firstCB = brigFun.begin();
-    BrigInstHelper helper = firstCB.getInstHelper();
-    inst_iterator firstInst = firstCB.begin();
-    llvm::DILineInfo info = getLineInfo(helper.getAddr(firstInst));
-    llvm::DIFile file = getDIFile(info);
+      // Add DWARF register debug information
+      insertGPUStateDebugInfo(entry, parent.DB, regs);
 
-    std::vector<llvm::Value *> args;
-    args.push_back(NULL);
-    for (BrigSymbol brigArg = brigFun.arg_begin(),
-           E = brigFun.arg_end(); brigArg != E; ++brigArg) {
-      args.push_back(runOnTypeDebug(parent.DB, brigArg.getType()));
-    }
-
-    llvm::DICompositeType debugFunTy =
-      parent.DB.createSubroutineType(file, parent.DB.getOrCreateArray(args));
-    sub = parent.DB.createFunction(file,
-                                   llvmFun->getName(),
-                                   llvmFun->getName(),
-                                   file,
-                                   1,
-                                   debugFunTy,
-                                   false,
-                                   true,
-                                   info.getLine(),
-                                   true,
-                                   llvmFun);
-
-    insertGPUStateDebugInfo(entry, parent.DB, regs);
-
-    unsigned argNo = 0;
-    for (BrigSymbol brigArg = brigFun.arg_begin(),
-           E = brigFun.arg_end(); brigArg != E; ++brigArg) {
-      insertDebugDeclareLocal(entry, brigArg, llvm::dwarf::DW_TAG_arg_variable,
-                              sub, ++argNo);
-    }
-
-    for (BrigSymbol local = brigFun.local_begin(),
-           E = brigFun.local_end(); local != E; ++local) {
-      insertDebugDeclareLocal(entry, local, llvm::dwarf::DW_TAG_auto_variable,
-                              sub);
+      // Add DWARF local variable debug information
+      for (BrigSymbol local = brigFun.local_begin(),
+             E = brigFun.local_end(); local != E; ++local) {
+        insertDebugDeclareLocal(entry, local, llvm::dwarf::DW_TAG_auto_variable,
+                                sub);
+      }
     }
   }
 
