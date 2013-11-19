@@ -9280,11 +9280,219 @@ TEST(BrigKernelTest, SWA) {
     "function &swa (arg_f64 %_result) (arg_u64 %_this, arg_f64 %_val) {\n"
     "  ret;\n"
     "};");
-    EXPECT_TRUE(BP);
+  EXPECT_TRUE(BP);
   if(!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP.getFunction("run");
   void *args[] = { NULL };
   BE.launch(fun, args);
+}
+
+static bool testFPE(const char *str, u32 mask) {
+
+  const char *buffer =
+    asnprintf("version 0:96:$full:$large;\n"
+              "\n"
+              "kernel &fpeTest(kernarg_u64 %resultPtr){\n"
+              "   cleardetectexcept_u32 31;\n"
+              "   %s\n"
+              "   getdetectexcept_u32 $s0;\n"
+              "   ld_kernarg_u64 $d0, [%resultPtr];\n"
+              "   st_global_u32 $s0, [$d0];\n"
+              "};", str);
+
+  hsa::brig::BrigProgram BP = TestHSAIL(buffer);
+  EXPECT_TRUE(BP);
+  if(!BP) return false;
+
+  hsa::brig::BrigEngine BE(BP);
+  llvm::Function *fun = BP.getFunction("fpeTest");
+
+  uint32_t *fpe = new uint32_t(0);
+  void *args[] = { &fpe };
+
+  BE.launch(fun, args);
+
+  bool result = !((*fpe ^ mask) & mask);
+
+  delete fpe;
+  delete[] buffer;
+
+  return result;
+}
+
+TEST(BrigFPE, Invalid) {
+
+#define INF32  "0f7f800000"
+#define INF64  "0d7ff0000000000000"
+#define NINF32 "0fff800000"
+#define NINF64  "0dfff0000000000000"
+#define QNAN32 "0f7fc00001"
+#define QNAN64 "0d7ff8000000000001"
+#define SNAN32 "0f7f800001"
+#define SNAN64 "0d7ff0000000000001"
+
+  using hsa::brig::HSA_INVALID;
+
+  // SNAN+0
+  EXPECT_TRUE(testFPE("add_f32 $s2, " SNAN32 ", 0;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("add_f64 $d2, " SNAN64 ", 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("add_f32 $s2, " QNAN32 ", 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("add_f64 $d2, " QNAN64 ", 0;", HSA_INVALID));
+
+  // 0*inf
+  EXPECT_TRUE(testFPE("mul_f32 $s2, 0, " INF32 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("mul_f64 $d2, 0, " INF64 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("mul_f32 $s2, 0, 1;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("mul_f64 $d2, 0, 1;", HSA_INVALID));
+
+  // inf*0
+  EXPECT_TRUE(testFPE("mul_f32 $s2, " INF32 ", 0;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("mul_f64 $d2, " INF64 ", 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("mul_f32 $s2, 1, 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("mul_f64 $d2, 1, 0;", HSA_INVALID));
+
+  // fma(0, inf, 0)
+  EXPECT_TRUE(testFPE("fma_f32 $s2, 0, " INF32 ", 0;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("fma_f64 $d2, 0, " INF64 ", 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("fma_f32 $s2, 0, 1, 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("fma_f64 $d2, 0, 1, 0;", HSA_INVALID));
+
+  // fma(inf, 0, 0)
+  EXPECT_TRUE(testFPE("fma_f32 $s2, " INF32 ", 0, 0;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("fma_f64 $d2, " INF64 ", 0, 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("fma_f32 $s2, 1, 0, 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("fma_f64 $d2, 1, 0, 0;", HSA_INVALID));
+
+  // INF + -INF
+  EXPECT_TRUE(testFPE("add_f32 $s2, " INF32 ", " NINF32 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("add_f64 $d2, " INF64 ", " NINF64 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("sub_f32 $s2, " INF32 ", " INF32 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("sub_f64 $d2, " INF64 ", " INF64 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("fma_f32 $s2, " INF32 ", 1, " NINF32 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("fma_f64 $d2, " INF64 ", 1, " NINF64 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("add_f32 $s2, " INF32 ", " INF32 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("add_f64 $d2, " INF64 ", " INF64 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("sub_f32 $s2, " INF32 ", " NINF32 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("sub_f64 $d2, " INF64 ", " NINF64 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("fma_f32 $s2, " INF32 ", 1, " INF32 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("fma_f64 $d2, " INF64 ", 1, " INF64 ";", HSA_INVALID));
+
+  // 0/0
+  EXPECT_TRUE(testFPE("div_f32 $s2, 0, 0;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("div_f64 $d2, 0, 0;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 0, 1;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 0, 1;", HSA_INVALID));
+
+  // inf/inf
+  EXPECT_TRUE(testFPE("div_f32 $s2, " INF32 ", " INF32 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("div_f64 $d2, " INF64 ", " INF64 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("div_f32 $s2, " INF32 ", 1;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, " INF64 ", 1;", HSA_INVALID));
+
+  // sqrt(-1)
+  EXPECT_TRUE(testFPE("sqrt_f32 $s2, -1;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("sqrt_f64 $d2, -1;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("sqrt_f32 $s2, 1;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("sqrt_f64 $d2, 1;", HSA_INVALID));
+
+  // cvt
+  EXPECT_TRUE(testFPE("cvt_u32_f32 $s2, " QNAN32 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("cvt_u64_f64 $d2, " QNAN64 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("cvt_u32_f32 $s2, " INF32 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("cvt_u64_f64 $d2, " INF64 ";", HSA_INVALID));
+  EXPECT_TRUE(testFPE("cvt_u32_f32 $s2, 1E+128;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("cvt_u64_f64 $d2, 1E+128;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_u32_f32 $s2, 1E+9;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_u64_f64 $d2, 1E+9;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_downi_sat_u32_f32 $s2, " QNAN32 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_downi_sat_u64_f64 $d2, " QNAN64 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_downi_sat_u32_f32 $s2, " INF32 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_downi_sat_u64_f64 $d2, " INF64 ";", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_downi_sat_u32_f32 $s2, 1E+128;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_downi_sat_u64_f64 $d2, 1E+128;", HSA_INVALID));
+
+#undef INF32
+#undef INF64
+#undef NINF32
+#undef NINF64
+#undef QNAN32
+#undef QNAN64
+#undef SNAN32
+#undef SNAN64
+}
+
+TEST(BrigFPE, DivisionByZero) {
+  using hsa::brig::HSA_DIVBYZERO;
+  EXPECT_TRUE(testFPE("div_f32 $s2, 1, 0;", HSA_DIVBYZERO));
+  EXPECT_TRUE(testFPE("div_f64 $d2, 1, 0;", HSA_DIVBYZERO));
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 1, 1;", HSA_DIVBYZERO));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 1, 1;", HSA_DIVBYZERO));
+}
+
+TEST(BrigFPE, UnderFlow) {
+  using hsa::brig::HSA_UNDERFLOW;
+
+  // Normal-Denormal Boundary
+  EXPECT_TRUE(testFPE("div_f32 $s2, 0f00800001, 2;", HSA_UNDERFLOW));
+  EXPECT_TRUE(testFPE("div_f64 $d2, 0d0010000000000001, 2;", HSA_UNDERFLOW));
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 0f00800000, 2;", HSA_UNDERFLOW));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 0d0010000000000000, 2;", HSA_UNDERFLOW));
+
+  // Denormal
+  EXPECT_TRUE(testFPE("div_f32 $s2, 0f00400001, 2;", HSA_UNDERFLOW));
+  EXPECT_TRUE(testFPE("div_f64 $d2, 0d0008000000000001, 2;", HSA_UNDERFLOW));
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 0f00400000, 2;", HSA_UNDERFLOW));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 0d0008000000000000, 2;", HSA_UNDERFLOW));
+
+  // Normal
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 0f01000001, 2;", HSA_UNDERFLOW));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 0d0020000000000001, 2;", HSA_UNDERFLOW));
+}
+
+TEST(BrigFPE, OverFlow) {
+  using hsa::brig::HSA_OVERFLOW;
+
+  // Normal-Infinity Boundary
+  EXPECT_TRUE(testFPE("mul_f32 $s2, 0f7f7fffff, 2;", HSA_OVERFLOW));
+  EXPECT_TRUE(testFPE("mul_f64 $d2, 0d7fefffffffffffff, 2;", HSA_OVERFLOW));
+
+  // Normal
+  EXPECT_TRUE(!testFPE("mul_f32 $s2, 0f7effffff, 2;", HSA_OVERFLOW));
+  EXPECT_TRUE(!testFPE("mul_f64 $d2, 0d7fdfffffffffffff, 2;", HSA_OVERFLOW));
+}
+
+TEST(BrigFPE, Inexact) {
+  using hsa::brig::HSA_INEXACT;
+
+  // Normal-Denormal Boundary
+  EXPECT_TRUE(testFPE("div_f32 $s2, 0f00800001, 2;", HSA_INEXACT));
+  EXPECT_TRUE(testFPE("div_f64 $d2, 0d0010000000000001, 2;", HSA_INEXACT));
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 0f00800000, 2;", HSA_INEXACT));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 0d0010000000000000, 2;", HSA_INEXACT));
+
+  // Denormal
+  EXPECT_TRUE(testFPE("div_f32 $s2, 0f00400001, 2;", HSA_INEXACT));
+  EXPECT_TRUE(testFPE("div_f64 $d2, 0d0008000000000001, 2;", HSA_INEXACT));
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 0f00400000, 2;", HSA_INEXACT));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 0d0008000000000000, 2;", HSA_INEXACT));
+
+  // Normal
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 0f01000001, 2;", HSA_INEXACT));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 0d0020000000000001, 2;", HSA_INEXACT));
+
+  // Normal-Infinity Boundary
+  EXPECT_TRUE(testFPE("mul_f32 $s2, 0f7f7fffff, 2;", HSA_INEXACT));
+  EXPECT_TRUE(testFPE("mul_f64 $d2, 0d7fefffffffffffff, 2;", HSA_INEXACT));
+
+  // Normal
+  EXPECT_TRUE(!testFPE("mul_f32 $s2, 0f7effffff, 2;", HSA_INEXACT));
+  EXPECT_TRUE(!testFPE("mul_f64 $d2, 0d7fdfffffffffffff, 2;", HSA_INEXACT));
+
+  // Rounding
+  EXPECT_TRUE(testFPE("div_f32 $s2, 1, 3;", HSA_INEXACT));
+  EXPECT_TRUE(testFPE("div_f64 $d2, 1, 3;", HSA_INEXACT));
+  EXPECT_TRUE(!testFPE("div_f32 $s2, 1, 2;", HSA_INEXACT));
+  EXPECT_TRUE(!testFPE("div_f64 $d2, 1, 2;", HSA_INEXACT));
 }
