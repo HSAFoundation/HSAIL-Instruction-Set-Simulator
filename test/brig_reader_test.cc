@@ -9249,7 +9249,7 @@ TEST(DebugTest, Square) {
 
   hsa::brig::BrigProgram BP = hsa::brig::GenLLVM::getLLVMModule(mod);
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP.getFunction("run");
@@ -9281,7 +9281,7 @@ TEST(BrigKernelTest, SWA) {
     "  ret;\n"
     "};");
   EXPECT_TRUE(BP);
-  if(!BP) return;
+  if (!BP) return;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP.getFunction("run");
@@ -9304,7 +9304,7 @@ static bool testFPE(const char *str, u32 mask) {
 
   hsa::brig::BrigProgram BP = TestHSAIL(buffer);
   EXPECT_TRUE(BP);
-  if(!BP) return false;
+  if (!BP) return false;
 
   hsa::brig::BrigEngine BE(BP);
   llvm::Function *fun = BP.getFunction("fpeTest");
