@@ -787,11 +787,6 @@ Cmp(define, snan, f64)
 // Integer rounding:
 // f32 to Int
 template<class R> static R Cvt(volatile f32 f, int mode) {
-  if (isPosInf(f) || isNegInf(f) || isNan(f) ||
-      f <= getMin<R>() || f >= getMax<R>())
-    return 0;  // should be undefined value
-  // an exception should be thrown
-
   int oldMode = fegetround();
   fesetround(mode);
   volatile R result = R(nearbyint(f));
@@ -816,11 +811,6 @@ template<> bool Cvt(f32 f, int mode) { return f != 0.0f; }
 // Integer rounding:
 // f64 to Int
 template<class R> static R Cvt(volatile f64 f, int mode) {
-  if (isPosInf(f) || isNegInf(f) || isNan(f) ||
-      f <= getMin<R>() || f >= getMax<R>())
-    return 0;   // should be undefined value
-  // an exception should be thrown
-
   int oldMode = fegetround();
   fesetround(mode);
   volatile R result = R(nearbyint(f));
@@ -1135,6 +1125,38 @@ extern "C" void Nop(void) {}
 
 extern "C" u32 NullPtr_u32(void) { return 0; }
 extern "C" u64 NullPtr_u64(void) { return 0; }
+
+static u32 hsaToCFPE(u32 hsaFlag) {
+  u32 feFlag = 0;
+  if(hsaFlag & HSA_INVALID)   feFlag |= FE_INVALID;
+  if(hsaFlag & HSA_DIVBYZERO) feFlag |= FE_DIVBYZERO;
+  if(hsaFlag & HSA_OVERFLOW)  feFlag |= FE_OVERFLOW;
+  if(hsaFlag & HSA_UNDERFLOW) feFlag |= FE_UNDERFLOW;
+  if(hsaFlag & HSA_INEXACT)   feFlag |= FE_INEXACT;
+  return feFlag;
+}
+
+static u32 cToHSAFPE(u32 feFlag) {
+  u32 hsaFlag = 0;
+  if(feFlag & FE_INVALID)   hsaFlag |= HSA_INVALID;
+  if(feFlag & FE_DIVBYZERO) hsaFlag |= HSA_DIVBYZERO;
+  if(feFlag & FE_OVERFLOW)  hsaFlag |= HSA_OVERFLOW;
+  if(feFlag & FE_UNDERFLOW) hsaFlag |= HSA_UNDERFLOW;
+  if(feFlag & FE_INEXACT)   hsaFlag |= HSA_INEXACT;
+  return hsaFlag;
+}
+
+extern "C" void ClearDetectExcept_u32(u32 x) {
+  feclearexcept(hsaToCFPE(x));
+}
+
+extern "C" u32 GetDetectExcept_u32(void) {
+  return cToHSAFPE(fetestexcept(FE_ALL_EXCEPT));
+}
+
+extern "C" void SetDetectExcept_u32(u32 x) {
+  feraiseexcept(hsaToCFPE(x));
+}
 
 }  // namespace brig
 }  // namespace hsa

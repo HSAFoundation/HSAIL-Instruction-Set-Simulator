@@ -755,6 +755,14 @@ enum BrigFPClass {
   PosInf     = 0x200
 };
 
+enum BrigFPE {
+  HSA_INVALID   = 1 << 0,
+  HSA_DIVBYZERO = 1 << 1,
+  HSA_OVERFLOW  = 1 << 2,
+  HSA_UNDERFLOW = 1 << 3,
+  HSA_INEXACT   = 1 << 4
+};
+
 template<class T> inline T cmpResult(bool result) {
   return result ? ~T(0) : T(0);
 }
