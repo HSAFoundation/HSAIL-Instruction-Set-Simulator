@@ -214,14 +214,15 @@ struct WorkItemLoopThreadInfo : public ThreadInfo {
                          EntryFunPtrTy EntryFunPtr,
                          uint32_t absidLow, uint32_t absidStep,
                          uint32_t groupSize, pthread_barrier_t *barriers) :
-    ThreadInfo(NDRangeSize, workdim, workGroupSize, workItemAbsId, barrier, args, size),
+    ThreadInfo(NDRangeSize, workdim, workGroupSize, workItemAbsId, barrier,
+               args, size),
     EntryFunPtr(EntryFunPtr), absidLow(absidLow), absidStep(absidStep),
     groupSize(groupSize), barriers(barriers) {
   }
 };
 
-static uint32_t roundUp(int val, int multiple) {
-  return ((val + multiple - 1) / multiple) * multiple;
+static uint32_t roundUpDiv(int val, int multiple) {
+  return ((val + multiple - 1) / multiple);
 }
 
 // the workItemLoop runs a set of workItems (from different workGroups)
@@ -233,9 +234,12 @@ static void *workItemLoop(void *vargs) {
   WorkItemLoopThreadInfo *thrInfo = (WorkItemLoopThreadInfo *) (args[0]);
   // compute size of the last group
   uint32_t lastGroupSize = thrInfo->NDRangeSize[0] % thrInfo->groupSize;
-  uint32_t lastGroupNum = (roundUp(thrInfo->NDRangeSize[0], thrInfo->groupSize) / thrInfo->groupSize) - 1;
+  uint32_t lastGroupNum =
+    roundUpDiv(thrInfo->NDRangeSize[0], thrInfo->groupSize) - 1;
   if (lastGroupSize == 0) lastGroupSize = thrInfo->groupSize;
-  for (uint32_t absid = thrInfo->absidLow; absid < thrInfo->NDRangeSize[0]; absid += thrInfo->absidStep ) {
+  for (uint32_t absid = thrInfo->absidLow;
+       absid < thrInfo->NDRangeSize[0];
+       absid += thrInfo->absidStep ) {
     thrInfo->workItemAbsId[0] = absid;
     uint32_t workGroupNum = absid / thrInfo->groupSize;
     thrInfo->barrier = &thrInfo->barriers[workGroupNum];
@@ -293,7 +297,7 @@ void BrigEngine::launch(llvm::Function *EntryFn,
   // as the incoming workGroupSize but we will also try to keep all
   // the processors busy by using multiples of the workGroupSize if
   // necessary
-  uint32_t numConcurrentWorkGroups = roundUp(numProcessors, workGroupSize) / workGroupSize;
+  uint32_t numConcurrentWorkGroups = roundUpDiv(numProcessors, workGroupSize);
   uint32_t numPthreads = numConcurrentWorkGroups * workGroupSize;
 
   WorkItemLoopThreadInfo **threads = new WorkItemLoopThreadInfo *[numPthreads];
@@ -309,13 +313,16 @@ void BrigEngine::launch(llvm::Function *EntryFn,
   // The final barrier might not have the full workGroupSize threads on it
   // (when we move to the input being NDRangeSize)
   if (NDRangeSize[0] % workGroupSize != 0) {
-    pthread_barrier_init(&barriers[blockNum-1], &barrierAttr, NDRangeSize[0] % workGroupSize);
+    pthread_barrier_init(&barriers[blockNum - 1], &barrierAttr,
+                         NDRangeSize[0] % workGroupSize);
   }
 
   // create the workItemLoop pthreads
   for (uint32_t k=0; k<numPthreads; k++) {
-    uint32_t workItemAbsId[] = { 0, 0, 0 };  // will be filled in by the workItemLoop
-    pthread_barrier_t *barrier = NULL;     // will be filled in by the workItemLoop
+    // will be filled in by the workItemLoop
+    uint32_t workItemAbsId[] = { 0, 0, 0 };
+    // will be filled in by the workItemLoop
+    pthread_barrier_t *barrier = NULL;
     uint32_t absidLow = k;
     uint32_t absidStep = numPthreads;
     uint32_t groupSize = workGroupSize;
@@ -329,7 +336,8 @@ void BrigEngine::launch(llvm::Function *EntryFn,
                                             groupSize, barriers);
 
 
-    pthread_create(&threads[k]->tid, &attr, &workItemLoop, threads[k]->argsArray);
+    pthread_create(&threads[k]->tid, &attr, &workItemLoop,
+                   threads[k]->argsArray);
   }
 
   // join all the workItemLoop pthreads

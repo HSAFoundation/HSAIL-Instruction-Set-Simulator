@@ -132,8 +132,10 @@ class BrigModule {
   bool validate(const inst_iterator inst) const;
 
   bool validateBitInst(const inst_iterator inst, unsigned nary) const;
-  bool validateIntegerArithmeticInst(const inst_iterator inst, unsigned nary) const;
-  bool validateFloatArithmeticInst(const inst_iterator inst, unsigned nary) const;
+  bool validateIntegerArithmeticInst(const inst_iterator inst,
+                                     unsigned nary) const;
+  bool validateFloatArithmeticInst(const inst_iterator inst,
+                                   unsigned nary) const;
   bool validateArithmeticInst(const inst_iterator inst, unsigned nary) const;
   bool validateShiftInst(const inst_iterator inst) const;
   bool validateInterleaveInst(const inst_iterator inst) const;

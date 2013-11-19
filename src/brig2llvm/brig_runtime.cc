@@ -198,7 +198,9 @@ template<class T> static T Add_Sat(T x, T y) {
     return res;
   }
 }
-template<class T> static T Add_SatVector(T x, T y) { return map(Add_Sat, x, y); }
+template<class T> static T Add_SatVector(T x, T y) {
+  return map(Add_Sat, x, y);
+}
 SignedVectorInst(define, Add_Sat, Binary)
 UnsignedVectorInst(define, Add_Sat, Binary)
 
@@ -231,7 +233,9 @@ template<class T> static T Mul_Sat(T x, T y) {
     return res;
   }
 }
-template<class T> static T Mul_SatVector(T x, T y) { return map(Mul_Sat, x, y); }
+template<class T> static T Mul_SatVector(T x, T y) {
+  return map(Mul_Sat, x, y);
+}
 SignedVectorInst(define, Mul_Sat, Binary)
 UnsignedVectorInst(define, Mul_Sat, Binary)
 
@@ -297,7 +301,9 @@ template<class T> static T Sub_Sat(T x, T y) {
     return res;
   }
 }
-template<class T> static T Sub_SatVector(T x, T y) { return map(Sub_Sat, x, y); }
+template<class T> static T Sub_SatVector(T x, T y) {
+  return map(Sub_Sat, x, y);
+}
 SignedVectorInst(define, Sub_Sat, Binary)
 UnsignedVectorInst(define, Sub_Sat, Binary)
 

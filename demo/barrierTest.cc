@@ -64,9 +64,11 @@ int main(int argc, char **argv) {
 
   const int NUM = 60;
 
-  int *outArray = (int *) hsaRT->allocateGlobalMemory(NUM * sizeof(int), sizeof(int));
+  int *outArray =
+    (int *) hsaRT->allocateGlobalMemory(NUM * sizeof(int), sizeof(int));
   if (!outArray) return -1;
-  int *locArray = (int *) hsaRT->allocateGlobalMemory(NUM * sizeof(int), sizeof(int));
+  int *locArray =
+    (int *) hsaRT->allocateGlobalMemory(NUM * sizeof(int), sizeof(int));
   if (!locArray) return -1;
 
   hsa::KernelArg argOut;
@@ -95,7 +97,8 @@ int main(int argc, char **argv) {
     hsacommon::vector<hsa::Event *> deps;
     queue->dispatch(kernel, la, deps, 2, argOut, argLoc);
 
-    cout  << "Results with " << la.grid[0] << " blocks of size " << la.group[0] << endl;
+    cout  << "Results with " << la.grid[0]
+          << " blocks of size " << la.group[0] << endl;
 
     for (int k = 0; k < NUM; k++) {
       cout << outArray[k] << " ";
@@ -110,7 +113,9 @@ int main(int argc, char **argv) {
       }
       int expected = sum;
       if (outArray[k] != expected) {
-        cout << "mismatch at index " << k << ", expected " << expected << " but saw " << outArray[k] << endl;
+        cout << "mismatch at index " << k
+             << ", expected " << expected
+             << " but saw " << outArray[k] << endl;
         mismatches++;
       }
     }

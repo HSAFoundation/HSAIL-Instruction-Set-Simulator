@@ -5178,7 +5178,7 @@ TEST(BrigKernelTest, VariadicFunction) {
       "cbr $c1, @done;\n"                // if it is, jump to done
       "ld_arg_u32 $s4, [%last][$s3];\n"  // load a value
       "add_f32 $s1, $s1, $s4;\n"        // add the value
-      "add_u32 $s3, $s3, 4;\n"          // advance the offset to the next element
+      "add_u32 $s3, $s3, 4;\n"         // advance the offset to the next element
       "sub_u32 $s0, $s0, 1;\n"          // decrement the count
       "brn @loop;\n"
       "@done:\n"
@@ -5186,7 +5186,7 @@ TEST(BrigKernelTest, VariadicFunction) {
       "ret;\n"
     "};\n"
     "kernel &adder(kernarg_u64 %r)\n"
-    "{\n"                             // here is an example caller passing in 4 32-bit floats
+    "{\n"          // here is an example caller passing in 4 32-bit floats
     "  {\n"
     "    ld_kernarg_u64 $d2, [%r];\n"
     "    align 8 arg_f32 %n[4];\n"
@@ -7046,7 +7046,8 @@ TEST(Instruction3Test, Carry) {
     testInst("carry_u32", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x0LL, 0x7ffffffffffffffeLL, 0x8000000000000000LL};
+    const uint64_t testVec[] = { 0x0LL, 0x7ffffffffffffffeLL,
+                                 0x8000000000000000LL};
     testInst("carry_s64", testVec);
   }
   {
@@ -7065,11 +7066,13 @@ TEST(Instruction3Test, Div) {
     testInst("div_u32", testVec);
   }
   {
-    const int64_t testVec[] = { 0x1LL, 0x7fffffffffffffffLL, 0x7ffffffffffffffeLL};
+    const int64_t testVec[] = { 0x1LL, 0x7fffffffffffffffLL,
+                                0x7ffffffffffffffeLL};
     testInst("div_s64", testVec);
   }
   {
-    const uint64_t testVec[] = { 0x10000020000LL, 0xfffffffffffffffeLL, 0xfffffeLL};
+    const uint64_t testVec[] = { 0x10000020000LL, 0xfffffffffffffffeLL,
+                                 0xfffffeLL};
     testInst("div_u64", testVec);
   }
 }
@@ -7084,7 +7087,8 @@ TEST(Instruction3Test, Rem) {
     testInst("rem_u32", testVec);
   }
   {
-    const int64_t testVec[] = { 0x2LL, 0x7fffffffffffffffLL, 0x7ffffffffffffffdLL};
+    const int64_t testVec[] = { 0x2LL, 0x7fffffffffffffffLL,
+                                0x7ffffffffffffffdLL};
     testInst("rem_s64", testVec);
   }
   {
@@ -7704,7 +7708,8 @@ TEST(Instruction3Test, Mul) {
     testInst("mul_u64", testVec);
   }
   {
-    const uint64_t testVec[] = {0xFFFFFFFF00000000ULL, ~2ULL + 1, 0x80000000ULL};
+    const uint64_t testVec[] = {0xFFFFFFFF00000000ULL, ~2ULL + 1,
+                                0x80000000ULL};
     testInst("mul_s64", testVec);
   }
   // packed mul unsigned
