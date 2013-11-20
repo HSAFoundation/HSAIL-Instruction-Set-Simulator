@@ -793,14 +793,15 @@ Cmp(define, snan, f64)
 // Integer rounding:
 // f32 to Int
 template<class R> static R Cvt(volatile f32 f, int mode) {
-  if (f >= getMax<R>() || f <= getMin<R>())
-    feraiseexcept(FE_INVALID);
-
   int oldMode = fegetround();
   fesetround(mode);
-  volatile R result = R(nearbyint(f));
+  volatile typename Int<R>::Int64Ty result = nearbyint(f);
+  if(result < getMin<R>() || result > getMax<R>())
+    feraiseexcept(FE_INVALID);
+  if(f < 0 && !Int<R>::isSigned)
+    feraiseexcept(FE_INVALID);
   fesetround(oldMode);
-  return result;
+  return R(result);
 }
 template<class R> static R Cvt_sat(volatile f32 f, int mode) {
   if (isPosInf(f)) return getMax<R>();
@@ -820,14 +821,15 @@ template<> bool Cvt(f32 f, int mode) { return f != 0.0f; }
 // Integer rounding:
 // f64 to Int
 template<class R> static R Cvt(volatile f64 f, int mode) {
-  if (f >= getMax<R>() || f <= getMin<R>())
-    feraiseexcept(FE_INVALID);
-
   int oldMode = fegetround();
   fesetround(mode);
-  volatile R result = R(nearbyint(f));
+  volatile typename Int<R>::Int64Ty result = nearbyint(f);
+  if(result < getMin<R>() || result > getMax<R>())
+    feraiseexcept(FE_INVALID);
+  if(f < 0 && !Int<R>::isSigned)
+    feraiseexcept(FE_INVALID);
   fesetround(oldMode);
-  return result;
+  return R(result);
 }
 template<class R> static R Cvt_sat(volatile f64 f, int mode) {
   if (isPosInf(f)) return getMax<R>();
