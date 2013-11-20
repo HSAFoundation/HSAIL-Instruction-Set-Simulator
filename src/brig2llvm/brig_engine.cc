@@ -36,6 +36,7 @@
 #include <cerrno>
 
 #include <dlfcn.h>
+#include <fenv.h>
 
 #ifdef __linux__
 // These includes used by LLIMCJITMemoryManager::getPointerToNamedFunction()
