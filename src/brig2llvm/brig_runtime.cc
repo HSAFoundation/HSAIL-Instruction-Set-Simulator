@@ -795,7 +795,8 @@ Cmp(define, snan, f64)
 template<class R> static R Cvt(volatile f32 f, int mode) {
   int oldMode = fegetround();
   fesetround(mode);
-  volatile typename Int<R>::Int64Ty result = nearbyint(f);
+  typedef typename Int<R>::Int64Ty Int64Ty;
+  volatile Int64Ty result = Int64Ty(nearbyint(f));
   if(result < getMin<R>() || result > getMax<R>())
     feraiseexcept(FE_INVALID);
   if(f < 0 && !Int<R>::isSigned)
@@ -823,7 +824,8 @@ template<> bool Cvt(f32 f, int mode) { return f != 0.0f; }
 template<class R> static R Cvt(volatile f64 f, int mode) {
   int oldMode = fegetround();
   fesetround(mode);
-  volatile typename Int<R>::Int64Ty result = nearbyint(f);
+  typedef typename Int<R>::Int64Ty Int64Ty;
+  volatile Int64Ty result = Int64Ty(nearbyint(f));
   if(result < getMin<R>() || result > getMax<R>())
     feraiseexcept(FE_INVALID);
   if(f < 0 && !Int<R>::isSigned)
