@@ -247,6 +247,10 @@ static void *workItemLoop(void *vargs) {
     if (workGroupNum == lastGroupNum) {
       thrInfo->workGroupSize[0] = lastGroupSize;
     }
+
+    // Reset the floating point exception flags
+    feclearexcept(FE_ALL_EXCEPT);
+
     // all other fields such as argsArray, etc were set up when thrInfo created
     (thrInfo->EntryFunPtr)(vargs);
   }
