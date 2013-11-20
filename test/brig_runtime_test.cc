@@ -1058,7 +1058,7 @@ template<class R, class T> static void Cvt_upi_Logic(R result, T a) {
   if (isNan(a) || isPosInf(a) || isNegInf(a)) {
     EXPECT_TRUE(fetestexcept(FE_INVALID));
     feclearexcept(FE_INVALID);
-  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
+  } else if (R(getMin<R>()) <= a && a < R(getMax<R>())) {
     EXPECT_LE(a, result);
   } else {
     EXPECT_TRUE(fetestexcept(FE_INVALID));
@@ -1080,7 +1080,7 @@ template<class R, class T> static void Cvt_downi_Logic(R result, T a) {
   if (isNan(a) || isPosInf(a) || isNegInf(a)) {
     EXPECT_TRUE(fetestexcept(FE_INVALID));
     feclearexcept(FE_INVALID);
-  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
+  } else if (T(getMin<R>()) <= a && a < T(getMax<R>())) {
     EXPECT_GE(a, result);
   } else {
     EXPECT_TRUE(fetestexcept(FE_INVALID));
@@ -1102,7 +1102,7 @@ template<class R, class T> static void Cvt_zeroi_Logic(R result, T a) {
   if (isNan(a) || isPosInf(a) || isNegInf(a)) {
     EXPECT_TRUE(fetestexcept(FE_INVALID));
     feclearexcept(FE_INVALID);
-  } else if (T(getMin<R>()) < a && a < T(getMax<R>())) {
+  } else if (T(getMin<R>()) <= a && a < T(getMax<R>())) {
     EXPECT_GE(llabs((int64_t) a), llabs((int64_t) result));
   } else {
     EXPECT_TRUE(fetestexcept(FE_INVALID));

@@ -760,7 +760,8 @@ enum BrigFPE {
   HSA_DIVBYZERO = 1 << 1,
   HSA_OVERFLOW  = 1 << 2,
   HSA_UNDERFLOW = 1 << 3,
-  HSA_INEXACT   = 1 << 4
+  HSA_INEXACT   = 1 << 4,
+  HSA_ALL_EXCEPT = (1 << 5) - 1
 };
 
 template<class T> inline T cmpResult(bool result) {
