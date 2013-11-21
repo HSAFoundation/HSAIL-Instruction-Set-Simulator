@@ -18,6 +18,10 @@
 #include <cmath>
 #include <cstdlib>
 
+#if defined(__clang__)
+#include <dlfcn.h>
+#endif // defined(__clang__)
+
 #include <unistd.h>
 
 namespace hsa {
@@ -83,6 +87,23 @@ static u32 getCPU() {
   return cpuId;
 #endif // defined(__i386__) || defined(__x86_64__)
 }
+
+#if defined(__clang__)
+// The glibc fenv.h header file defines an extern inline and extern version of
+// feraiseexcept and the extern inline version calls the inline version using
+// asm renaming. In GCC, asm renaming happens at assembly time, so everything
+// works as expected, but in clang, asm renaming happens at parse time, so clang
+// tries to call the extern inline version instead of the extern
+// version. Getting the address of feraiseexcept from dlsym at runtime yields
+// the extern version.
+#define feraiseexcept(X) FERaiseExcept(X)
+static inline int FERaiseExcept(int except) {
+  typedef int (*FERaiseExceptTy)(int);
+  static const void *symbol = dlsym(NULL, "feraiseexcept");
+  FERaiseExceptTy FERaiseExcept = *(FERaiseExceptTy *) &symbol;
+  return FERaiseExcept(except);
+}
+#endif // defined(__clang__)
 
 // On i386, the x87 FPU does not respect the FTZ mode. We use the
 // -mfpmath=sse compile flag to ensure the compiler uses SSE floating
@@ -804,6 +825,7 @@ template<class R> static R Cvt(volatile f32 f, int mode) {
   fesetround(oldMode);
   return R(result);
 }
+
 template<class R> static R Cvt_sat(volatile f32 f, int mode) {
   if (isPosInf(f)) return getMax<R>();
   if (isNegInf(f)) return getMin<R>();
@@ -833,6 +855,33 @@ template<class R> static R Cvt(volatile f64 f, int mode) {
   fesetround(oldMode);
   return R(result);
 }
+
+#if defined(__clang__) && defined(__x86_64__)
+// x86-64 does not have an instruction to convert from floating point to
+// u64. gcc and clang both shift the floating point value to a value in the s64
+// range and then shift back after conversion. In the gcc implementation, there
+// is a branch to control how the u64 should be converted. The clang
+// implementation computes both values and then selects between
+// them. Consequently, the clang implementation will incorrectly raise an
+// FE_INVALID exception when converting from a float to a u64 when the input
+// value is between Int<u64>::HighBit and Int<u64>::Max. For more details, read
+// LLVM's lib/Target/X86/README-X86-64.txt (search for cvttss2siq) and
+// lib/CodeGen/SelectionDAG/LegalizeDAG.cpp (search for ISD::FP_TO_UINT in
+// ExpandNode).
+template<> u64 Cvt(volatile f32 f, int mode) {
+  if(f < 0) feraiseexcept(FE_INVALID);
+  if(f >= Int<u64>::HighBit)
+    return u64(Cvt<s64>(f - Int<u64>::HighBit, mode)) + Int<u64>::HighBit;
+  return u64(Cvt<s64>(f, mode));
+}
+template<> u64 Cvt(volatile f64 f, int mode) {
+  if(f < 0) feraiseexcept(FE_INVALID);
+  if(f >= Int<u64>::HighBit)
+    return u64(Cvt<s64>(f - Int<u64>::HighBit, mode)) + Int<u64>::HighBit;
+  return u64(Cvt<s64>(f, mode));
+}
+#endif // defined(__clang__) && defined(__x86_64__)
+
 template<class R> static R Cvt_sat(volatile f64 f, int mode) {
   if (isPosInf(f)) return getMax<R>();
   if (isNegInf(f)) return getMin<R>();
