@@ -390,6 +390,8 @@ suite3 = unittest.TestLoader().loadTestsFromTestCase(TestGdbCheckArgSanityUponEn
 suite4 = unittest.TestLoader().loadTestsFromTestCase(TestGdbPrintTypesOnEachLine)
 suitelist = [suite0, suite1, suite2, suite3, suite4]
 
+os.environ["SIMNOOPT"] = "1"
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--testselect", help="Select an individual test to run.", dest='case_no', action="store")
 parser.add_argument("-s", "--stoponfail", help="Stop the tests on the first failure.", action="store_true")
