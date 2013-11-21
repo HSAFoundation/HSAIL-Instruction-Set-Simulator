@@ -23,6 +23,7 @@ def gdb_print_types_on_lines(exenm,filenm,linenum_arr,gdb_cmd):
               "set verbose off  \n" \
               "set logging redirect on \n" \
               "set confirm off \n" \
+              "set print thread-events off \n" \
               "set breakpoint pending on \n"
 
 
@@ -73,6 +74,7 @@ def gdb_script_and_test(exenm,filenm,line_num,ignore_count,gdb_cmd):
               "set verbose off \n" \
               "set logging redirect on \n" \
               "set confirm off \n" \
+              "set print thread-events off \n" \
               "set breakpoint pending on \n"
 
     gdb_str = gdb_str + \
@@ -121,6 +123,7 @@ def gdb_check_arg_sanity_upon_entry(exenm, filenm, krnlnm, ignore_count, fmt, ar
               "set verbose off\n" \
               "set logging redirect on\n" \
               "set confirm off\n" \
+              "set print thread-events off \n" \
               "set breakpoint pending on\n"
 
     gdb_str = gdb_str + \
@@ -170,6 +173,7 @@ def gdb_check_set_breakpoints(exenm,filenm,linenum_arr):
               "set verbose off  \n"\
               "set logging redirect on \n"\
               "set confirm off \n"\
+              "set print thread-events off \n" \
               "set breakpoint pending on \n"
 
     gdb_str = gdb_str + \
