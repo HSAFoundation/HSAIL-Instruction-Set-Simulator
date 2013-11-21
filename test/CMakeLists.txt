@@ -16,3 +16,8 @@ endforeach()
 if(IS_X86)
   add_custom_target(HSAILAssemblerSamples ALL SOURCES ${sample_OUTPUTS})
 endif(IS_X86)
+
+add_custom_target( hsail_gdb_tests ALL
+  DEPENDS hsail_gdb_test.py hsail_gdb_test_common.py
+  COMMAND cp hsail_gdb_test.py hsail_gdb_test_common.py ${PROJECT_BINARY_DIR}
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/test )
