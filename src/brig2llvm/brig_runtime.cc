@@ -818,9 +818,9 @@ template<class R> static R Cvt(volatile f32 f, int mode) {
   fesetround(mode);
   typedef typename Int<R>::Int64Ty Int64Ty;
   volatile Int64Ty result = Int64Ty(nearbyint(f));
-  if(result < getMin<R>() || result > getMax<R>())
+  if (result < getMin<R>() || result > getMax<R>())
     feraiseexcept(FE_INVALID);
-  if(f < 0 && !Int<R>::isSigned)
+  if (f < 0 && !Int<R>::isSigned)
     feraiseexcept(FE_INVALID);
   fesetround(oldMode);
   return R(result);
@@ -848,9 +848,9 @@ template<class R> static R Cvt(volatile f64 f, int mode) {
   fesetround(mode);
   typedef typename Int<R>::Int64Ty Int64Ty;
   volatile Int64Ty result = Int64Ty(nearbyint(f));
-  if(result < getMin<R>() || result > getMax<R>())
+  if (result < getMin<R>() || result > getMax<R>())
     feraiseexcept(FE_INVALID);
-  if(f < 0 && !Int<R>::isSigned)
+  if (f < 0 && !Int<R>::isSigned)
     feraiseexcept(FE_INVALID);
   fesetround(oldMode);
   return R(result);
@@ -869,14 +869,14 @@ template<class R> static R Cvt(volatile f64 f, int mode) {
 // lib/CodeGen/SelectionDAG/LegalizeDAG.cpp (search for ISD::FP_TO_UINT in
 // ExpandNode).
 template<> u64 Cvt(volatile f32 f, int mode) {
-  if(f < 0) feraiseexcept(FE_INVALID);
-  if(f >= Int<u64>::HighBit)
+  if (f < 0) feraiseexcept(FE_INVALID);
+  if (f >= Int<u64>::HighBit)
     return u64(Cvt<s64>(f - Int<u64>::HighBit, mode)) + Int<u64>::HighBit;
   return u64(Cvt<s64>(f, mode));
 }
 template<> u64 Cvt(volatile f64 f, int mode) {
-  if(f < 0) feraiseexcept(FE_INVALID);
-  if(f >= Int<u64>::HighBit)
+  if (f < 0) feraiseexcept(FE_INVALID);
+  if (f >= Int<u64>::HighBit)
     return u64(Cvt<s64>(f - Int<u64>::HighBit, mode)) + Int<u64>::HighBit;
   return u64(Cvt<s64>(f, mode));
 }
@@ -1120,17 +1120,17 @@ extern "C" u32 Dim_u32(void) {
 }
 
 extern "C" u32 WorkItemAbsId_u32(u32 x) {
-  if(x >= Dim_u32()) return 0;
+  if (x >= Dim_u32()) return 0;
   return __brigThreadInfo->workItemAbsId[x];
 }
 
 extern "C" u32 GridSize_u32(u32 x) {
-  if(x > Dim_u32()) return 1;
+  if (x > Dim_u32()) return 1;
   return __brigThreadInfo->NDRangeSize[x];
 }
 
 extern "C" u32 WorkGroupSize_u32(u32 x) {
-  if(x >= Dim_u32()) return 1;
+  if (x >= Dim_u32()) return 1;
   return __brigThreadInfo->workGroupSize[x];
 }
 
@@ -1143,12 +1143,12 @@ extern "C" u32 CurrentWorkGroupSize_u32(u32 x) {
 }
 
 extern "C" u32 WorkItemId_u32(u32 x) {
-  if(x >= Dim_u32()) return 0;
+  if (x >= Dim_u32()) return 0;
   return WorkItemAbsId_u32(x) % WorkGroupSize_u32(x);
 }
 
 extern "C" u32 WorkGroupId_u32(u32 x) {
-  if(x >= Dim_u32()) return 0;
+  if (x >= Dim_u32()) return 0;
   return WorkItemAbsId_u32(x) / WorkGroupSize_u32(x);
 }
 
@@ -1193,21 +1193,21 @@ extern "C" u64 NullPtr_u64(void) { return 0; }
 
 static u32 hsaToCFPE(u32 hsaFlag) {
   u32 feFlag = 0;
-  if(hsaFlag & HSA_INVALID)   feFlag |= FE_INVALID;
-  if(hsaFlag & HSA_DIVBYZERO) feFlag |= FE_DIVBYZERO;
-  if(hsaFlag & HSA_OVERFLOW)  feFlag |= FE_OVERFLOW;
-  if(hsaFlag & HSA_UNDERFLOW) feFlag |= FE_UNDERFLOW;
-  if(hsaFlag & HSA_INEXACT)   feFlag |= FE_INEXACT;
+  if (hsaFlag & HSA_INVALID)   feFlag |= FE_INVALID;
+  if (hsaFlag & HSA_DIVBYZERO) feFlag |= FE_DIVBYZERO;
+  if (hsaFlag & HSA_OVERFLOW)  feFlag |= FE_OVERFLOW;
+  if (hsaFlag & HSA_UNDERFLOW) feFlag |= FE_UNDERFLOW;
+  if (hsaFlag & HSA_INEXACT)   feFlag |= FE_INEXACT;
   return feFlag;
 }
 
 static u32 cToHSAFPE(u32 feFlag) {
   u32 hsaFlag = 0;
-  if(feFlag & FE_INVALID)   hsaFlag |= HSA_INVALID;
-  if(feFlag & FE_DIVBYZERO) hsaFlag |= HSA_DIVBYZERO;
-  if(feFlag & FE_OVERFLOW)  hsaFlag |= HSA_OVERFLOW;
-  if(feFlag & FE_UNDERFLOW) hsaFlag |= HSA_UNDERFLOW;
-  if(feFlag & FE_INEXACT)   hsaFlag |= HSA_INEXACT;
+  if (feFlag & FE_INVALID)   hsaFlag |= HSA_INVALID;
+  if (feFlag & FE_DIVBYZERO) hsaFlag |= HSA_DIVBYZERO;
+  if (feFlag & FE_OVERFLOW)  hsaFlag |= HSA_OVERFLOW;
+  if (feFlag & FE_UNDERFLOW) hsaFlag |= HSA_UNDERFLOW;
+  if (feFlag & FE_INEXACT)   hsaFlag |= HSA_INEXACT;
   return hsaFlag;
 }
 
