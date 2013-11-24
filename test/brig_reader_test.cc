@@ -9458,7 +9458,13 @@ TEST(BrigFPE, Invalid) {
   EXPECT_TRUE(testFPE("cvt_u64_f32 $d2, -1;", HSA_INVALID));
   EXPECT_TRUE(testFPE("cvt_u64_f32 $d2,  0f5f800000;", HSA_INVALID));
   EXPECT_TRUE(!testFPE("cvt_u64_f32 $d2, 0;", HSA_INVALID));
-  EXPECT_TRUE(!testFPE("cvt_u64_f32 $d2, 0f5f7FFFFF;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_u64_f32 $d2, 0f5F7FFFFF;", HSA_INVALID));
+
+  // cvt_s64_f32
+  EXPECT_TRUE(testFPE("cvt_s64_f32 $d2,  0fdf000001;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("cvt_s64_f32 $d2,  0f5f000000;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_s64_f32 $d2, 0fdf000000;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_s64_f32 $d2, 0f5effffff;", HSA_INVALID));
 
   // cvt_u8_f64
   EXPECT_TRUE(testFPE("cvt_u8_f64 $s2, -1;", HSA_INVALID));
@@ -9501,6 +9507,12 @@ TEST(BrigFPE, Invalid) {
   EXPECT_TRUE(testFPE("cvt_u64_f64 $d2,  0d43f0000000000000;", HSA_INVALID));
   EXPECT_TRUE(!testFPE("cvt_u64_f64 $d2, 0;", HSA_INVALID));
   EXPECT_TRUE(!testFPE("cvt_u64_f64 $d2, 0d43efffffffffffff;", HSA_INVALID));
+
+  // cvt_s64_f64
+  EXPECT_TRUE(testFPE("cvt_s64_f64 $d2,  0dc3e0000000000001;", HSA_INVALID));
+  EXPECT_TRUE(testFPE("cvt_s64_f64 $d2,  0d43e0000000000000;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_s64_f64 $d2, 0dc3e0000000000000;", HSA_INVALID));
+  EXPECT_TRUE(!testFPE("cvt_s64_f64 $d2, 0d43dfffffffffffff;", HSA_INVALID));
 
   // cvt_sat
   EXPECT_TRUE(!testFPE("cvt_downi_sat_u32_f32 $s2, " QNAN32 ";", HSA_INVALID));
