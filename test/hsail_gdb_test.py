@@ -13,8 +13,8 @@ import random
 import os
 import filecmp
 import sys
-import argparse
 import re
+import imp
 
 from hsail_gdb_test_common import *
 
@@ -392,19 +392,69 @@ suitelist = [suite0, suite1, suite2, suite3, suite4]
 
 os.environ["SIMNOOPT"] = "1"
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--testselect", help="Select an individual test to run.", dest='case_no', action="store")
-parser.add_argument("-s", "--stoponfail", help="Stop the tests on the first failure.", action="store_true")
-args = parser.parse_args()
 
-if args.case_no:
-    print("testselect turned on with case no = %s" % args.case_no)
-    alltests = unittest.TestSuite([suitelist[int(args.case_no)]])
-else:
-    alltests = unittest.TestSuite(suitelist)
+try:
+    imp.find_module('argparse')
+    found_argparse = True
+    import argparse
+except ImportError:
+    found_argparse = False
+    import getopt
 
-if args.stoponfail:
-    print("stoponfail turned on: testing will stop on the first failure!")
-    unittest.TextTestRunner(verbosity=2,failfast=True).run(alltests)
+
+if found_argparse:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--testselect", help="Select an individual test to run.", dest='case_no', action="store")
+    parser.add_argument("-s", "--stoponfail", help="Stop the tests on the first failure.", action="store_true")
+    args = parser.parse_args()
+
+    if args.case_no:
+        print("testselect turned on with case no = %s" % args.case_no)
+        alltests = unittest.TestSuite([suitelist[int(args.case_no)]])
+    else:
+        alltests = unittest.TestSuite(suitelist)
+
+    if args.stoponfail:
+        print("stoponfail turned on: testing will stop on the first failure!")
+        unittest.TextTestRunner(verbosity=2,failfast=True).run(alltests)
+    else:
+        unittest.TextTestRunner(verbosity=2,failfast=False).run(alltests)
 else:
-    unittest.TextTestRunner(verbosity=2,failfast=False).run(alltests)
+    case_no = -1
+    stoponfail = False
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],"hst:",["help","stoponfail","testselect="])
+    except getopt.GetoptError:
+        print "usage: hsail_gdb_test.py [-h] [-t CASE_NO] [-s]\n" + \
+              " optional arguments:\n" + \
+              "  -h, --help            Show this help message and exit\n" + \
+              "  -t CASE_NO, --testselect CASE_NO\n" + \
+              "                        Select an individual test to run.\n" + \
+              "  -s, --stoponfail      Stop the tests on the first failure.\n"
+        sys.exit(2)
+    for opt, arg in opts:
+        print opt
+        if opt in ("-h","--help"):
+            print "usage: hsail_gdb_test.py [-h] [-t CASE_NO] [-s]\n" + \
+                  " optional arguments:\n" + \
+                  "  -h, --help            Show this help message and exit\n" + \
+                  "  -t CASE_NO, --testselect CASE_NO\n" + \
+                  "                        Select an individual test to run.\n" + \
+                  "  -s, --stoponfail      Stop the tests on the first failure.\n"
+            sys.exit()
+        elif opt in ("-t", "--testselect"):
+            case_no = arg
+        elif opt in ("-s", "--stoponfail"):
+            stoponfail = True
+
+    if case_no > 0:
+        print("testselect turned on with case no = %s" % case_no)
+        alltests = unittest.TestSuite([suitelist[int(case_no)]])
+    else:
+        alltests = unittest.TestSuite(suitelist)
+
+    if stoponfail == True:
+        print("stoponfail turned on: testing will stop on the first failure!")
+        unittest.TextTestRunner(verbosity=2,failfast=True).run(alltests)
+    else:
+        unittest.TextTestRunner(verbosity=2,failfast=False).run(alltests)
