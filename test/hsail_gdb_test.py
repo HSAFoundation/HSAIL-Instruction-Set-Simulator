@@ -401,7 +401,6 @@ except ImportError:
     found_argparse = False
     import getopt
 
-
 if found_argparse:
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--testselect", help="Select an individual test to run.", dest='case_no', action="store")
@@ -433,7 +432,6 @@ else:
               "  -s, --stoponfail      Stop the tests on the first failure.\n"
         sys.exit(2)
     for opt, arg in opts:
-        print opt
         if opt in ("-h","--help"):
             print "usage: hsail_gdb_test.py [-h] [-t CASE_NO] [-s]\n" + \
                   " optional arguments:\n" + \
