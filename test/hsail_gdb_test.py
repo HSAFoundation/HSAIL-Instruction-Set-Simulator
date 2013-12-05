@@ -392,6 +392,14 @@ suitelist = [suite0, suite1, suite2, suite3, suite4]
 
 os.environ["SIMNOOPT"] = "1"
 
+python_major = sys.version_info[0]
+python_minor = sys.version_info[1]
+
+if (python_major > 2) or ((python_major == 2) and (python_minor >= 7)):
+    support_failfast = True
+else:
+    support_failfast = False
+
 
 try:
     imp.find_module('argparse')
@@ -413,11 +421,15 @@ if found_argparse:
     else:
         alltests = unittest.TestSuite(suitelist)
 
-    if args.stoponfail:
-        print("stoponfail turned on: testing will stop on the first failure!")
-        unittest.TextTestRunner(verbosity=2,failfast=True).run(alltests)
+    if support_failfast:
+        if args.stoponfail:
+            print("stoponfail turned on: testing will stop on the first failure!")
+            unittest.TextTestRunner(verbosity=2,failfast=True).run(alltests)
+        else:
+            unittest.TextTestRunner(verbosity=2,failfast=False).run(alltests)
     else:
-        unittest.TextTestRunner(verbosity=2,failfast=False).run(alltests)
+        unittest.TextTestRunner(verbosity=2).run(alltests)
+
 else:
     case_no = -1
     stoponfail = False
@@ -451,8 +463,12 @@ else:
     else:
         alltests = unittest.TestSuite(suitelist)
 
-    if stoponfail == True:
-        print("stoponfail turned on: testing will stop on the first failure!")
-        unittest.TextTestRunner(verbosity=2,failfast=True).run(alltests)
+    if support_failfast:
+        if stoponfail == True:
+            print("stoponfail turned on: testing will stop on the first failure!")
+            unittest.TextTestRunner(verbosity=2,failfast=True).run(alltests)
+        else:
+            unittest.TextTestRunner(verbosity=2,failfast=False).run(alltests)
     else:
-        unittest.TextTestRunner(verbosity=2,failfast=False).run(alltests)
+        unittest.TextTestRunner(verbosity=2).run(alltests)
+    
