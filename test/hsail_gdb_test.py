@@ -471,4 +471,3 @@ else:
             unittest.TextTestRunner(verbosity=2,failfast=False).run(alltests)
     else:
         unittest.TextTestRunner(verbosity=2).run(alltests)
-    
