@@ -271,7 +271,7 @@ will need to be enhanced.
 src/brig2llvm/brig_engine.cc - glue code to dynamically compile the LLVM at
 runtime and spawn an appropriate number of threads
 
----BRIG Runtime----
+----BRIG Runtime----
 
 src/brig2llvm/brig_runtime.cc - provides a C++ implementation for each HSAIL
 instruction. This code makes extensive use of macros and templates in order
@@ -293,3 +293,66 @@ order relative to the original HSAIL program. Conceptually, SIMNOOPT is
 equivalent to passing -O0 to a compiler. Since code optimization takes time,
 SIMNOOPT may improve performance when optimization time dominates execution
 time.
+
+----GDB-Based Debugging Interface---
+
+The simulators GDB-based debugging interface supports printing and modifying
+local variables, registers, and arguments. Here is an example debugging session:
+
+$ gdb ./fib
+Reading symbols from /home/tjablin/hsa-workspace/hsail2brig-objects/fib...done.
+(gdb) break fib
+Function "fib" not defined.
+Make breakpoint pending on future shared library load? (y or [n]) y
+Breakpoint 1 (fib) pending.
+(gdb) run
+Starting program: ./fib
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Fib sequence: [New Thread 0x7ffff6bb9700 (LWP 1752)]
+[Switching to Thread 0x7ffff6bb9700 (LWP 1752)]
+
+Breakpoint 1, fib (n=@0x7ffff6bb8810: 1, r=@0x7ffff6bb8814: 0) at hsail2brig/test/fib.hsail:13
+13        ld_arg_s32 $s1, [%n];
+(gdb) p n
+$1 = (s32 &) @0x7ffff6bb8810: 1
+(gdb) p hsa$s1
+$2 = {b32 = 0, f32 = 0}
+(gdb) n
+14        cmp_lt_b1_s32 $c1, $s1, 3; // if n < 3 go to return
+(gdb) p hsa$s1
+$3 = {b32 = 1, f32 = 1.40129846e-45}
+(gdb) n
+15        cbr $c1, @return;
+(gdb) p hsa$c1
+$4 = false
+
+Implementation notes:
+
+1. Registers are named hsa$<RegName>, eg. hsa$s1, hsa$d4
+
+2. In order to ensure that registers have their proper values at all times,
+stores to the simulated register file are now marked volatile. This may slightly
+harm simulator performance.
+
+3. If two or more local variables in the same function have the same name, but
+different scopes, they cannot be printed or modified reliably.
+
+4. The type of the $c registers is boolean
+
+5. The type of the $s registers is the union of an unsigned 32-bit value and a
+float
+
+6. The type of the $d registers is the union of an unsigned 64-bit value and a
+double
+
+7. The type of the $q registers is an unsigned 128-bit value
+
+8. The arguments to HSA functions are reference types.
+
+9. Before executing the first instruction of a function, the value of all HSA
+registers is non-deterministic, as per the HSA specification. After the last
+breakpoint before the first instruction, but before the first instruction
+executes, the simulator sets all registers to zero. Consequently, breaking on a
+function, modifying a register, and then executing the first instruction, will
+not have the desired effect.
