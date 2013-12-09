@@ -294,6 +294,12 @@ equivalent to passing -O0 to a compiler. Since code optimization takes time,
 SIMNOOPT may improve performance when optimization time dominates execution
 time.
 
+SIMTHREADS - By default the simulator will create approximately as many threads
+to process workitems as there are cores on the host system. This can complicate
+things while debugging under gdb. If you set SIMTHREADS=1, only a single thread
+will be used to process workitems. SIMTHREADS can be set to other values to
+use a specific number of threads at runtime.
+
 ----GDB-Based Debugging Interface---
 
 The simulators GDB-based debugging interface supports printing and modifying
