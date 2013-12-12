@@ -151,7 +151,8 @@ static llvm::DIType runOnTypeDebug(llvm::DIBuilder &DB, BrigType type) {
     BrigInstHelper::isSignedTy(type)   ? llvm::dwarf::DW_ATE_signed :
     llvm::dwarf::DW_AT_GNU_vector;
 
-  return DB.createBasicType(typeName, size, size, encoding);
+  unsigned storageSize = std::max(size, 8U);
+  return DB.createBasicType(typeName, storageSize, storageSize, encoding);
 }
 
 static void insertGPUStateDebugInfo(llvm::BasicBlock &entry,
