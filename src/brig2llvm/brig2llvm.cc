@@ -1446,7 +1446,8 @@ static llvm::Constant *runOnInitializer(llvm::LLVMContext &C,
 
 static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
                         SymbolMap &symbolMap,
-                        SymbolInfoMap &symbolInfoMap) {
+                        SymbolInfoMap &symbolInfoMap,
+                        llvm::DIBuilder &DB) {
   llvm::LLVMContext &C = M.getContext();
   llvm::Type *type = runOnType(C, S);
   bool isConst = S.isConst();
@@ -1476,10 +1477,14 @@ static void runOnGlobal(llvm::Module &M, const BrigSymbol &S,
     init = llvm::Constant::getNullValue(type);
   }
 
-  symbolMap[S.getAddr()] =
+  llvm::Value *global =
     new llvm::GlobalVariable(M, type, isConst, linkage, init, name);
+  symbolMap[S.getAddr()] = global;
   symbolInfoMap[S.getAddr()] = SymbolInfo(name.str(), S, true);
 
+  llvm::DIType debugTy = runOnTypeDebug(DB, S.getType());
+  llvm::DIFile file = DB.createFile("-", "");
+  DB.createGlobalVariable(name, file, 0, debugTy, true, global);
 }
 
 llvm::DIContext *runOnDebugInfo(const BrigModule &M) {
@@ -1547,7 +1552,7 @@ BrigProgram GenLLVM::getLLVMModule(const BrigModule &M,
   SymbolInfoMap symbolInfoMap;
   for (BrigSymbol symbol = M.global_begin(),
         E = M.global_end(); symbol != E; ++symbol) {
-    runOnGlobal(*mod, symbol, symbolMap, symbolInfoMap);
+    runOnGlobal(*mod, symbol, symbolMap, symbolInfoMap, DB);
   }
 
   FunMap funMap;
