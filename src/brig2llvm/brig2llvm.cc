@@ -391,7 +391,7 @@ struct FunScope {
                                      true,
                                      llvmFun);
 
-      // Add DWARF rgument debug information
+      // Add DWARF argument debug information
       unsigned argNo = 0;
       for (BrigSymbol brigArg = brigFun.arg_begin(),
              E = brigFun.arg_end(); brigArg != E; ++brigArg) {
