@@ -335,28 +335,28 @@ $4 = false
 
 Implementation notes:
 
-1. Registers are named hsa$<RegName>, eg. hsa$s1, hsa$d4
+*  Registers are named hsa$<RegName>, eg. hsa$s1, hsa$d4
 
-2. In order to ensure that registers have their proper values at all times,
+*  In order to ensure that registers have their proper values at all times,
 stores to the simulated register file are now marked volatile. This may slightly
 harm simulator performance.
 
-3. If two or more local variables in the same function have the same name, but
+*  If two or more local variables in the same function have the same name, but
 different scopes, they cannot be printed or modified reliably.
 
-4. The type of the $c registers is boolean
+*  The type of the $c registers is boolean
 
-5. The type of the $s registers is the union of an unsigned 32-bit value and a
+*  The type of the $s registers is the union of an unsigned 32-bit value and a
 float
 
-6. The type of the $d registers is the union of an unsigned 64-bit value and a
+*  The type of the $d registers is the union of an unsigned 64-bit value and a
 double
 
-7. The type of the $q registers is an unsigned 128-bit value
+*  The type of the $q registers is an unsigned 128-bit value
 
-8. The arguments to HSA functions are reference types.
+*  The arguments to HSA functions are reference types.
 
-9. Before executing the first instruction of a function, the value of all HSA
+*  Before executing the first instruction of a function, the value of all HSA
 registers is non-deterministic, as per the HSA specification. After the last
 breakpoint before the first instruction, but before the first instruction
 executes, the simulator sets all registers to zero. Consequently, breaking on a
