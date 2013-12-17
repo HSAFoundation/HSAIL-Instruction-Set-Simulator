@@ -73,7 +73,7 @@ class TestGdbPrintTypesOnEachLine(unittest.TestCase):
 
     def test_fib(self):
         linenum_arr =[13,14,15,21,22,23,24,30,31,32,33,35,36,37,38,40,41]
-        gdb_cmd = "ptype r\nptype n\nptype hsa$c1\nptype hsa$s1\nptype hsa$s2\nptype hsa$s3\nptype p\nptype nm2\nptype res\n"
+        gdb_cmd = "ptype r\nptype n\nptype hsa$c1\nptype hsa$s1\nptype hsa$s2\nptype hsa$s3\nptype p\n"
         gt = "type = s32 &\n" \
              "type = s32 &\n" \
              "type = b1\n" \
@@ -89,15 +89,13 @@ class TestGdbPrintTypesOnEachLine(unittest.TestCase):
              "    b32 b32;\n" \
              "    f32 f32;\n" \
              "}\n" \
-             "type = s32\n" \
-             "type = s32\n" \
              "type = s32\n"
 
         self.check_types_on_each_line_pretty_printer(fib_exenm, fib_hsail_filenm, linenum_arr, gdb_cmd, gt)
 
 
     def test_fibKernel(self):
-        linenum_arr =[49,50,51,52,53,54]
+        linenum_arr =[50,51,52,53,54]
         gdb_cmd = "ptype r_ptr\nptype n_ptr\nptype r\nptype n\nptype hsa$s0\nptype hsa$s1"
         gt = "type = s32 &\n" \
              "type = s32 &\n" \
@@ -181,7 +179,7 @@ class TestGdbCheckArgSanityUponEntry(unittest.TestCase):
 
     def test_fibKernel(self):
         ground_truth = int_re + ",5"
-        krnlnm = "fib.hsail:49"
+        krnlnm = "fib.hsail:50"
         ignore_count = 4
         fmt = "%d,%d\\n"
         argList = "r_ptr, n_ptr"
@@ -289,19 +287,19 @@ class TestGdbCheckRegisterContents(unittest.TestCase):
         gdb_cmd = "printf \"%d,%d,%d,%d\\n\",res,nm2,hsa$s1.b32,hsa$s2.b32"
 
         line_num = 33
-        ground_truth = "1,1,3,2"
+        ground_truth = "1,2,3,2"
         ignore_count = 0
         self.check_gdb_register_contents_pretty_printer(fib_exenm, fib_hsail_filenm,line_num,ignore_count,gdb_cmd,ground_truth)
 
-        ground_truth = "1,1,3,2"
+        ground_truth = "1,2,3,2"
         ignore_count = 1
         self.check_gdb_register_contents_pretty_printer(fib_exenm, fib_hsail_filenm,line_num,ignore_count,gdb_cmd,ground_truth)
 
-        ground_truth = "1,2,4,3"
+        ground_truth = "2,3,4,3"
         ignore_count = 2
         self.check_gdb_register_contents_pretty_printer(fib_exenm, fib_hsail_filenm,line_num,ignore_count,gdb_cmd,ground_truth)
 
-        ground_truth = "1,1,3,2"
+        ground_truth = "1,2,3,2"
         ignore_count = 3
         self.check_gdb_register_contents_pretty_printer(fib_exenm, fib_hsail_filenm,line_num,ignore_count,gdb_cmd,ground_truth)
 
@@ -325,7 +323,7 @@ class TestGdbCheckRegisterContents(unittest.TestCase):
 
     def test_fibKernel(self):
         gdb_cmd = "printf \"%d,%d,%d\\n\", r_ptr, n_ptr, hsa$s0.b32"
-        line_num = 49
+        line_num = 50
         ground_truth = int_re + "," + "1," + int_re
         ignore_count = 0
         self.check_gdb_register_contents_pretty_printer(fib_exenm, fib_hsail_filenm,line_num,ignore_count,gdb_cmd,ground_truth)
