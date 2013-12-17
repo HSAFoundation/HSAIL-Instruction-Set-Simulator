@@ -898,7 +898,6 @@ bool BrigModule::validate(const BrigDirectiveLoc *dir) const {
 bool BrigModule::validate(const BrigDirectiveVariableInit *dir) const {
   bool valid = true;
   if (!validateSize(dir)) return false;
-  valid &= validateAlignment(dir, 8);
   valid &= validateCCode(dir->code);
   valid &= check(dir->type <= BRIG_TYPE_F64X2,
                  "Invalid data type");
