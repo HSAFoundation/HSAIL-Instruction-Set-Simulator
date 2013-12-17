@@ -18,6 +18,7 @@ namespace brig {
 
 class BrigSymbol;
 class BrigControlBlock;
+class BrigScope;
 
 class BrigFunction {
 
@@ -42,6 +43,7 @@ class BrigFunction {
   bool isFunction() const { return isa<BrigDirectiveFunction>(it_); }
 
   uint32_t getOffset() const { return it_ - S_.directives; }
+  uint32_t getCCode() const { return getMethod()->code; }
 
   BrigSymbol arg_begin() const;
   BrigSymbol arg_end() const;
@@ -51,6 +53,9 @@ class BrigFunction {
 
   BrigControlBlock begin() const;
   BrigControlBlock end() const;
+
+  BrigScope scope_begin() const;
+  BrigScope scope_end() const;
 
   bool operator!=(const BrigFunction &other) const {
     return it_ != other.it_;
@@ -66,6 +71,8 @@ class BrigFunction {
   friend BrigSymbol local_end(const BrigFunction &F);
   friend BrigControlBlock cb_begin(const BrigFunction &F);
   friend BrigControlBlock cb_end(const BrigFunction &F);
+  friend BrigScope scope_begin(const BrigFunction &F);
+  friend BrigScope scope_end(const BrigFunction &F);
 
   private:
   BrigFunction(const BrigSections &S, const dir_iterator it) :

@@ -341,8 +341,12 @@ Implementation notes:
 stores to the simulated register file are now marked volatile. This may slightly
 harm simulator performance.
 
-* If two or more local variables in the same function have the same name, but
-different scopes, they cannot be printed or modified reliably.
+* If a function includes a code block before the first instruction and gdb is
+set to break on the line number of the first instruction, then the simulator
+will break twice, once before entering the code block and once after entering
+the code block. On the first breakpoint, local variables inside the code block
+will be out of scope. On the second breakpoint, the local variables inside the
+code block will be in scope.
 
 * The type of the $c registers is boolean
 

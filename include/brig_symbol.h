@@ -47,6 +47,8 @@ class BrigSymbol {
     return ((uint64_t) getSymbol()->dimHi << 32) + getSymbol()->dimLo;
   }
 
+  uint32_t getCCode() const { return getSymbol()->code; }
+
   BrigType getType() const { return BrigType(getSymbol()->type); }
 
   bool isImage() const { return isa<BrigDirectiveImage>(it_); }

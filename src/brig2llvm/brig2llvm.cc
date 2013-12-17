@@ -14,6 +14,7 @@
 #include "brig_function.h"
 #include "brig_inst_helper.h"
 #include "brig_module.h"
+#include "brig_scope.h"
 #include "brig_symbol.h"
 
 #include "llvm/DIBuilder.h"
@@ -338,6 +339,18 @@ struct FunScope {
   llvm::DISubprogram sub;
   const size_t id;
 
+  struct BlockScope {
+    llvm::DIScope scope;
+    const uint32_t start;
+    const uint32_t end;
+    BlockScope(llvm::DIScope scope, uint32_t start, uint32_t end) :
+      scope(scope), start(start), end(end) {}
+  };
+
+  typedef std::map<uint32_t, BlockScope> ScopeMap;
+  ScopeMap instScopeMap;
+  ScopeMap dirScopeMap;
+
  public:
   CBMap cbMap;
   llvm::Value *regs;
@@ -364,10 +377,7 @@ struct FunScope {
     if (hasDebugInfo()) {
 
       // Add DWARF function debug information
-      BrigControlBlock firstCB = brigFun.begin();
-      BrigInstHelper helper = firstCB.getInstHelper();
-      inst_iterator firstInst = firstCB.begin();
-      llvm::DILineInfo info = getLineInfo(helper.getAddr(firstInst));
+      llvm::DILineInfo info = getLineInfo(brigFun.getCCode());
       llvm::DIFile file = getDIFile(info);
 
       std::vector<llvm::Value *> args;
@@ -398,6 +408,29 @@ struct FunScope {
         insertDebugDeclareLocal(entry, brigArg,
                                 llvm::dwarf::DW_TAG_arg_variable,
                                 sub, ++argNo);
+      }
+
+      for(BrigScope scope = brigFun.scope_begin(), E = brigFun.scope_end();
+          scope != E; ++scope) {
+
+        uint32_t codeStart = scope.getCodeScopeStart();
+        uint32_t codeEnd = scope.getCodeScopeEnd();
+        assert(codeStart < codeEnd && "Invalid scope");
+
+        llvm::DILineInfo info = getLineInfo(codeStart);
+        uint32_t line = info.getLine();
+        uint32_t column = info.getColumn();
+        llvm::DIScope LB = parent.DB.createLexicalBlock(sub, file, line, column);
+
+        BlockScope instBS(LB, codeStart, codeEnd);
+        instScopeMap.insert(std::make_pair(codeStart, instBS));
+
+        uint32_t dirStart = scope.getDirScopeStart();
+        uint32_t dirEnd = scope.getDirScopeEnd();
+        assert(dirStart < dirEnd && "Invalid scope");
+
+        BlockScope dirBS(LB, dirStart, dirEnd);
+        dirScopeMap.insert(std::make_pair(dirStart, dirBS));
       }
     }
 
@@ -465,7 +498,7 @@ struct FunScope {
   }
 
   SymbolInfoMap::const_iterator symbol_end() const {
-    return parent.symbolInfoMap.begin();
+    return parent.symbolInfoMap.end();
   }
 
   llvm::Function *lookupFun(uint32_t addr) const {
@@ -489,12 +522,42 @@ struct FunScope {
     return parent.DB.createFile(srcFile, srcDir);
   }
 
+  const llvm::DIScope *getDebugScope(size_t addr, const ScopeMap &map) const {
+    llvm::DILineInfo info = getLineInfo(addr);
+    ScopeMap::const_iterator it = map.upper_bound(addr);
+
+    if (it == map.begin()) return NULL;
+    --it;
+    if (addr >= it->second.end) return NULL;
+
+    assert(addr >= it->second.start && "Wrong scope?");
+    return &it->second.scope;
+  }
+
   llvm::DebugLoc getDebugLoc(size_t addr) const {
     llvm::DILineInfo info = getLineInfo(addr);
-    llvm::DIFile file = getDIFile(info);
+    uint32_t line = info.getLine();
+    uint32_t column = info.getColumn();
+
+    if(const llvm::DIScope *scope = getDebugScope(addr, instScopeMap))
+      return llvm::DebugLoc::get(line, column, *scope);
+
     llvm::DILexicalBlockFile LB =
-      parent.DB.createLexicalBlockFile(sub, file);
-    return llvm::DebugLoc::get(info.getLine(), info.getColumn(), LB);
+      parent.DB.createLexicalBlockFile(sub, getDIFile(info));
+    return llvm::DebugLoc::get(line, column, LB);
+  }
+
+  llvm::DebugLoc getDebugLoc(BrigSymbol &local) const {
+    llvm::DILineInfo info = getLineInfo(local.getCCode());
+    uint32_t line = info.getLine();
+    uint32_t column = info.getColumn();
+
+    if(const llvm::DIScope *scope = getDebugScope(local.getAddr(), dirScopeMap))
+      return llvm::DebugLoc::get(line, column, *scope);
+
+    llvm::DILexicalBlockFile LB =
+      parent.DB.createLexicalBlockFile(sub, getDIFile(info));
+    return llvm::DebugLoc::get(line, column, LB);
   }
 
   void insertDebugDeclareLocal(llvm::BasicBlock &entry, BrigSymbol &local,
@@ -513,8 +576,12 @@ struct FunScope {
                                     dTy, true, 0, argNo);
 
     llvm::Value *v = parent.symbolMap[local.getAddr()];
-    if(!isArg) parent.DB.insertDeclare(v, dVar, &entry);
-    else parent.DB.insertDbgValueIntrinsic(v, 0, dVar, &entry);
+    if (!isArg) {
+      llvm::Instruction *dbgInst = parent.DB.insertDeclare(v, dVar, &entry);
+      dbgInst->setDebugLoc(getDebugLoc(local));
+    } else {
+      parent.DB.insertDbgValueIntrinsic(v, 0, dVar, &entry);
+    }
   }
 
   size_t getFunId() const { return id; }

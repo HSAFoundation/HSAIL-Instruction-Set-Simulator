@@ -24,10 +24,6 @@ class BrigInstHelper {
   BrigInstHelper(const BrigSections &S) : S_(S) {}
 
   // Directive methods
-  const BrigDirectiveBase *getDirective(uint32_t offset) const {
-    return dir_iterator(S_.directives + offset);
-  }
-
   const BrigString *getName(const BrigDirectiveSymbol *symbol) const {
     return (const BrigString *) (S_.strings + symbol->name);
   }

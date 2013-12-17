@@ -22,6 +22,7 @@ add_llvm_library(brig2llvm
   brig_function.cc
   brig_symbol.cc
   brig_control_block.cc
+  brig_scope.cc
   brig_inst_helper.cc
   brig_engine.cc
   brig_runtime.cc
