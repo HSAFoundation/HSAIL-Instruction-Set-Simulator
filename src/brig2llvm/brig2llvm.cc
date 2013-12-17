@@ -415,7 +415,7 @@ struct FunScope {
 
       // Build tables mapping from code and directive offsets to debugging
       // scopes
-      for(BrigScope scope = brigFun.scope_begin(), E = brigFun.scope_end();
+      for (BrigScope scope = brigFun.scope_begin(), E = brigFun.scope_end();
           scope != E; ++scope) {
 
         uint32_t codeStart = scope.getCodeScopeStart();
@@ -547,7 +547,7 @@ struct FunScope {
     uint32_t line = info.getLine();
     uint32_t column = info.getColumn();
 
-    if(const llvm::DIScope *scope = getDebugScope(addr, instScopeMap))
+    if (const llvm::DIScope *scope = getDebugScope(addr, instScopeMap))
       return llvm::DebugLoc::get(line, column, *scope);
 
     llvm::DILexicalBlockFile LB =
@@ -561,7 +561,7 @@ struct FunScope {
     uint32_t line = info.getLine();
     uint32_t column = info.getColumn();
 
-    if(const llvm::DIScope *scope = getDebugScope(local.getAddr(), dirScopeMap))
+    if (const llvm::DIScope *scope = getDebugScope(local.getAddr(), dirScopeMap))
       return llvm::DebugLoc::get(line, column, *scope);
 
     llvm::DILexicalBlockFile LB =
@@ -579,7 +579,7 @@ struct FunScope {
 
     // Arguments are passed by reference
     llvm::DIType dTy = runOnTypeDebug(parent.DB, local.getType());
-    if(isArg)
+    if (isArg)
       dTy = parent.DB.createReferenceType(llvm::dwarf::DW_TAG_reference_type,
                                           dTy);
     llvm::DIVariable dVar =
@@ -1121,7 +1121,7 @@ static void insertDeclareVariable(llvm::BasicBlock &B,
     llvm::FunctionType::get(llvm::Type::getVoidTy(C), argsTy, false);
 
   void (*declareSymbol)(HSADebugger *, void *, SymbolId);
-  if(isGlobal) declareSymbol = HSADebugger::declareGlobal;
+  if (isGlobal) declareSymbol = HSADebugger::declareGlobal;
   else declareSymbol = HSADebugger::declareLocal;
 
   llvm::Constant *cbIntValue =
@@ -1338,8 +1338,8 @@ static void updateDebugInfo(llvm::BasicBlock &B,
   // Update previous BBs if they have no debug information of their own.  For
   // example, HSA instruction-less BBs caused by labels at the beginning of
   // functions.
-  if(llvm::BasicBlock *pred = B.getUniquePredecessor())
-    if(!pred->begin()->hasMetadata())
+  if (llvm::BasicBlock *pred = B.getUniquePredecessor())
+    if (!pred->begin()->hasMetadata())
       updateDebugInfo(*pred, inst, helper, scope);
 }
 
@@ -1427,9 +1427,9 @@ static void makeKernelTrampoline(llvm::Function *fun,
   }
 
   typedef SymbolInfoMap::const_iterator SymbolInfoMapIt;
-  for(SymbolInfoMapIt info = scope.symbol_begin(),
+  for (SymbolInfoMapIt info = scope.symbol_begin(),
         E = scope.symbol_end(); info != E; ++info)
-    if(info->second.isGlobal)
+    if (info->second.isGlobal)
       insertDeclareVariable(*bb, info->first, true, scope);
 
   llvm::CallInst::Create(fun, trampParams, "", bb);
@@ -1452,7 +1452,7 @@ static llvm::Function *createFunctionDecl(llvm::Module &M,
   llvm::StringRef nameRef = getStringRef(F.getName());
   llvm::Twine name(nameRef);
 
-  if(llvm::Function *fun = M.getFunction(name.str()))
+  if (llvm::Function *fun = M.getFunction(name.str()))
     return fun;
 
   return llvm::Function::Create(funTy, linkage, name, &M);
