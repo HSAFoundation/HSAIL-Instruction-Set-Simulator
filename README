@@ -205,6 +205,12 @@ src/brig2llvm/brig_function.cc - The BrigFunction class represents functions.
     BrigControlBlock begin() const;
     BrigControlBlock end() const;
 
+    // Iterate over all of the scopes in a function. Variables declared in an
+    // inner scope cannot be accessed in other scopes. HSA does not allow nested
+    // scopes.
+    BrigScope scope_begin() const;
+    BrigScope scope_end() const;
+
 src/brig2llvm/brig_symbol.cc - The BrigSymbol class representing global
 variables, local variables, and arguments
 
@@ -249,6 +255,18 @@ src/brig2llvm/brig_control_block.cc - represents a control block
     // iterate over instructions in each control block
     inst_iterator begin() const;
     inst_iterator end() const;
+
+src/brig2llvm/brig_scope.cc - represents a scope with a function
+
+    // Get the offsets into the code section corresponding to the start and end
+    // of the scope
+    uint32_t getCodeScopeStart() const;
+    uint32_t getCodeScopeEnd() const;
+
+    // Get the offsets into the directives section corresponding to the start
+    // and end of the scope
+    uint32_t getDirScopeStart() const; uint32_t
+    getDirScopeEnd() const;
 
 include/brig_util.h - a variety of utility methods for iterating over BRIG
 data-structures (dir_iterator, inst_iterator, and oper_iterator)
