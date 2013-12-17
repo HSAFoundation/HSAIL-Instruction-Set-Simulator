@@ -55,3 +55,10 @@ kernel &fibKernel(kernarg_s32 %r_ptr, kernarg_s32 %n_ptr)
   }
   ret;
 };
+
+global_b8  &b8Value  = 0x31;
+global_b16 &b16Value = 0x3141;
+global_b32 &b32Value = 0x31415926;
+global_b64 &b64Value = 0x3141592653589793;
+global_f32 &f32Value =  3.1415926535897932;
+global_f64 &f64Value =  3.1415926535897932;
