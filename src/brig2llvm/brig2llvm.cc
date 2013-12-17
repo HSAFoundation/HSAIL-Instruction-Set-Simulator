@@ -103,6 +103,7 @@ static void insertGPUStateTy(llvm::LLVMContext &C) {
   llvm::StructType::create(C, tv1, std::string("struct.regs"), false);
 }
 
+// Create a debug entry corresponding to a particular register
 static void insertGPURegDebugInfo(llvm::BasicBlock &entry,
                                   llvm::DIBuilder &DB,
                                   llvm::Value *regs,
@@ -130,6 +131,7 @@ static void insertGPURegDebugInfo(llvm::BasicBlock &entry,
   DB.insertDeclare(regs, reg, &entry);
 }
 
+// Generate an llvm::DIType corresponding to a particular BrigType.
 static llvm::DIType runOnTypeDebug(llvm::DIBuilder &DB, BrigType type) {
 
   char prefix =
@@ -156,6 +158,7 @@ static llvm::DIType runOnTypeDebug(llvm::DIBuilder &DB, BrigType type) {
   return DB.createBasicType(typeName, storageSize, storageSize, encoding);
 }
 
+// Create debug entries corresponding to all HSA registers
 static void insertGPUStateDebugInfo(llvm::BasicBlock &entry,
                                     llvm::DIBuilder &DB,
                                     llvm::Value *regs) {
@@ -410,6 +413,8 @@ struct FunScope {
                                 sub, ++argNo);
       }
 
+      // Build tables mapping from code and directive offsets to debugging
+      // scopes
       for(BrigScope scope = brigFun.scope_begin(), E = brigFun.scope_end();
           scope != E; ++scope) {
 
@@ -522,6 +527,8 @@ struct FunScope {
     return parent.DB.createFile(srcFile, srcDir);
   }
 
+  // Find the proper scope, if any, of a symbol or instruction based on its
+  // directive or code offset respectively.
   const llvm::DIScope *getDebugScope(size_t addr, const ScopeMap &map) const {
     llvm::DILineInfo info = getLineInfo(addr);
     ScopeMap::const_iterator it = map.upper_bound(addr);
@@ -534,6 +541,7 @@ struct FunScope {
     return &it->second.scope;
   }
 
+  // Generate a DebugLoc for an instruction based on its code offset
   llvm::DebugLoc getDebugLoc(size_t addr) const {
     llvm::DILineInfo info = getLineInfo(addr);
     uint32_t line = info.getLine();
@@ -547,6 +555,7 @@ struct FunScope {
     return llvm::DebugLoc::get(line, column, LB);
   }
 
+  // Generate a DebugLoc for a symbol based on its directive offset
   llvm::DebugLoc getDebugLoc(BrigSymbol &local) const {
     llvm::DILineInfo info = getLineInfo(local.getCCode());
     uint32_t line = info.getLine();
@@ -560,12 +569,15 @@ struct FunScope {
     return llvm::DebugLoc::get(line, column, LB);
   }
 
+  // Insert debuging information corresponding to a local variable or parameter
   void insertDebugDeclareLocal(llvm::BasicBlock &entry, BrigSymbol &local,
                                unsigned tag, llvm::DIDescriptor scope,
                                unsigned argNo = 0) {
     bool isArg = tag == llvm::dwarf::DW_TAG_arg_variable;
     llvm::DIFile file = parent.DB.createFile("-", "");
     llvm::StringRef name = getStringRef(local.getName());
+
+    // Arguments are passed by reference
     llvm::DIType dTy = runOnTypeDebug(parent.DB, local.getType());
     if(isArg)
       dTy = parent.DB.createReferenceType(llvm::dwarf::DW_TAG_reference_type,
@@ -577,6 +589,8 @@ struct FunScope {
 
     llvm::Value *v = parent.symbolMap[local.getAddr()];
     if (!isArg) {
+      // The DebugLoc of a gdbDeclare intrinsic controls the scope of the
+      // declaration.
       llvm::Instruction *dbgInst = parent.DB.insertDeclare(v, dVar, &entry);
       dbgInst->setDebugLoc(getDebugLoc(local));
     } else {
