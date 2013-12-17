@@ -77,7 +77,7 @@ class BrigSymbol {
     return reinterpret_cast<const T *>(str->bytes);
   }
 
-  const void *getAddr() const { return it_; }
+  size_t getAddr() const { return it_ - S_.directives; }
 
   BrigSymbol &operator++();
 

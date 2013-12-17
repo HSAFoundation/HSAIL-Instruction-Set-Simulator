@@ -307,7 +307,7 @@ static void insertDeclareVariable(llvm::BasicBlock &,
                                   const bool,
                                   const FunScope &);
 
-typedef std::map<const void *, llvm::Value *> SymbolMap;
+typedef std::map<SymbolId, llvm::Value *> SymbolMap;
 
 struct ModScope {
   FunMap &funMap;
@@ -450,7 +450,7 @@ struct FunScope {
     }
   }
 
-  llvm::Value *lookupSymbol(const void *symbol) const {
+  llvm::Value *lookupSymbol(SymbolId symbol) const {
     SymbolMap::const_iterator it = parent.symbolMap.find(symbol);
     return it != parent.symbolMap.end() ? it->second : NULL;
   }
@@ -650,9 +650,7 @@ static llvm::Value *getOperand(llvm::BasicBlock &B,
     llvm::Type *type = llvm::Type::getIntNTy(C, sizeof(intptr_t) * 8);
     llvm::Value *addr;
     if (adderOp->symbol) {
-      const BrigDirectiveSymbol *symbol =
-        cast<BrigDirectiveSymbol>(helper.getDirective(adderOp->symbol));
-      addr = scope.lookupSymbol(symbol);
+      addr = scope.lookupSymbol(adderOp->symbol);
     } else {
       addr = llvm::ConstantPointerNull::get(llvm::Type::getInt8PtrTy(C));
     }

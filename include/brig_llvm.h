@@ -40,7 +40,7 @@ class BrigSymbol;
 struct BrigRegState;
 
 typedef intptr_t FunId;
-typedef const void *SymbolId;
+typedef size_t SymbolId;
 
 struct HSADebugger {
 
@@ -83,7 +83,7 @@ struct SymbolInfo {
   SymbolInfo(std::string name, const BrigSymbol &S, bool isGlobal);
 };
 
-typedef std::map<const void *, SymbolInfo> SymbolInfoMap;
+typedef std::map<SymbolId, SymbolInfo> SymbolInfoMap;
 typedef std::map<FunId, llvm::Function *> FunMap;
 
 struct BrigProgram {
