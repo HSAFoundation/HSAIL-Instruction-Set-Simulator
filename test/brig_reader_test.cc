@@ -9242,6 +9242,26 @@ TEST(BrigInstTest, PackedShl) {
   }
 }
 
+TEST(BrigInstTest, QId) {
+  const uint32_t testVec32[] = { 0 };
+  testInst("qid_u32", testVec32);
+}
+
+TEST(BrigInstTest, QPtr) {
+  const uint32_t testVec32[] = { 0 };
+  testInst("qptr_global_u32", testVec32);
+}
+
+TEST(BrigInstTest, DispatchId) {
+  const uint64_t testVec32[] = { 0 };
+  testInst("dispatchid_u64", testVec32);
+}
+
+TEST(BrigInstTest, DispatchPtr) {
+  const uint32_t testVec32[] = { 0 };
+  testInst("dispatchptr_global_u32", testVec32);
+}
+
 TEST(DebugTest, Square) {
   const char filename[] = XSTR(OBJ_PATH) "/square.o";
   BrigReader *reader = BrigReader::createBrigReader(filename);
