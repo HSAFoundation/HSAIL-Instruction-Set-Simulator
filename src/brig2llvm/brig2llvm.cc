@@ -68,6 +68,10 @@ llvm::Function *BrigProgram::getFunction(llvm::StringRef name) const {
   return M->getFunction(mangledName.str());
 }
 
+unsigned BrigProgram::getNumParams(llvm::StringRef name) const {
+  return M->getFunction(name)->arg_size();
+}
+
 void BrigProgram::delModule(llvm::Module *M) {
   if (!M) return;
   llvm::LLVMContext *C = &M->getContext();

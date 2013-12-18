@@ -43,6 +43,15 @@ class BrigReader {
 
   static BrigReader *createBrigReader(const char *filename);
   static BrigReader *createBrigReader(const char *buffer, size_t size);
+  static BrigReader *createBrigReader(
+    llvm::StringRef directives,
+    llvm::StringRef code,
+    llvm::StringRef operands,
+    llvm::StringRef debug,
+    llvm::StringRef strings) {
+    return new BrigReader(NULL, directives, code, operands, debug, strings);
+  }
+
  private:
 
   BrigReader(llvm::object::ObjectFile *objFile,

@@ -89,6 +89,7 @@ endif (SUPPORTS_NO_RET_C_LINK)
 add_subdirectory(src)
 add_subdirectory(src/brig2llvm)
 add_subdirectory(src/hsa_runtime)
+add_subdirectory(src/newcore)
 
 # setup compilation environment
 if (UNIX)
@@ -186,6 +187,10 @@ target_link_libraries(brig_validate brig2llvm)
 set(fibDebug_SOURCES demo/fibDebug.cc)
 add_executable(fibDebug ${fibDebug_SOURCES})
 target_link_libraries(fibDebug brig2llvm)
+
+set(aqlDemo_SOURCES demo/aqlDemo.cc)
+add_executable(aqlDemo ${aqlDemo_SOURCES})
+target_link_libraries(aqlDemo newcore brig2llvm)
 
 set(debug_SOURCES demo/debug.cc)
 add_executable(debug ${debug_SOURCES})

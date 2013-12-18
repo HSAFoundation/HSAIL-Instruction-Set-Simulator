@@ -1,0 +1,26 @@
+//===- aqlDemo.hsail ----------------------------------------------------===//
+//
+//                     The HSA Simulator
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
+version 0:96:$full:$large;
+kernel &aqlDemo(kernarg_u64 %src, kernarg_u64 %dest) {
+  workitemid_u32 $s0, 0;
+  cmp_ne_b1_u32 $c0, $s0, 0;
+  cbr $c0, @return;
+  ld_kernarg_u64 $d0, [%src];
+  ld_kernarg_u64 $d1, [%dest];
+  workgroupid_u32 $s0, 0;
+  shl_u32 $s0, $s0, 2;
+  cvt_u64_u32 $d2, $s0;
+  add_u64 $d0, $d0, $d2;
+  add_u64 $d1, $d1, $d2;
+  ld_u32 $s0, [$d0];
+  st_u32 $s0, [$d1];
+@return:
+  ret;
+};

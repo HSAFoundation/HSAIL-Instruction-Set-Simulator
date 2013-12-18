@@ -98,6 +98,7 @@ struct BrigProgram {
   bool operator!() { return !M; }
 
   llvm::Function *getFunction(llvm::StringRef name) const;
+  unsigned getNumParams(llvm::StringRef name) const;
 
   llvm::DILineInfo getLineInfoForAddress(uint64_t pc) const {
     llvm::DILineInfoSpecifier spec(
