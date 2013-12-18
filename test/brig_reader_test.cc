@@ -9070,12 +9070,16 @@ TEST(BrigInstTest, WorkItemAndGroup) {
     "        workitemid_u32 $s0, 0;\n"
     "        workgroupid_u32 $s1, 0;\n"
     "        workgroupsize_u32 $s2, 0;\n"
+    "        currentworkgroupsize_u32 $s6, 0;\n"
+    "        cmp_ne_b1_u32 $c0, $s2, $s6;\n"
+    "        cbr $c0, @return;\n"
     "        mul_u32 $s3, $s2, $s1;\n"
     "        add_u32 $s4, $s3, $s0;\n"
     "        mul_u32 $s5, $s4, 4;\n"
     "        cvt_u64_u32 $d1, $s5;\n"
     "        add_u64 $d2, $d0, $d1;\n"
     "        st_u32 0x31415926, [$d2];\n"
+    "@return:\n"
     "        ret;\n"
     "};\n");
   EXPECT_TRUE(BP);
