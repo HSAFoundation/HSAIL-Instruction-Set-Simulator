@@ -212,13 +212,15 @@ struct WorkItemLoopThreadInfo : public ThreadInfo {
                          uint32_t workGroupSize[3], uint32_t workItemAbsId[3],
                          pthread_barrier_t *barrier,
                          void *const *args, size_t size,
+                         void *queue, uint64_t queueId,
+                         void *dispatch, uint64_t dispatchId,
                          EntryFunPtrTy EntryFunPtr,
                          uint32_t absidLow, uint32_t absidStep,
                          uint32_t groupSize, pthread_barrier_t *barriers) :
     ThreadInfo(NDRangeSize, workdim, workGroupSize, workItemAbsId, barrier,
-               args, size),
-    EntryFunPtr(EntryFunPtr), absidLow(absidLow), absidStep(absidStep),
-    groupSize(groupSize), barriers(barriers) {
+               args, size, queue, queueId, dispatch, dispatchId),
+  EntryFunPtr(EntryFunPtr), absidLow(absidLow), absidStep(absidStep),
+  groupSize(groupSize), barriers(barriers) {
   }
 };
 
@@ -262,7 +264,9 @@ static void *workItemLoop(void *vargs) {
 void BrigEngine::launch(llvm::Function *EntryFn,
                         llvm::ArrayRef<void *> args,
                         uint32_t blockNum,
-                        uint32_t workGroupSize) {
+                        uint32_t workGroupSize,
+                        void *queue, uint64_t queueId,
+                        void *dispatch, uint64_t dispatchId) {
 
   /***
    *  Note: This interface is currently built on the assumption that
@@ -336,6 +340,8 @@ void BrigEngine::launch(llvm::Function *EntryFn,
                                             workGroupSizeV3, workItemAbsId,
                                             barrier,
                                             args.data(), args.size(),
+                                            queue, queueId,
+                                            dispatch, dispatchId,
                                             EntryFunPtr,
                                             absidLow, absidStep,
                                             groupSize, barriers);

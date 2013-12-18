@@ -37,7 +37,9 @@ class BrigEngine {
   void launch(llvm::Function *EntryFn,
               llvm::ArrayRef<void *> args,
               uint32_t blockNum = 1,
-              uint32_t threadNum = 1);
+              uint32_t threadNum = 1,
+              void *queue = NULL, uint64_t queueId = 0,
+              void *dispatch = NULL, uint64_t dispatchId = 0);
 
 
   ~BrigEngine();

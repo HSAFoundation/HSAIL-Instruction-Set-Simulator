@@ -1223,5 +1223,19 @@ extern "C" void SetDetectExcept_u32(u32 x) {
   feraiseexcept(hsaToCFPE(x));
 }
 
+extern "C" u32 Qid_u32(void) { return __brigThreadInfo->queueId; }
+
+extern "C" u32 QPtr_u32(void) { return (u32)(size_t) __brigThreadInfo->queue; }
+extern "C" u64 QPtr_u64(void) { return (u64)(size_t) __brigThreadInfo->queue; }
+
+extern "C" u64 DispatchId_u64(void) { return __brigThreadInfo->dispatchId; }
+
+extern "C" u32 DispatchPtr_u32(void) {
+  return (u32)(size_t)__brigThreadInfo->dispatch;
+}
+extern "C" u64 DispatchPtr_u64(void) {
+  return (u64) __brigThreadInfo->dispatch;
+}
+
 }  // namespace brig
 }  // namespace hsa

@@ -132,12 +132,18 @@ struct ThreadInfo {
   uint32_t workGroupSize[3];  // work group dimensions
   uint32_t workItemAbsId[3];  // absolute identifier
   pthread_t tid;
+  void *queue;
+  uint64_t queueId;
+  void *dispatch;
+  uint64_t dispatchId;
 
   ThreadInfo(uint32_t NDRangeSize[3], uint32_t workdim,
              uint32_t workGroupSize[3], uint32_t workItemAbsId[3],
              pthread_barrier_t *barrier,
-             void *const *args, size_t size) :
-    argsArray(new void*[size + 1]), workdim(workdim), barrier(barrier) {
+             void *const *args, size_t size,
+             void *queue, uint64_t queueId, void *dispatch, uint64_t dispatchId) :
+    argsArray(new void*[size + 1]), workdim(workdim), barrier(barrier),
+    queue(queue), queueId(queueId), dispatch(dispatch), dispatchId(dispatchId) {
 
     for (unsigned i = 0; i < 3; ++i) {
       this->NDRangeSize[i] = NDRangeSize[i];
