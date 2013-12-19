@@ -973,7 +973,6 @@ RFICvtSat(define)
 RIFCvt(define)
 
 // Boolean conversions
-defineCvt(Cvt,       ~0,            b1,  b1)
 defineCvt(Cvt,       ~0,            b1,  s8)
 defineCvt(Cvt,       ~0,            b1,  u8)
 defineCvt(Cvt,       ~0,            b1,  s16)
