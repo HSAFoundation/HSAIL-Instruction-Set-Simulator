@@ -1824,15 +1824,17 @@ TEST(BrigInstTest, CvtRoundingMode) {
     testInstCvt(INST, "_"#DTYPE, "_"#STYPE, result.DTYPE, input.STYPE); \
   } while(0)
 
-#define CvtTestBits(INST, STYPE, RESULT, INPUT) do {               \
-    CvtTest(INST, u8,  STYPE, u8,  RESULT, STYPE, INPUT); \
-    CvtTest(INST, s8,  STYPE, u8,  RESULT, STYPE, INPUT); \
-    CvtTest(INST, u16, STYPE, u16, RESULT, STYPE, INPUT); \
-    CvtTest(INST, s16, STYPE, u16, RESULT, STYPE, INPUT); \
-    CvtTest(INST, u32, STYPE, u32, RESULT, STYPE, INPUT); \
-    CvtTest(INST, s32, STYPE, u32, RESULT, STYPE, INPUT); \
-    CvtTest(INST, u64, STYPE, u64, RESULT, STYPE, INPUT); \
-    CvtTest(INST, s64, STYPE, u64, RESULT, STYPE, INPUT); \
+#define CvtTestBits(INST, STYPE, RESULT, INPUT) do {        \
+    CvtTest(INST, s8,  STYPE, u8,  RESULT, STYPE, INPUT);   \
+    CvtTest(INST, s16, STYPE, u16, RESULT, STYPE, INPUT);   \
+    CvtTest(INST, s32, STYPE, u32, RESULT, STYPE, INPUT);   \
+    CvtTest(INST, s64, STYPE, u64, RESULT, STYPE, INPUT);   \
+    if (INPUT >= 0) {                                       \
+      CvtTest(INST, u8,  STYPE, u8,  RESULT, STYPE, INPUT); \
+      CvtTest(INST, u16, STYPE, u16, RESULT, STYPE, INPUT); \
+      CvtTest(INST, u32, STYPE, u32, RESULT, STYPE, INPUT); \
+      CvtTest(INST, u64, STYPE, u64, RESULT, STYPE, INPUT); \
+    }                                                       \
   } while(0)
 
   // Float to Int Tests
@@ -7486,12 +7488,12 @@ TEST(BrigInstTest, CvtF64ToBool) {
     bool b1;
   } result, input;
   CvtTest("cvt", b1, f64, u8, 0, u64, 0); // +0.0
-  CvtTest("cvt", b1, f64, u8, 0, u64, 0x8000000000000000); // -0.0
+  CvtTest("cvt", b1, f64, u8, 0, u64, 0x8000000000000000ULL); // -0.0
   CvtTest("cvt", b1, f64, u8, 1, f64, NAN);
   CvtTest("cvt", b1, f64, u8, 1, f64, -1);
   CvtTest("cvt", b1, f64, u8, 1, f64, 1);
   CvtTest("cvt", b1, f64, u8, 1, u64, 1); // > +0.0
-  CvtTest("cvt", b1, f64, u8, 1, u64, 0x8000000000000001); // < -0.0
+  CvtTest("cvt", b1, f64, u8, 1, u64, 0x8000000000000001ULL); // < -0.0
   CvtTest("cvt", b1, f64, u8, 1, f64, -INFINITY);
   CvtTest("cvt", b1, f64, u8, 1, f64, INFINITY);
 }
