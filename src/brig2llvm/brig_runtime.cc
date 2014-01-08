@@ -146,6 +146,7 @@ extern "C" void setRoundingMode_down(void) {
   fesetround(FE_DOWNWARD);
 }
 
+// Presently only a wavefront size of one is supported.
 extern "C" unsigned getWavefrontSize(void) { return 1; }
 
 template<class T> static T Abs(T t) { return std::abs(t); }
@@ -1165,6 +1166,7 @@ extern "C" u32 WorkItemFlatId_u32(void) {
     WorkItemId_u32(2) * WorkGroupSize_u32(0) * WorkGroupSize_u32(1);
 }
 
+// Presently only a wavefront size of one is supported.
 extern "C" u32 LaneId_u32(void) {
   return 0;
 }
