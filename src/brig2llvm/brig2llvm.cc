@@ -429,7 +429,8 @@ struct FunScope {
         llvm::DILineInfo info = getLineInfo(codeStart);
         uint32_t line = info.getLine();
         uint32_t column = info.getColumn();
-        llvm::DIScope LB = parent.DB.createLexicalBlock(sub, file, line, column);
+        llvm::DIScope LB =
+          parent.DB.createLexicalBlock(sub, file, line, column);
 
         BlockScope instBS(LB, codeStart, codeEnd);
         instScopeMap.insert(std::make_pair(codeStart, instBS));
@@ -565,7 +566,8 @@ struct FunScope {
     uint32_t line = info.getLine();
     uint32_t column = info.getColumn();
 
-    if (const llvm::DIScope *scope = getDebugScope(local.getAddr(), dirScopeMap))
+    const llvm::DIScope *scope = getDebugScope(local.getAddr(), dirScopeMap);
+    if (scope)
       return llvm::DebugLoc::get(line, column, *scope);
 
     llvm::DILexicalBlockFile LB =
