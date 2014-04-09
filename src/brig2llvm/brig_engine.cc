@@ -66,7 +66,7 @@ void llvm_initialize(void) {
 namespace hsa {
 namespace brig {
 
-static ForceBrigRuntimeLinkage runtime;
+ForceBrigRuntimeLinkage runtime;
 
 BrigEngine::BrigEngine(hsa::brig::BrigProgram &BP,
                        bool forceInterpreter,
