@@ -99,7 +99,6 @@ static std::set<std::string> loadedLibs;
 
 void BrigEngine::init(bool forceInterpreter, char optLevel) {
 
-  Dl_info info;
   char *threnv = getenv("SIMTHREADS");
   if (threnv != NULL && atoi(threnv) > 0) {
     numProcessors = atoi(threnv);
@@ -109,11 +108,17 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
     numProcessors = 1;
   }
 
+  Dl_info info;
   int err = dladdr(&runtime, &info);
   assert(err && info.dli_fname &&
          "How are we executing if we haven't even been loaded?!");
   if (loadedLibs.insert(std::string(info.dli_fname)).second)
     llvm::sys::DynamicLibrary::LoadLibraryPermanently(info.dli_fname);
+
+  if (info.dli_sname && *info.dli_sname) {
+    void *badHandle = dlsym(RTLD_NEXT, info.dli_sname);
+    assert(!badHandle && "HSAIL simulator library loaded twice?!");
+  }
 
   assert(!EE_ && "BrigEngine was already constructed?!");
 
