@@ -1057,7 +1057,9 @@ template<class T> static T AtomicCas(T *x, T y, T z) {
 AtomicInst(define, Cas, Ternary)
 
 template<class T> static T AtomicExch(T *x, T y) {
-  return __sync_val_compare_and_swap(x, *x, y);
+  T oldVal;
+  for (oldVal = *x; !__sync_bool_compare_and_swap(x, oldVal, y); oldVal = *x);
+  return oldVal;
 }
 AtomicInst(define, Exch, Binary)
 
