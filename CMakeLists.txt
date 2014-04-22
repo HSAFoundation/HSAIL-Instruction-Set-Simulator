@@ -106,7 +106,7 @@ else (UNIX)
 
   SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${LIBRARY_OUTPUT_PATH})
   SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${LIBRARY_OUTPUT_PATH})
-  MESSAGE("(DEBUG|RELEASE) output changed to path:", "${EXECUTABLE_OUTPUT_PATH}")
+  MESSAGE("(DEBUG|RELEASE) output changed to path:" , "${EXECUTABLE_OUTPUT_PATH}")
 
 endif (UNIX)
 
@@ -175,6 +175,10 @@ target_link_libraries(fib hsa brig2llvm)
 set(barrierTest_SOURCES demo/barrierTest.cc)
 add_executable(barrierTest ${barrierTest_SOURCES})
 target_link_libraries(barrierTest hsa brig2llvm)
+
+set(atomicexch_SOURCES demo/atomicexch.cc)
+add_executable(atomicexch ${atomicexch_SOURCES})
+target_link_libraries(atomicexch hsa brig2llvm)
 
 set(fcos_SOURCES demo/fcos.cc)
 add_executable(fcos ${fcos_SOURCES})

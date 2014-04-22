@@ -1,0 +1,23 @@
+version 0:95: $full : $large;
+
+kernel &run(
+   align 8 kernarg_u64 %_atomic, 
+   align 8 kernarg_u64 %_out,
+   align 8 kernarg_u32 %_siz
+){
+   ld_kernarg_u64 $d0, [%_atomic];
+   ld_kernarg_u64 $d1, [%_out];
+   ld_kernarg_u32 $s0, [%_siz];
+   
+   workitemabsid_u32 $s2, 0;
+   add_u32 $s2, $s2, 1;
+   atomic_exch_global_b32  $s3, [$d0], $s2;   // read old into $s3, set new from $s2
+   // link old to new
+   mad_u32 $s3, $s3, $s0, $s2;    // $s3 = offset of modified cell
+   cvt_s64_s32 $d3, $s3;
+   add_u64 $d3, $d1, $d3;
+
+   st_global_u8 1, [$d3];
+   ret;
+   
+};
