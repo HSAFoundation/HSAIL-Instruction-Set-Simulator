@@ -123,7 +123,10 @@ information. The output file will have the same name as the input file with
 
 * The insert instruction is not implemented correctly
 
-* Shared memory is shared between workgroups.
+* Private variables at function scope are supported correctly, but at module
+  scope they are treated as being in the Global segment.
+
+* Group variables are always treated as being in the Global segment.
 
 * RegV2 and RegV4 operands are not correctly simulated when they are the
   destination of an instruction.
