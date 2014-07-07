@@ -6790,7 +6790,7 @@ TEST(BrigInstTest, WaveId) {
 
 TEST(BrigInstTest, CuId) {
 
-  uint32_t *maxCuId = new uint32_t(0);
+  int32_t *maxCuId = new int32_t(-11);
   {
     hsa::brig::BrigProgram BP = TestHSAIL(
       "version 0:96:$full:$large;\n"
@@ -6810,7 +6810,7 @@ TEST(BrigInstTest, CuId) {
 
     void *args[] = { &maxCuId };
     BE.launch(fun, args);
-    EXPECT_GT(*maxCuId, 0);
+    EXPECT_GE(*maxCuId, 0);
   }
 
   hsa::brig::BrigProgram BP = TestHSAIL(
