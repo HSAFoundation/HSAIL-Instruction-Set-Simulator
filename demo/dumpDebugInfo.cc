@@ -55,7 +55,8 @@ int main(int argc, char **argv) {
       std::string filename = input.substr(0, input.length()-2);
       filename.append(".debuginfo");
 
-      llvm::raw_fd_ostream fstream(filename.c_str(), err, 2);
+      llvm::raw_fd_ostream fstream(filename.c_str(), err,
+                                   llvm::sys::fs::F_None);
       fstream << debugDataBuffer->getBuffer() ;
       return 0;
     }

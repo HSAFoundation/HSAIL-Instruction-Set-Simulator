@@ -10,6 +10,7 @@
 #include "brig_reader.h"
 
 #include "llvm/Object/ELF.h"
+#include "llvm/Object/ObjectFile.h"
 #include "llvm/Support/MemoryBuffer.h"
 
 namespace hsa {

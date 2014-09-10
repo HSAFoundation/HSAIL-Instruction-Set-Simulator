@@ -24,6 +24,7 @@
 #include "llvm/IR/Attributes.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -156,7 +157,7 @@ static llvm::DIType runOnTypeDebug(llvm::DIBuilder &DB, BrigType type) {
     BrigInstHelper::isFloatTy(type)    ? llvm::dwarf::DW_ATE_float :
     BrigInstHelper::isUnsignedTy(type) ? llvm::dwarf::DW_ATE_unsigned :
     BrigInstHelper::isSignedTy(type)   ? llvm::dwarf::DW_ATE_signed :
-    llvm::dwarf::DW_AT_GNU_vector;
+    llvm::dwarf::DW_ATE_lo_user;
 
   unsigned storageSize = std::max(size, 8U);
   return DB.createBasicType(typeName, storageSize, storageSize, encoding);
@@ -400,21 +401,26 @@ struct FunScope {
                                      llvmFun->getName(),
                                      llvmFun->getName(),
                                      file,
-                                     1,
+                                     info.getLine()-1,
                                      debugFunTy,
                                      false,
                                      true,
                                      info.getLine(),
-                                     true,
+                                     llvm::DIDescriptor::FlagPrototyped,
+                                     false,
                                      llvmFun);
 
       // Add DWARF argument debug information
       unsigned argNo = 0;
       for (BrigSymbol brigArg = brigFun.arg_begin(),
              E = brigFun.arg_end(); brigArg != E; ++brigArg) {
+        llvm::Value *arg = parent.symbolMap[brigArg.getAddr()];
+        llvm::Value *stackArg =
+          new llvm::AllocaInst(arg->getType(), "", &entry);
+        new llvm::StoreInst(arg, stackArg, &entry);
         insertDebugDeclareLocal(entry, brigArg,
                                 llvm::dwarf::DW_TAG_arg_variable,
-                                sub, ++argNo);
+                                sub, stackArg, ++argNo);
       }
 
       // Build tables mapping from code and directive offsets to debugging
@@ -578,30 +584,34 @@ struct FunScope {
   // Insert debuging information corresponding to a local variable or parameter
   void insertDebugDeclareLocal(llvm::BasicBlock &entry, BrigSymbol &local,
                                unsigned tag, llvm::DIDescriptor scope,
-                               unsigned argNo = 0) {
+                               llvm::Value *arg = NULL, unsigned argNo = 0) {
     bool isArg = tag == llvm::dwarf::DW_TAG_arg_variable;
+    assert(isArg == bool(arg));
+    assert(isArg == bool(argNo));
+
     llvm::DIFile file = parent.DB.createFile("-", "");
     llvm::StringRef name = getStringRef(local.getName());
 
     // Arguments are passed by reference
     llvm::DIType dTy = runOnTypeDebug(parent.DB, local.getType());
-    if (isArg)
-      dTy = parent.DB.createReferenceType(llvm::dwarf::DW_TAG_reference_type,
-                                          dTy);
-    llvm::DIVariable dVar =
-      parent.DB.createLocalVariable(tag,
-                                    scope, name, file, 0,
-                                    dTy, true, 0, argNo);
+    llvm::DIType dArgTy =
+      parent.DB.createReferenceType(llvm::dwarf::DW_TAG_reference_type, dTy);
 
-    llvm::Value *v = parent.symbolMap[local.getAddr()];
-    if (!isArg) {
-      // The DebugLoc of a gdbDeclare intrinsic controls the scope of the
-      // declaration.
-      llvm::Instruction *dbgInst = parent.DB.insertDeclare(v, dVar, &entry);
-      dbgInst->setDebugLoc(getDebugLoc(local));
-    } else {
-      parent.DB.insertDbgValueIntrinsic(v, 0, dVar, &entry);
-    }
+    llvm::DebugLoc loc = isArg ?
+      llvm::DebugLoc::get(sub.getLineNumber(), 0, sub) : getDebugLoc(local);
+
+    llvm::DIVariable dVar =
+      parent.DB.createLocalVariable(tag, scope, name, file, loc.getLine(),
+                                    isArg ? dArgTy : dTy, true, 0, argNo);
+
+    // Use the stack address instead of the argument for parameters, since the
+    // register holding the parameter may get killed later.
+    llvm::Value *v = isArg ? arg : parent.symbolMap[local.getAddr()];
+
+    // The DebugLoc of a gdbDeclare intrinsic controls the scope of the
+    // declaration.
+    llvm::Instruction *dbgInst = parent.DB.insertDeclare(v, dVar, &entry);
+    dbgInst->setDebugLoc(loc);
   }
 
   size_t getFunId() const { return id; }
@@ -1337,8 +1347,13 @@ static void updateDebugInfo(llvm::BasicBlock &B,
   llvm::DebugLoc loc = scope.getDebugLoc(helper.getAddr(inst));
 
   typedef llvm::BasicBlock::iterator BBIt;
+  // Don't add metadata to any instructions that may appear in the function
+  // prolog. It may cause breakpoints to be set in the prolog.
   for (BBIt it = B.begin(), E = B.end(); it != E; ++it)
-    if (!it->hasMetadata())
+    if (!it->hasMetadata() &&
+        !llvm::isa<llvm::AllocaInst>(it) &&
+        !llvm::isa<llvm::StoreInst>(it) &&
+        !llvm::isa<llvm::MemIntrinsic>(it))
       it->setDebugLoc(loc);
 
   // Update previous BBs if they have no debug information of their own.  For
@@ -1468,6 +1483,7 @@ static void runOnFunction(llvm::Module &M, const BrigFunction &F,
                           ModScope &mScope) {
 
   llvm::Function *fun = mScope.funMap[F.getOffset()];
+  fun->addFnAttr("no-frame-pointer-elim", "true");
 
   BrigSymbol brigArg = F.arg_begin();
   llvm::Function::arg_iterator llvmArg = fun->arg_begin();

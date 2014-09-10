@@ -12,6 +12,7 @@
 #include "llvm/ADT/OwningPtr.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/Program.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/system_error.h"
 
@@ -38,13 +39,13 @@ bool HsailAsm::assembleHSAILString(const char *sourceCode,
   int result_fd;
   llvm::SmallString<128> sourceFile;
   llvm::error_code ec =
-    llvm::sys::fs::unique_file("temp-%%%%.hsail", result_fd, sourceFile);
+    llvm::sys::fs::createUniqueFile("temp-%%%%.hsail", result_fd, sourceFile);
   close(result_fd);
   check(!ec, ec.message());
 
   std::string outErrMsg;
   llvm::raw_fd_ostream out(sourceFile.c_str(), outErrMsg,
-                           llvm::raw_fd_ostream::F_Binary);
+                           llvm::sys::fs::F_Binary);
   check(!outErrMsg.size(), outErrMsg);
 
   out << sourceCode;
@@ -68,32 +69,31 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
   const char *args[] = { "hsailasm", sourceFile, "-o", outputFile,
                          enableDebug ? "-g" : NULL, NULL };
 
-  llvm::sys::Path programPath(XSTR(BIN_PATH) "/hsailasm");
+  llvm::StringRef programPath(XSTR(BIN_PATH) "/hsailasm");
 
-  check(programPath.isRegularFile(), "Cannot find hsailasm");
-  check(programPath.canExecute(), "Cannot execute hsailasm");
+  check(llvm::sys::fs::is_regular_file(programPath), "Cannot find hsailasm");
+  check(llvm::sys::fs::can_execute(programPath), "Cannot execute hsailasm");
 
   int result_fd;
   llvm::SmallString<128> resultPath;
   llvm::error_code ec =
-    llvm::sys::fs::unique_file("hsailasm-%%%%.log", result_fd, resultPath);
+    llvm::sys::fs::createUniqueFile("hsailasm-%%%%.log", result_fd, resultPath);
   close(result_fd);
   check(!ec, ec.message());
 
-  llvm::sys::Path errFile(resultPath);
+  llvm::StringRef errFile(resultPath);
 
-  const llvm::sys::Path *redirects[] = { &errFile, &errFile, 0 };
+  const llvm::StringRef *redirects[] = { &errFile, &errFile, 0 };
 
-  int result = llvm::sys::Program::ExecuteAndWait(programPath,
-                                                  args,
-                                                  NULL,
-                                                  redirects,
-                                                  0,
-                                                  0,
-                                                  errMsg);
-
+  int result = llvm::sys::ExecuteAndWait(programPath,
+                                         args,
+                                         NULL,
+                                         redirects,
+                                         0,
+                                         0,
+                                         errMsg);
   if (errMsg && errMsg->size() > 0) {
-    errFile.eraseFromDisk();
+    llvm::sys::fs::remove(errFile);
     return false;
   }
 
@@ -101,19 +101,19 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
     if (errMsg) {
       llvm::OwningPtr<llvm::MemoryBuffer> result;
       llvm::error_code error =
-        llvm::MemoryBuffer::getFile(errFile.c_str(), result);
+        llvm::MemoryBuffer::getFile(errFile, result);
       *errMsg = error == llvm::error_code::success() ?
         std::string(result->getBuffer()) :
         error.message();
     }
-    errFile.eraseFromDisk();
+    llvm::sys::fs::remove(errFile);
     return false;
   }
 
-  llvm::sys::Path output(outputFile);
-  check(output.isRegularFile(), "Missing output");
+  llvm::StringRef output(outputFile);
+  check(llvm::sys::fs::is_regular_file(output), "Missing output");
 
-  errFile.eraseFromDisk();
+  llvm::sys::fs::remove(errFile);
 
   return true;
 }

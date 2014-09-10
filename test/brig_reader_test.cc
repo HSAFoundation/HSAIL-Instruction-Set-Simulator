@@ -36,7 +36,7 @@ hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
   int result_fd;
   llvm::SmallString<128> resultPath;
   llvm::error_code ec =
-    llvm::sys::fs::unique_file("emptyBrig-%%%%%.o", result_fd, resultPath);
+    llvm::sys::fs::createUniqueFile("emptyBrig-%%%%%.o", result_fd, resultPath);
   close(result_fd);
   EXPECT_TRUE(!ec);
   if (ec) return NULL;

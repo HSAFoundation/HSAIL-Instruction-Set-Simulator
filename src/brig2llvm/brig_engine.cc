@@ -33,6 +33,8 @@
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/Memory.h"
+
+#include <set>
 #include <cerrno>
 
 #include <dlfcn.h>
@@ -144,7 +146,7 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
   llvm::SectionMemoryManager *JMM = NULL;
   if (!forceInterpreter) {
     JMM = new llvm::SectionMemoryManager();
-    builder.setJITMemoryManager(JMM);
+    builder.setMCJITMemoryManager(JMM);
   }
 
   // If SIMNOOPT is defined, optimization will be disabled to facilitate
@@ -195,7 +197,7 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
   for (llvm::Module::iterator I = M_->begin(), E = M_->end(); I != E; ++I) {
     llvm::Function *Fn = &*I;
     if (!Fn->isDeclaration())
-      EE_->getPointerToFunction(Fn);
+      EE_->getFunctionAddress(Fn->getName());
   }
 
   if (JMM)
@@ -291,7 +293,7 @@ void BrigEngine::launch(llvm::Function *EntryFn,
   assert(blockNum && workGroupSize && "Thread count too low");
 
   EntryFunPtrTy EntryFunPtr =
-    (EntryFunPtrTy)(intptr_t) EE_->getPointerToFunction(EntryFn);
+    (EntryFunPtrTy)(intptr_t) EE_->getFunctionAddress(EntryFn->getName());
 
   pthread_attr_t attr;
   pthread_attr_init(&attr);
