@@ -51,6 +51,7 @@ set(LLVM_INCLUDE_TOOLS off CACHE STRING "")
 set(LLVM_INCLUDE_EXAMPLES off CACHE STRING "")
 set(LLVM_INCLUDE_TESTS off CACHE STRING "")
 set(LLVM_INCLUDE_RUNTIME off CACHE STRING "")
+set(LLVM_ENABLE_TERMINFO off CACHE STRING "")
 set(LLVM_BINARY_DIR "${PROJECT_BINARY_DIR}/src/brig2llvm/compiler")
 
 SET(LLVM_REQUIRES_EH "true")
@@ -133,7 +134,9 @@ SET( MAKE_OPTIONS
 
 add_custom_target( build_libhsail ALL
   DEPENDS brig2llvm
-  COMMAND ${GIT_EXECUTABLE} pull https://github.com/HSAFoundation/HSAIL-Tools.git
+  # COMMAND ${GIT_EXECUTABLE} pull https://github.com/HSAFoundation/HSAIL-Tools.git
+  # hold the version of HSAIL-Tools before `HSAIL 1.0 P`
+  # COMMAND ${GIT_EXECUTABLE} checkout 51fb3716
   COMMAND ${CMAKE_MAKE_PROGRAM} ${MAKE_OPTIONS}
   WORKING_DIRECTORY ${HSAIL_TOOLS_SRC_DIR} )
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${HSAIL_TOOLS_BINARY_DIR})
