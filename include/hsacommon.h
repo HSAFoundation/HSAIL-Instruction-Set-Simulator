@@ -45,6 +45,18 @@
 #define AMD_DEVICE_TYPE_HSA                          (1 << 4)
 #define AMD_DEVICE_TYPE_ALL                          0xFFFFFFFF
 
+#ifdef __GXX_RTTI
+#define THROW_DECL throw()
+#define THROW(X) throw X
+#define TRY try
+#define CATCH(X) catch(X)
+#else // __GXX_RTTI
+#define THROW_DECL
+#define THROW(X) assert(false && #X)
+#define TRY
+#define CATCH(X) if (0)
+#endif // __GXX_RTTI
+
 // all the items shared between namespace hsacore and namespace hsa go to this namespace
 namespace hsacommon
 {
@@ -83,12 +95,12 @@ public:
      */
     ~vector()
     {
-        try
+        TRY
         {
             clear();
             delete[] data_;
         }
-        catch(...){
+        CATCH(...){
             delete[] data_;
         }
     }
@@ -244,7 +256,7 @@ public:
     T& back()
     {
         if (size_ <= 0) {
-            throw std::out_of_range("vector::back() called on empty hsa::vector.");
+          THROW(std::out_of_range("vector::back() called on empty hsa::vector."));
         }
         return (items_[size_-1]);
     }
@@ -260,7 +272,7 @@ public:
     const T& back() const
     {
         if (size_ <= 0) {
-            throw std::out_of_range("vector::back() called on empty hsa::vector.");
+          THROW(std::out_of_range("vector::back() called on empty hsa::vector."));
         }
         return (items_[size_-1]);
     }
@@ -303,7 +315,7 @@ public:
     T& at(size_t n)
     {
         if (n >= size_){
-            throw std::out_of_range("vector::at() called on element outside hsa::vector.");
+          THROW(std::out_of_range("vector::at() called on element outside hsa::vector."));
         }
         return items_[n];
     }
@@ -320,7 +332,7 @@ public:
     const T& at(size_t n) const
     {
         if (n >= size_){
-            throw std::out_of_range("vector::at() called on element outside hsa::vector.");
+          THROW(std::out_of_range("vector::at() called on element outside hsa::vector."));
         }
         return items_[n];
     }
@@ -581,7 +593,7 @@ static void *malloc_check(size_t n)
     void *vp = malloc(n);
     if (vp == NULL){
         // throw exception
-        throw std::bad_alloc();
+      THROW(std::bad_alloc());
     }
     return vp;
 }
@@ -591,7 +603,7 @@ static void *realloc_check(void * ptr, size_t size)
     void *vp = realloc(ptr, size);
     if (vp == NULL){
         // throw exception
-        throw std::bad_alloc();
+      THROW(std::bad_alloc());
     }
     return vp;
 }
@@ -844,7 +856,7 @@ public:
     const char& at (size_t pos) const
     {
         if (pos >= size()){
-            throw std::out_of_range("hsacommon::string::at() called on element outside range.");
+          THROW(std::out_of_range("hsacommon::string::at() called on element outside range."));
         }
         return cptr[pos];
     }
@@ -860,7 +872,7 @@ public:
     char& at (size_t pos)
     {
         if (pos >= size()){
-            throw std::out_of_range("hsacommon::string::at() called on element outside range.");
+          THROW(std::out_of_range("hsacommon::string::at() called on element outside range."));
         }
         return cptr[pos];
     }
@@ -1213,7 +1225,7 @@ private:
     Exception& operator = (const Exception&);
 
 public:
-    ~Exception() throw(){}
+    ~Exception() THROW_DECL {}
 
     /**
      * @brief append info to an exception, this version requires a type
@@ -1319,7 +1331,7 @@ class UnsupportedOperation: public Exception {};
     if (errVal){                                                    \
         hsacommon::Exception exObj;                                 \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
-        throw (exObj);                                              \
+        THROW(exObj);                                              \
     }
 
 // macros for derived exception classses
@@ -1327,28 +1339,28 @@ class UnsupportedOperation: public Exception {};
     if (errVal){                                                    \
         hsacommon::InvalidArgument exObj;                           \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
-        throw (exObj);                                              \
+        THROW(exObj);                                              \
     }
 
 #define ERR_THROW_RESOURCEFAILURE(errVal, errMsg, expVal)           \
     if (errVal){                                                    \
         hsacommon::ResourceFailure exObj;                           \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
-        throw (exObj);                                              \
+        THROW (exObj);                                              \
     }
 
 #define ERR_THROW_BUILDFAILURE(errVal, errMsg, expVal)              \
     if (errVal){                                                    \
         hsacommon::BuildFailure exObj;                              \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
-        throw (exObj);                                              \
+        THROW (exObj);                                              \
     }
 
 #define ERR_THROW_UNSUPPORTEDOPERATION(errVal, errMsg, expVal)      \
     if (errVal){                                                    \
         hsacommon::UnsupportedOperation exObj;                      \
         exObj.appendInfo(__FUNCTION__,(errMsg),(expVal));           \
-        throw (exObj);                                              \
+        THROW (exObj);                                              \
     }
 
 /**
