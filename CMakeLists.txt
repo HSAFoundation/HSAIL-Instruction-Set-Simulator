@@ -136,7 +136,7 @@ SET( MAKE_OPTIONS
      " CXX=${CMAKE_CXX_COMPILER}"
      " AR=${CMAKE_AR}"
      " CC=${CMAKE_C_COMPILER}"
-     " CXXFLAGS=${CMAKE_CXX_FLAGS}"
+     " CXXFLAGS=${CMAKE_CXX_FLAGS} -fexceptions -frtti"
      " LDFLAGS=${CMAKE_EXE_LINKER_FLAGS}")
 
 add_custom_target( build_libhsail ALL
