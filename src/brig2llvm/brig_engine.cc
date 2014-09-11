@@ -130,13 +130,13 @@ void BrigEngine::init(bool forceInterpreter, char optLevel) {
   llvm::InitializeNativeTargetAsmPrinter();
 
   // load the whole bitcode file eagerly
-  std::string errorMsg;
-  if (M_->MaterializeAllPermanently(&errorMsg)) {
+  if (std::error_code ec = M_->materializeAllPermanently()) {
     llvm::errs() << "bitcode didn't read correctly.\n";
-    llvm::errs() << "Reason: " << errorMsg << "\n";
+    llvm::errs() << "Reason: " << ec.message() << "\n";
     exit(1);
   }
 
+  std::string errorMsg;
   llvm::EngineBuilder builder(M_);
   builder.setErrorStr(&errorMsg);
   builder.setEngineKind(forceInterpreter

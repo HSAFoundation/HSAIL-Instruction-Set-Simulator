@@ -20,7 +20,6 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/Support/system_error.h"
 #include "gtest/gtest.h"
 
 #include <cstdarg>
@@ -32,14 +31,15 @@ using hsa::brig::BrigReader;
 
 hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
 
-
-  int result_fd;
   llvm::SmallString<128> resultPath;
-  llvm::error_code ec =
-    llvm::sys::fs::createUniqueFile("emptyBrig-%%%%%.o", result_fd, resultPath);
-  close(result_fd);
-  EXPECT_TRUE(!ec);
-  if (ec) return NULL;
+  {
+    int result_fd;
+    std::error_code ec =
+      llvm::sys::fs::createUniqueFile("emptyBrig-%%%%%.o", result_fd, resultPath);
+    close(result_fd);
+    EXPECT_TRUE(!ec);
+    if (ec) return NULL;
+  }
 
   std::string errMsg;
   bool isValidHSA = hsa::brig::HsailAsm::assembleHSAILString(source.c_str(),
@@ -65,9 +65,11 @@ hsa::brig::BrigProgram TestHSAIL(const std::string &source) {
 
   delete reader;
 
-  bool existed;
-  llvm::sys::fs::remove(resultPath.c_str(), existed);
-  EXPECT_TRUE(existed);
+  {
+    std::error_code ec =
+      llvm::sys::fs::remove(resultPath.c_str(), false);
+    EXPECT_TRUE(!ec);
+  }
 
   return BP;
 }
@@ -259,22 +261,23 @@ TEST(BrigKernelTest, VectorCopy) {
 }
 
 TEST(BrigAllUpTest, AllUp) {
-  llvm::OwningPtr<llvm::MemoryBuffer> file;
-  const char filename[] = XSTR(TEST_PATH) "/AllUp.hsail";
-  llvm::error_code ec = llvm::MemoryBuffer::getFile(filename, file);
-  EXPECT_TRUE(!ec);
 
-  hsa::brig::BrigProgram BP = TestHSAIL(file->getBufferStart());
+  const char filename[] = XSTR(TEST_PATH) "/AllUp.hsail";
+  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> file =
+    llvm::MemoryBuffer::getFile(filename);
+  EXPECT_TRUE(!file.getError());
+
+  hsa::brig::BrigProgram BP = TestHSAIL((*file)->getBufferStart());
   EXPECT_TRUE(BP);
 }
 
 TEST(BrigAllUpTest, AMDAllUp) {
-  llvm::OwningPtr<llvm::MemoryBuffer> file;
   const char filename[] = XSTR(TEST_PATH) "/hsail_tests_p.hsail";
-  llvm::error_code ec = llvm::MemoryBuffer::getFile(filename, file);
-  EXPECT_TRUE(!ec);
+  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> file =
+    llvm::MemoryBuffer::getFile(filename);
+  EXPECT_TRUE(!file.getError());
 
-  hsa::brig::BrigProgram BP = TestHSAIL(file->getBufferStart());
+  hsa::brig::BrigProgram BP = TestHSAIL((*file)->getBufferStart());
   EXPECT_TRUE(BP);
 }
 
@@ -7074,6 +7077,7 @@ TEST(DebugTest, Square) {
   EXPECT_EQ(16.0, *out);
   delete in;
   delete out;
+  delete reader;
 }
 
 TEST(BrigKernelTest, SWA) {

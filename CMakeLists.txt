@@ -5,7 +5,9 @@ include_directories(include)
 include_directories(${CMAKE_BINARY_DIR})
 add_definitions(-DGTEST_HAS_PTHREAD=0)
 
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
+SET(CMAKE_MODULE_PATH
+  "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake"
+  "${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/")
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
 include (FindTargetArch)
 
@@ -53,8 +55,11 @@ set(LLVM_INCLUDE_TESTS off CACHE STRING "")
 set(LLVM_INCLUDE_RUNTIME off CACHE STRING "")
 set(LLVM_ENABLE_TERMINFO off CACHE STRING "")
 set(LLVM_BINARY_DIR "${PROJECT_BINARY_DIR}/src/brig2llvm/compiler")
+set(LLVM_RUNTIME_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
+set(LLVM_LIBRARY_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib)
 
 SET(LLVM_REQUIRES_EH "true")
+SET(LLVM_REQUIRES_RTTI "true")
 
 # obtain specific information about llvm setup
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
@@ -71,14 +76,15 @@ SET(PROJ_SEARCH_PATH
 "${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
-"${PROJECT_BINARY_DIR}/src")
+"${PROJECT_BINARY_DIR}/src"
+"${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/")
 include_directories( ${PROJ_SEARCH_PATH} )
 
 LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
 
 add_subdirectory(src/brig2llvm/compiler)
 
-include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
+include(LLVMConfig)
 include(HandleLLVMOptions)
 
 include(CheckCXXCompilerFlag)

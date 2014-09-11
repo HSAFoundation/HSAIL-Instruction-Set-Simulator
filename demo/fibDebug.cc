@@ -23,22 +23,23 @@
 template<class T>
 static void printSourceLine(T &out, llvm::DILineInfo &info) {
 
-  const char *filename = info.getFileName();
-  uint32_t line = info.getLine();
-  uint32_t column = info.getColumn();
+  std::string filename = info.FileName;
+  uint32_t line = info.Line;
+  uint32_t column = info.Column;
 
-  llvm::OwningPtr<llvm::MemoryBuffer> file;
-  if (llvm::MemoryBuffer::getFile(filename, file)) {
+  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> file =
+    llvm::MemoryBuffer::getFile(filename);
+  if (file.getError()) {
     out << "<Missing file: " << filename << ">\n";
     return;
   }
 
-  const char *start = file->getBufferStart();
-  for (unsigned i = 1; start < file->getBufferEnd() && i < line; ++i) {
-    while (start < file->getBufferEnd() && *start != '\n' && *start != '\r')
+  const char *start = (*file)->getBufferStart();
+  for (unsigned i = 1; start < (*file)->getBufferEnd() && i < line; ++i) {
+    while (start < (*file)->getBufferEnd() && *start != '\n' && *start != '\r')
       ++start;
     ++start;
-    if (start < file->getBufferEnd() && start[-1] != *start &&
+    if (start < (*file)->getBufferEnd() && start[-1] != *start &&
        ( *start == '\n' || *start == '\r'))
       ++start;
   }
@@ -46,8 +47,8 @@ static void printSourceLine(T &out, llvm::DILineInfo &info) {
   start += (column - 1);
 
   const char *end = start;
-  while (end < file->getBufferEnd() && *end != ';') ++end;
-  while (end < file->getBufferEnd() && *end != '\n' && *end != '\r') ++end;
+  while (end < (*file)->getBufferEnd() && *end != ';') ++end;
+  while (end < (*file)->getBufferEnd() && *end != '\n' && *end != '\r') ++end;
 
   std::string text(start, end - start);
   out << text;
@@ -62,8 +63,8 @@ class DemoDebugger : public hsa::brig::HSADebugger {
   virtual void updatePC(size_t pc) {
     stack.back().showRegChanges();
     llvm::DILineInfo info = BP->getLineInfoForAddress(pc);
-    std::cout << info.getFunctionName() << " at "
-              << info.getFileName() << ":" << info.getLine() << "\t";
+    std::cout << info.FunctionName << " at "
+              << info.FileName << ":" << info.Line << "\t";
     printSourceLine(std::cout, info);
     std::cout << "\n";
   }

@@ -102,9 +102,8 @@ struct BrigProgram {
 
   llvm::DILineInfo getLineInfoForAddress(uint64_t pc) const {
     llvm::DILineInfoSpecifier spec(
-      llvm::DILineInfoSpecifier::FunctionName |
-      llvm::DILineInfoSpecifier::FileLineInfo |
-      llvm::DILineInfoSpecifier::AbsoluteFilePath);
+      llvm::DILineInfoSpecifier::FileLineInfoKind::AbsoluteFilePath,
+      llvm::DILineInfoSpecifier::FunctionNameKind::LinkageName);
     return debugInfo->getLineInfoForAddress(pc, spec);
   }
 

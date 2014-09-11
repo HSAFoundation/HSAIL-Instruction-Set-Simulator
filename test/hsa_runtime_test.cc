@@ -15,7 +15,6 @@
 
 #include <cmath>
 
-#include "llvm/ADT/OwningPtr.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
 
@@ -36,15 +35,14 @@ TEST(HSARuntimeTest, VectorCopy) {
   hsa::vector<hsa::Device *> devices = hsaRT->getDevices();
   EXPECT_EQ(numDevices, devices.size());
 
-  llvm::OwningPtr<llvm::MemoryBuffer> file;
-  llvm::error_code ec =
-    llvm::MemoryBuffer::getFile(XSTR(OBJ_PATH) "/VectorCopy.o", file);
-  EXPECT_TRUE(!ec);
-  if (ec) return;
+  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> file =
+    llvm::MemoryBuffer::getFile(XSTR(OBJ_PATH) "/VectorCopy.o");
+  EXPECT_TRUE(!file.getError());
+  if (file.getError()) return;
 
   hsa::Program *program =
-    hsaRT->createProgram(const_cast<char *>(file->getBufferStart()),
-                         file->getBufferSize(),
+    hsaRT->createProgram(const_cast<char *>((*file)->getBufferStart()),
+                         (*file)->getBufferSize(),
                          &devices);
   EXPECT_TRUE(program);
   if (!program) return;

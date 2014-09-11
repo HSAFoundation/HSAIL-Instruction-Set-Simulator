@@ -283,7 +283,7 @@ class SimRuntimeApi : public RuntimeApi {
   virtual const DeviceList &getDevices() { return devices; }
 
   virtual Program *createProgram(char *elf, size_t elfSize, DeviceList *) {
-    llvm::OwningPtr<hsa::brig::BrigReader> reader
+    std::unique_ptr<hsa::brig::BrigReader> reader
       (hsa::brig::BrigReader::createBrigReader(elf, elfSize));
     if (!reader) return NULL;
 

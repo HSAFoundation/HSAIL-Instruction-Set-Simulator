@@ -29,4 +29,4 @@ add_llvm_library(brig2llvm
   brig_reader.cc
   hsailasm_wrapper.cc
   s_fma.c)
-llvm_config(brig2llvm ${LLVM_LINK_COMPONENTS})
+add_dependencies(brig2llvm intrinsics_gen)
