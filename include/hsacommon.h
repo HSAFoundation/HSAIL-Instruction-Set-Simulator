@@ -1225,7 +1225,7 @@ private:
     Exception& operator = (const Exception&);
 
 public:
-    ~Exception() THROW_DECL {}
+  ~Exception() noexcept {}
 
     /**
      * @brief append info to an exception, this version requires a type

@@ -476,7 +476,7 @@
 #  endif
 
 // Starting with version 4.3.2, gcc defines __GXX_RTTI iff RTTI is enabled.
-# elif defined(__GNUC__) && (GTEST_GCC_VER_ >= 40302)
+# elif (defined(__GNUC__) && (GTEST_GCC_VER_ >= 40302)) || defined(__clang__)
 
 #  ifdef __GXX_RTTI
 #   define GTEST_HAS_RTTI 1
