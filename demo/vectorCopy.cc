@@ -19,6 +19,7 @@
 #include <cmath>
 
 // Use LLVM for portable IO
+#include "llvm/ADT/OwningPtr.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/raw_ostream.h"
@@ -38,13 +39,14 @@ int main(int argc, char **argv) {
 
   hsa::vector<hsa::Device *> devices = hsaRT->getDevices();
 
-  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> file =
-    llvm::MemoryBuffer::getFile(XSTR(OBJ_PATH) "/VectorCopy.o");
-  if (file.getError()) return -1;
+  llvm::OwningPtr<llvm::MemoryBuffer> file;
+  llvm::error_code ec =
+    llvm::MemoryBuffer::getFile(XSTR(OBJ_PATH) "/VectorCopy.o", file);
+  if (ec) return -1;
 
   hsa::Program *program =
-    hsaRT->createProgram(const_cast<char *>((*file)->getBufferStart()),
-                         (*file)->getBufferSize(),
+    hsaRT->createProgram(const_cast<char *>(file->getBufferStart()),
+                         file->getBufferSize(),
                          &devices);
   if (!program) return -1;
 

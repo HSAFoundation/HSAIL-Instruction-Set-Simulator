@@ -14,9 +14,9 @@
 #include "brig_runtime.h"
 #include "brig_inst_helper.h"
 
-#include "llvm/IR/DIBuilder.h"
-#include "llvm/IR/DebugInfo.h"
 #include "llvm/IR/Module.h"
+#include "llvm/DIBuilder.h"
+#include "llvm/DebugInfo.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/FileSystem.h"

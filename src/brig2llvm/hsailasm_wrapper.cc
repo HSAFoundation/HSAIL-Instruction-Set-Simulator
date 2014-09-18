@@ -9,10 +9,12 @@
 
 #include "hsailasm_wrapper.h"
 
+#include "llvm/ADT/OwningPtr.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/Program.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/system_error.h"
 
 #include <unistd.h>
 
@@ -36,16 +38,14 @@ bool HsailAsm::assembleHSAILString(const char *sourceCode,
 
   int result_fd;
   llvm::SmallString<128> sourceFile;
-  {
-    std::error_code ec =
-      llvm::sys::fs::createUniqueFile("temp-%%%%.hsail", result_fd, sourceFile);
-    close(result_fd);
-    check(!ec, ec.message());
-  }
+  llvm::error_code ec =
+    llvm::sys::fs::createUniqueFile("temp-%%%%.hsail", result_fd, sourceFile);
+  close(result_fd);
+  check(!ec, ec.message());
 
   std::string outErrMsg;
   llvm::raw_fd_ostream out(sourceFile.c_str(), outErrMsg,
-                           llvm::sys::fs::F_Text);
+                           llvm::sys::fs::F_Binary);
   check(!outErrMsg.size(), outErrMsg);
 
   out << sourceCode;
@@ -55,8 +55,10 @@ bool HsailAsm::assembleHSAILString(const char *sourceCode,
   bool result =
     assembleHSAILSource(sourceFile.c_str(), outputFile, errMsg, enableDebug);
 
-  std::error_code ec = llvm::sys::fs::remove(sourceFile.c_str(), false);
-  return result && !ec;
+  bool existed;
+  llvm::sys::fs::remove(sourceFile.c_str(), existed);
+
+  return result && existed;
 }
 
 bool HsailAsm::assembleHSAILSource(const char *sourceFile,
@@ -74,7 +76,7 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
 
   int result_fd;
   llvm::SmallString<128> resultPath;
-  std::error_code ec =
+  llvm::error_code ec =
     llvm::sys::fs::createUniqueFile("hsailasm-%%%%.log", result_fd, resultPath);
   close(result_fd);
   check(!ec, ec.message());
@@ -97,11 +99,12 @@ bool HsailAsm::assembleHSAILSource(const char *sourceFile,
 
   if (result) {
     if (errMsg) {
-      llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> result =
-        llvm::MemoryBuffer::getFile(errFile);
-      *errMsg = !result.getError() ?
-        std::string((*result)->getBuffer()) :
-        result.getError().message();
+      llvm::OwningPtr<llvm::MemoryBuffer> result;
+      llvm::error_code error =
+        llvm::MemoryBuffer::getFile(errFile, result);
+      *errMsg = error == llvm::error_code::success() ?
+        std::string(result->getBuffer()) :
+        error.message();
     }
     llvm::sys::fs::remove(errFile);
     return false;

@@ -17,17 +17,17 @@
 #include "brig_scope.h"
 #include "brig_symbol.h"
 
+#include "llvm/DIBuilder.h"
+#include "llvm/DebugInfo.h"
 #include "llvm/ADT/Triple.h"
+#include "llvm/Analysis/Verifier.h"
 #include "llvm/IR/Attributes.h"
-#include "llvm/IR/DebugInfo.h"
 #include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/DIBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
-#include "llvm/IR/Verifier.h"
 #include "llvm/Support/Dwarf.h"
 #include "llvm/Support/Host.h"
 #include "llvm/Support/Path.h"
@@ -401,11 +401,11 @@ struct FunScope {
                                      llvmFun->getName(),
                                      llvmFun->getName(),
                                      file,
-                                     info.Line - 1,
+                                     info.getLine()-1,
                                      debugFunTy,
                                      false,
                                      true,
-                                     info.Line,
+                                     info.getLine(),
                                      llvm::DIDescriptor::FlagPrototyped,
                                      false,
                                      llvmFun);
@@ -433,10 +433,10 @@ struct FunScope {
         assert(codeStart < codeEnd && "Invalid scope");
 
         llvm::DILineInfo info = getLineInfo(codeStart);
-        uint32_t line = info.Line;
-        uint32_t column = info.Column;
+        uint32_t line = info.getLine();
+        uint32_t column = info.getColumn();
         llvm::DIScope LB =
-          parent.DB.createLexicalBlock(sub, file, line, column, 0);
+          parent.DB.createLexicalBlock(sub, file, line, column);
 
         BlockScope instBS(LB, codeStart, codeEnd);
         instScopeMap.insert(std::make_pair(codeStart, instBS));
@@ -526,14 +526,15 @@ struct FunScope {
 
   llvm::DILineInfo getLineInfo(size_t addr) const {
     llvm::DILineInfoSpecifier spec(
-      llvm::DILineInfoSpecifier::FileLineInfoKind::AbsoluteFilePath,
-      llvm::DILineInfoSpecifier::FunctionNameKind::LinkageName);
+      llvm::DILineInfoSpecifier::FunctionName |
+      llvm::DILineInfoSpecifier::FileLineInfo |
+      llvm::DILineInfoSpecifier::AbsoluteFilePath);
     return parent.debugInfo->getLineInfoForAddress(addr, spec);
   }
 
   llvm::DIFile getDIFile(llvm::DILineInfo info) const {
-    llvm::StringRef srcDir = llvm::sys::path::parent_path(info.FileName);
-    llvm::StringRef srcFile = llvm::sys::path::filename(info.FileName);
+    llvm::StringRef srcDir = llvm::sys::path::parent_path(info.getFileName());
+    llvm::StringRef srcFile = llvm::sys::path::filename(info.getFileName());
     return parent.DB.createFile(srcFile, srcDir);
   }
 
@@ -554,8 +555,8 @@ struct FunScope {
   // Generate a DebugLoc for an instruction based on its code offset
   llvm::DebugLoc getDebugLoc(size_t addr) const {
     llvm::DILineInfo info = getLineInfo(addr);
-    uint32_t line = info.Line;
-    uint32_t column = info.Column;
+    uint32_t line = info.getLine();
+    uint32_t column = info.getColumn();
 
     if (const llvm::DIScope *scope = getDebugScope(addr, instScopeMap))
       return llvm::DebugLoc::get(line, column, *scope);
@@ -568,8 +569,8 @@ struct FunScope {
   // Generate a DebugLoc for a symbol based on its directive offset
   llvm::DebugLoc getDebugLoc(BrigSymbol &local) const {
     llvm::DILineInfo info = getLineInfo(local.getCCode());
-    uint32_t line = info.Line;
-    uint32_t column = info.Column;
+    uint32_t line = info.getLine();
+    uint32_t column = info.getColumn();
 
     const llvm::DIScope *scope = getDebugScope(local.getAddr(), dirScopeMap);
     if (scope)
@@ -1596,22 +1597,22 @@ llvm::DIContext *runOnDebugInfo(const BrigModule &M) {
     if (const BrigBlockNumeric *numeric = dyn_cast<BrigBlockNumeric>(it)) {
       const BrigString *str = helper.getData(numeric);
       llvm::StringRef debugData((const char *) str->bytes, str->byteCount);
-      std::unique_ptr<llvm::MemoryBuffer> debugDataBuffer(
-        llvm::MemoryBuffer::getMemBuffer(debugData, "", false));
-      llvm::ErrorOr<llvm::object::ObjectFile *> objFile =
+      llvm::MemoryBuffer *debugDataBuffer =
+        llvm::MemoryBuffer::getMemBuffer(debugData, "", false);
+      llvm::object::ObjectFile *objFile =
         llvm::object::ObjectFile::createObjectFile(debugDataBuffer);
 
       int errFID = dup(STDERR_FILENO);
       int nullFID = open("/dev/null", O_WRONLY);
       dup2(nullFID, STDERR_FILENO);
 
-      llvm::DIContext *dic = llvm::DIContext::getDWARFContext(*objFile);
+      llvm::DIContext *dic = llvm::DIContext::getDWARFContext(objFile);
 
       dup2(errFID, STDERR_FILENO);
       close(nullFID);
       close(errFID);
 
-      delete *objFile;
+      delete objFile;
 
       return dic;
     }

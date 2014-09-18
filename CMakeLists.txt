@@ -5,9 +5,7 @@ include_directories(include)
 include_directories(${CMAKE_BINARY_DIR})
 add_definitions(-DGTEST_HAS_PTHREAD=0)
 
-SET(CMAKE_MODULE_PATH
-  "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake"
-  "${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/")
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/brig2llvm/scripts/cmake")
 MESSAGE("Module path: ${CMAKE_MODULE_PATH}")
 include (FindTargetArch)
 
@@ -27,7 +25,6 @@ set(CMAKE_CXX_FLAGS "-DTEST_PATH=${PROJECT_SOURCE_DIR}/test ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DBIN_PATH=${PROJECT_BINARY_DIR}/HSAIL-Tools ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-DOBJ_PATH=${PROJECT_BINARY_DIR}/test ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS "-I/usr/include/libdwarf ${CMAKE_CXX_FLAGS}")
-set(CMAKE_CXX_FLAGS "-fno-rtti -fno-exceptions ${CMAKE_CXX_FLAGS}")
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -UNDEBUG")
 
@@ -56,11 +53,8 @@ set(LLVM_INCLUDE_TESTS off CACHE STRING "")
 set(LLVM_INCLUDE_RUNTIME off CACHE STRING "")
 set(LLVM_ENABLE_TERMINFO off CACHE STRING "")
 set(LLVM_BINARY_DIR "${PROJECT_BINARY_DIR}/src/brig2llvm/compiler")
-set(LLVM_RUNTIME_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/bin)
-set(LLVM_LIBRARY_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/${CMAKE_CFG_INTDIR}/lib)
 
-SET(LLVM_REQUIRES_EH "false")
-SET(LLVM_REQUIRES_RTTI "false")
+SET(LLVM_REQUIRES_EH "true")
 
 # obtain specific information about llvm setup
 SET(LOCAL_LLVM_INCLUDE src/brig2llvm/compiler/include)
@@ -77,15 +71,14 @@ SET(PROJ_SEARCH_PATH
 "${PROJECT_SOURCE_DIR}/include"
 "${PROJECT_SOURCE_DIR}/${LOCAL_LLVM_INCLUDE}"
 "${PROJECT_BINARY_DIR}/${LOCAL_LLVM_INCLUDE}"
-"${PROJECT_BINARY_DIR}/src"
-"${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/")
+"${PROJECT_BINARY_DIR}/src")
 include_directories( ${PROJ_SEARCH_PATH} )
 
 LINK_DIRECTORIES( ${LLVM_LIB_DIR} )
 
 add_subdirectory(src/brig2llvm/compiler)
 
-include(LLVMConfig)
+include("${PROJECT_BINARY_DIR}/src/brig2llvm/compiler/share/llvm/cmake/LLVMConfig.cmake")
 include(HandleLLVMOptions)
 
 include(CheckCXXCompilerFlag)
@@ -136,7 +129,7 @@ SET( MAKE_OPTIONS
      " CXX=${CMAKE_CXX_COMPILER}"
      " AR=${CMAKE_AR}"
      " CC=${CMAKE_C_COMPILER}"
-     " CXXFLAGS=${CMAKE_CXX_FLAGS} -fexceptions -frtti -Dfalse=0"
+     " CXXFLAGS=${CMAKE_CXX_FLAGS}"
      " LDFLAGS=${CMAKE_EXE_LINKER_FLAGS}")
 
 add_custom_target( build_libhsail ALL

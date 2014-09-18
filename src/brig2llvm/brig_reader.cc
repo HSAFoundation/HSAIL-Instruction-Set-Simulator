@@ -19,26 +19,26 @@ namespace brig {
 BrigReader::~BrigReader() { delete objFile_; }
 
 BrigReader *BrigReader::createBrigReader(const char *filename) {
-  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> file =
-    llvm::MemoryBuffer::getFile(filename);
-  if (file.getError()) return NULL;
-  llvm::ErrorOr<llvm::object::ObjectFile *> objFile =
-    llvm::object::ObjectFile::createELFObjectFile(*file);
+  llvm::OwningPtr<llvm::MemoryBuffer> file;
+  if (llvm::MemoryBuffer::getFile(filename, file))
+    return NULL;
+  llvm::object::ObjectFile *objFile =
+    llvm::object::ObjectFile::createELFObjectFile(file.take());
 
-  BrigReader *reader = createBrigReader(*objFile);
-  if (!reader) delete *objFile;
+  BrigReader *reader = createBrigReader(objFile);
+  if (!reader) delete objFile;
   return reader;
 }
 
 BrigReader *BrigReader::createBrigReader(const char *buffer, size_t size) {
   llvm::StringRef bufRef(buffer, size);
-  std::unique_ptr<llvm::MemoryBuffer> file(
-    llvm::MemoryBuffer::getMemBuffer(bufRef, "", false));
-  llvm::ErrorOr<llvm::object::ObjectFile *> objFile =
+  llvm::MemoryBuffer *file =
+    llvm::MemoryBuffer::getMemBuffer(bufRef, "", false);
+  llvm::object::ObjectFile *objFile =
     llvm::object::ObjectFile::createELFObjectFile(file);
 
-  BrigReader *reader = createBrigReader(*objFile);
-  if (!reader) delete *objFile;
+  BrigReader *reader = createBrigReader(objFile);
+  if (!reader) delete objFile;
   return reader;
 }
 
@@ -50,8 +50,12 @@ BrigReader *BrigReader::createBrigReader(llvm::object::ObjectFile *objFile) {
   llvm::StringRef strings;
 
   typedef llvm::object::section_iterator SecIt;
-  const SecIt E = objFile->section_end();
-  for (SecIt it = objFile->section_begin(); it != E; ++it) {
+  const SecIt E = objFile->end_sections();
+  llvm::error_code ec;
+  for (SecIt it = objFile->begin_sections(); it != E; it.increment(ec)) {
+
+    if (ec) return NULL;
+
     llvm::StringRef name;
     it->getName(name);
 
